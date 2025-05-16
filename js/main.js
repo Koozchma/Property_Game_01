@@ -1,15 +1,14 @@
 // Metropolis Estates - main.js
 
 let gameState = {
-    cash: 200, // Starting cash slightly increased
+    cash: 200, // Starting cash
     rentPerSecond: 0, // Gross RPS from properties
     netRentPerSecond: 0, // RPS after facility upkeep
     facilityUpkeepPerSecond: 0,
     buildingMaterials: 0,
     researchPoints: 0,
     unlockedResearch: [], // Array of research topic IDs that have been completed
-    activeBuffs: [] // To store active global buffs from research
-    // other global states can go here
+    // gameState.activeBuffs is removed; buffs are applied dynamically by checking unlockedResearch
 };
 
 const GAME_TICK_INTERVAL = 1000; // 1 second
@@ -20,70 +19,80 @@ function gameTick() {
     applyFacilityOutputs();
 
     // 2. Calculate income & expenses
-    // Gross RPS is calculated by calculateTotalPropertiesRPS()
-    // Facility upkeep is calculated by calculateTotalFacilityUpkeep()
+    // Gross RPS and Facility upkeep are now calculated in updateGameData and stored in gameState
 
-    // Apply global buffs that might affect RPS or upkeep before calculating net
-    // This part needs to be more robust if buffs are complex.
-    // For now, assuming direct RPS/upkeep values are final.
-
-    let incomeThisTick = gameState.rentPerSecond;
+    let incomeThisTick = gameState.rentPerSecond; // This is already affected by buffs if calculateTotalPropertiesRPS handles it
     let expensesThisTick = gameState.facilityUpkeepPerSecond;
 
     gameState.cash += (incomeThisTick - expensesThisTick);
-    if (gameState.cash < 0) {
-        // Handle negative cash scenario - e.g., debt, bankruptcy (future feature)
-        // For now, just let it go negative.
-        // logMessage("Warning: Cash is negative! Manage your expenses.", "error");
+
+    if (gameState.cash < -10000 && ownedProperties.length > 0) { // Example threshold for debt warning
+        logMessage("Warning: Cash is significantly negative! Consider selling assets or reducing upkeep.", "error");
     }
 
+    // 3. Update UI for dynamic values (cash, resources that change per tick)
+    updateCashDisplay();
+    updateBuildingMaterialsDisplay(); // If they change per tick and aren't just on purchase
+    updateResearchPointsDisplay();    // Same as above
 
-    // 3. Update UI
-    updateUIDisplays(); // Consolidated UI update function
-
-    // 4. Check for game over or win conditions (later)
+    // Button states are best updated in updateGameData or after specific actions,
+    // but can be refreshed here less frequently if performance allows.
+    // For simplicity, they are updated in updateGameData.
 }
 
+// This function is central to updating all calculated stats and triggering UI refreshes
+function updateGameData() {
+    // Recalculate all core stats
+    // Order matters: buffs might affect property RPS or facility upkeep/output
+
+    // 1. Calculate total gross RPS from properties (this function should consider buffs)
+    gameState.rentPerSecond = parseFloat(calculateTotalPropertiesRPS().toFixed(2));
+
+    // 2. Calculate total facility upkeep (this function could also consider buffs if any applied to upkeep)
+    gameState.facilityUpkeepPerSecond = parseFloat(calculateTotalFacilityUpkeep().toFixed(2));
+
+    // 3. Calculate net RPS
+    gameState.netRentPerSecond = parseFloat((gameState.rentPerSecond - gameState.facilityUpkeepPerSecond).toFixed(2));
+
+    // 4. Update all relevant UI display elements that show these calculated values
+    updateUIDisplays();
+
+    // 5. Re-render lists and button states as underlying data or availability might have changed
+    displayAvailableProperties();
+    displayOwnedProperties();
+    displayAvailableFacilities();
+    displayOwnedFacilities();
+    displayResearchOptions();
+
+    // Explicitly update all button states after data changes and lists are re-rendered
+    updateAllBuyButtonStates();
+    updateAllFacilityBuyButtonStates();
+    updateAllUpgradeButtonStates(); // For properties
+    updateAllFacilityUpgradeButtonStates();
+    updateResearchButtonStates();
+}
+
+
+// Consolidates calls to individual UI update functions for stats
 function updateUIDisplays() {
     updateCashDisplay();
-    updateNetRPSDisplay(); // Changed from updateRPSDisplay
+    updateNetRPSDisplay();
     updateOwnedPropertiesCountDisplay();
     updateBuildingMaterialsDisplay();
     updateResearchPointsDisplay();
     updateTotalUpkeepDisplay();
-
-    // Update button states (buy/upgrade) based on current cash & resources
-    updateAllBuyButtonStates(); // For properties
-    updateAllFacilityBuyButtonStates(); // For facilities
-    updateAllUpgradeButtonStates(); // For properties
-    updateAllFacilityUpgradeButtonStates(); // For facilities
-    updateResearchButtonStates(); // For research items
 }
 
-
-function updateGameData() {
-    // Recalculate all core stats
-    gameState.rentPerSecond = parseFloat(calculateTotalPropertiesRPS().toFixed(2));
-    gameState.facilityUpkeepPerSecond = parseFloat(calculateTotalFacilityUpkeep().toFixed(2));
-    gameState.netRentPerSecond = parseFloat((gameState.rentPerSecond - gameState.facilityUpkeepPerSecond).toFixed(2));
-
-    // Update displays that depend on these calculations
-    updateUIDisplays();
-
-    // Re-render lists as underlying data might have changed significantly
-    displayAvailableProperties(); // Might change if research unlocks new ones
-    displayOwnedProperties();
-    displayAvailableFacilities(); // Availability depends on research
-    displayOwnedFacilities();
-    displayResearchOptions();
-}
 
 function initGame() {
-    console.log("Metropolis Estates Initializing...");
+    console.log("Metropolis Estates Initializing (v0.1.0)...");
+    console.log("Current Date/Time (Client): " + new Date().toString());
+    // Attempt to get a more accurate time if needed, but for an idle game, client time is usually fine.
+    // For persistent state or server interaction, server time would be critical.
 
     // Initial UI render (some parts might be hidden until unlocked)
-    initialRender(); // Defined in ui.js - sets up initial property list, etc.
-    updateGameData(); // Calculate initial RPS, upkeep, netRPS, update all displays
+    initialRender();    // Defined in ui.js - sets up initial property/facility/research lists, etc.
+    updateGameData();   // Calculate initial RPS, upkeep, netRPS, update all displays & button states
 
     // Start the game loop
     if (gameLoopIntervalId) clearInterval(gameLoopIntervalId);
@@ -91,23 +100,21 @@ function initGame() {
 
     logMessage("Game initialized. Your empire awaits!", "success");
 
-    // Make initial facility (Lumber Mill) available if not research-locked by default
-    // Or make basic_education research available by default
-    if (!RESEARCH_TOPICS.find(rt => rt.id === "basic_education").costRP > 0) {
-        // If basic_education is free or doesn't exist, or if we want to kickstart science
-        // gameState.unlockedResearch.push("basic_education"); // Auto-unlock it for testing
+    // Ensure displays for new resources are visible if they have starting values or become relevant
+    // These checks are also handled in their respective update functions now if they become > 0
+    if(gameState.buildingMaterials > 0 || FACILITY_TYPES.find(f=>f.id==="lumber_mill" && !f.requiredResearch)) { // Show if starting with some or if Lumber Mill is available
+        document.getElementById('building-materials-display').style.display = 'inline-block';
     }
-    // Ensure displays for new resources are visible if starting with them or if they become non-zero
-    if(gameState.buildingMaterials > 0) document.getElementById('building-materials-display').style.display = 'inline-block';
-    if(gameState.researchPoints > 0 || gameState.unlockedResearch.includes("basic_education")) {
+    if(gameState.researchPoints > 0 || gameState.unlockedResearch.includes("basic_education") || RESEARCH_TOPICS.find(rt=>rt.id === "basic_education" && rt.costRP <= gameState.researchPoints)) {
          document.getElementById('research-points-display').style.display = 'inline-block';
          document.getElementById('research-section').style.display = 'block';
     }
-    if(gameState.facilityUpkeepPerSecond > 0) document.getElementById('total-upkeep-display').style.display = 'inline-block';
+    // Total upkeep display visibility is handled if upkeep > 0 by its update function or buyFacility.
 
-
-    displayAvailableFacilities(); // Call this to show initially available facilities
-    displayResearchOptions();   // Call this to show initially available research
+    // Call these once after init to ensure lists are populated based on initial game state (e.g. research)
+    displayAvailableFacilities();
+    displayResearchOptions();
 }
 
+// --- Event Listeners & Startup ---
 document.addEventListener('DOMContentLoaded', initGame);
