@@ -253,3 +253,67 @@ footer {
     margin-top: auto; /* Pushes footer to the bottom of the page */
     flex-shrink: 0; /* Prevent footer from shrinking */
 }
+
+/* Styling for the new elements within owned property cards */
+.owned-property-card .manage-upgrades-btn {
+    background-color: #3498db; /* A distinct blue for manage button */
+    margin-top: 10px;
+    width: calc(100% - 20px); /* Adjust if padding affects width */
+    margin-left: 10px;
+    margin-right: 10px;
+    box-sizing: border-box;
+}
+
+.owned-property-card .manage-upgrades-btn:hover {
+    background-color: #2980b9;
+}
+
+.property-upgrades-detail {
+    display: none; /* Initially hidden */
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #ecf0f1; /* Slightly different background for the detail area */
+    border-top: 1px solid #bdc3c7;
+    border-radius: 0 0 4px 4px; /* Rounded bottom corners if card is rounded */
+}
+
+.property-upgrades-detail.visible {
+    display: block; /* Or flex/grid if needed for internal layout */
+}
+
+.property-upgrades-detail .upgrade-main-btn-detail,
+.property-upgrades-detail .specific-upgrade-btn-detail {
+    width: calc(100% - 10px); /* Full width within padding */
+    margin: 5px;
+    box-sizing: border-box;
+}
+.property-upgrades-detail .upgrade-main-btn-detail {
+    background-color: #1abc9c; /* Teal for main level upgrade in detail */
+}
+.property-upgrades-detail .upgrade-main-btn-detail:hover {
+    background-color: #16a085;
+}
+
+.property-upgrades-detail .specific-upgrade-btn-detail {
+    background-color: #9b59b6; /* Purple for specific upgrades in detail */
+}
+.property-upgrades-detail .specific-upgrade-btn-detail:hover {
+    background-color: #8e44ad;
+}
+
+.property-upgrades-detail p { /* For "Specific Upgrades:" title inside detail view */
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+    color: #34495e;
+}
+
+/* Ensure the scrollable list still works with potentially taller cards */
+.scrollable-list {
+    max-height: 65vh; /* Adjust as needed, viewport height relative */
+    overflow-y: auto;
+    padding-right: 10px; /* Space for scrollbar */
+    /* Add some bottom padding to the list itself if cards expand near the bottom */
+    padding-bottom: 20px;
+}
