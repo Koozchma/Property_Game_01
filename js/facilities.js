@@ -183,4 +183,152 @@ function calculateFacilityStats(facilityInstance, facilityType) {
     outputAmount *= mainLevelOutputMultiplier;
     upkeep *= mainLevelUpkeepMultiplier;
 
-    facilityInstance.currentUpkeepRPS = Math.max(0, parseFloat(upkeep.toFixed(
+    facilityInstance.currentUpkeepRPS = Math.max(0, parseFloat(upkeep.toFixed(2)));
+    if (facilityInstance.currentOutput && facilityType.output) { // Check if facilityInstance.currentOutput exists
+        facilityInstance.currentOutput.amount = parseFloat(outputAmount.toFixed(3)); // Output can be more precise
+    } else if (facilityType.output) { // If currentOutput doesn't exist but facilityType.output does, create it
+         facilityInstance.currentOutput = { resource: facilityType.output.resource, amount: parseFloat(outputAmount.toFixed(3)) };
+    }
+
+
+    // Update global effects if any (this part might need more sophisticated handling for stacking)
+    // For now, assume effects are recalculated and reapplied elsewhere or buffs are directly managed in gameState
+}
+
+
+function upgradeFacilityMainLevel(facilityUniqueId) {
+    const facilityInstance = ownedFacilities.find(f => f.uniqueId === facilityUniqueId);
+    if (!facilityInstance) return;
+    const facilityType = getFacilityTypeById(facilityInstance.typeId);
+    if (!facilityType) return;
+
+    if (facilityInstance.mainLevel < facilityType.mainLevelMax) {
+        const upgradeCost = Math.floor(facilityType.cost * 0.4 * Math.pow(1.7, facilityInstance.mainLevel - 1));
+        if (gameState.cash >= upgradeCost) {
+            gameState.cash -= upgradeCost;
+            facilityInstance.mainLevel++;
+            calculateFacilityStats(facilityInstance, facilityType); // Recalculate stats
+            updateGameData();
+            logMessage(`${facilityInstance.name} main level upgraded to ${facilityInstance.mainLevel}. Cost: $${upgradeCost.toLocaleString()}.`, "success");
+        } else {
+            logMessage(`Not enough cash for ${facilityInstance.name} main level upgrade. Need $${upgradeCost.toLocaleString()}.`, "error");
+        }
+    } else {
+        logMessage(`${facilityInstance.name} is at max main level.`, "info");
+    }
+}
+
+function applySpecificFacilityUpgrade(facilityUniqueId, specificUpgradeId) {
+    const facilityInstance = ownedFacilities.find(f => f.uniqueId === facilityUniqueId);
+    if (!facilityInstance) return;
+    const facilityType = getFacilityTypeById(facilityInstance.typeId);
+    if (!facilityType || !facilityType.upgrades) return;
+
+    const upgradeDef = facilityType.upgrades.find(u => u.id === specificUpgradeId);
+    if (!upgradeDef) return;
+
+    const currentTier = facilityInstance.appliedUpgrades[specificUpgradeId] || 0;
+    if (currentTier >= upgradeDef.maxTier) {
+        logMessage(`${upgradeDef.name} is already at max tier for ${facilityInstance.name}.`, "info");
+        return;
+    }
+
+    const costForNextTier = Math.floor(upgradeDef.cost * Math.pow(1.6, currentTier));
+    // Add material/research checks if facility upgrades need them
+
+    if (gameState.cash >= costForNextTier) {
+        gameState.cash -= costForNextTier;
+        facilityInstance.appliedUpgrades[specificUpgradeId] = currentTier + 1;
+        calculateFacilityStats(facilityInstance, facilityType); // Recalculate stats
+        updateGameData();
+        logMessage(`${upgradeDef.name} (Tier ${currentTier + 1}) applied to ${facilityInstance.name}. Cost: $${costForNextTier.toLocaleString()}.`, "success");
+    } else {
+        logMessage(`Not enough cash for ${upgradeDef.name} on ${facilityInstance.name}. Need $${costForNextTier.toLocaleString()}.`, "error");
+    }
+}
+
+
+function calculateTotalFacilityUpkeep() {
+    return ownedFacilities.reduce((sum, fac) => sum + fac.currentUpkeepRPS, 0);
+}
+
+function applyFacilityOutputs() {
+    ownedFacilities.forEach(fac => {
+        if (fac.currentOutput && fac.currentOutput.amount > 0) {
+            const resource = fac.currentOutput.resource;
+            const amount = fac.currentOutput.amount; // This is per tick (second)
+            if (gameState.hasOwnProperty(resource)) {
+                gameState[resource] += amount;
+            } else {
+                gameState[resource] = amount;
+            }
+            // gameState[resource] = parseFloat(gameState[resource].toFixed(3)); // Keep precision
+        }
+    });
+}
+
+function sellFacilityInstance(facilityUniqueId) {
+    const facilityIndex = ownedFacilities.findIndex(f => f.uniqueId === facilityUniqueId);
+    if (facilityIndex === -1) return;
+
+    const facilityInstance = ownedFacilities[facilityIndex];
+    const facilityType = getFacilityTypeById(facilityInstance.typeId);
+    const sellPrice = Math.floor(facilityType.cost * 0.5); // Simple sell price for now
+
+    gameState.cash += sellPrice;
+    ownedFacilities.splice(facilityIndex, 1);
+
+    updateGameData();
+    logMessage(`Sold ${facilityInstance.name} for $${sellPrice.toLocaleString()}.`, "info");
+}
+
+function completeResearch(researchId) {
+    const research = RESEARCH_TOPICS.find(r => r.id === researchId);
+    if (!research || gameState.unlockedResearch.includes(researchId)) {
+        logMessage("Research topic not found or already completed.", "error");
+        return false;
+    }
+
+    if (gameState.researchPoints >= research.costRP) {
+        gameState.researchPoints -= research.costRP;
+        gameState.unlockedResearch.push(researchId);
+
+        // Apply unlocks and buffs
+        if (research.unlocksFacility) {
+            research.unlocksFacility.forEach(facId => logMessage(`Unlocked facility: ${getFacilityTypeById(facId)?.name || facId}`, "science"));
+        }
+        if (research.unlocksProperty) {
+            // Logic to make new properties available (e.g., add to a list, or set a flag)
+            research.unlocksProperty.forEach(propId => logMessage(`Unlocked property type: ${getPropertyTypeById(propId)?.name || propId}`, "science"));
+        }
+        if (research.globalBuff) {
+            // Apply global buff logic - this will need careful management in gameState
+            if (!gameState.activeBuffs) gameState.activeBuffs = [];
+            gameState.activeBuffs.push(research.globalBuff); // Store the buff; apply it where relevant
+            logMessage(`Global buff activated: ${research.globalBuff.type}`, "science");
+        }
+
+        logMessage(`Research "${research.name}" completed!`, "science");
+        updateGameData(); // Update UI for research list, facility availability etc.
+        return true;
+    } else {
+        logMessage(`Not enough Research Points for "${research.name}". Need ${research.costRP} RP.`, "error");
+        return false;
+    }
+}
+
+// Call this to apply active global buffs from research
+function applyAllGlobalBuffs() {
+    // Reset any previously applied buff effects if they are not permanent state changes
+    // Example: If a buff reduces property costs, it should be applied when costs are calculated.
+    // For RPS boosts, they need to be part of the RPS calculation.
+
+    // This function might be more about flagginggameState variables that other functions check.
+    // E.g., gameState.propertyCostModifier = 1;
+    // (gameState.activeBuffs || []).forEach(buff => {
+    //    if (buff.type === "construction_cost_reduction") {
+    //        gameState.propertyCostModifier *= (1 - buff.percentage);
+    //    }
+    // });
+    // This approach is complex to manage dynamically. Simpler to check gameState.unlockedResearch directly.
+}
