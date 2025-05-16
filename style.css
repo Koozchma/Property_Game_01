@@ -1,216 +1,193 @@
 body {
     font-family: 'Arial', sans-serif;
+    background-color: #1a1a1a;
+    color: #e0e0e0;
     margin: 0;
     padding: 0;
-    background-color: #f0f2f5;
-    color: #333;
-    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    font-size: 14px;
+}
+
+.container {
+    width: 95%;
+    max-width: 1600px;
+    background-color: #2c2c2c;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 header {
-    background-color: #2c3e50;
-    color: #ecf0f1;
-    padding: 1rem 2rem;
+    background-color: #111;
+    color: #ff4136; /* A 'psychotic' red */
+    padding: 15px 20px;
     text-align: center;
-    border-bottom: 4px solid #e67e22;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
 }
 
 header h1 {
     margin: 0;
-    font-size: 2.5rem;
+    font-size: 2em;
 }
 
-.stats-container {
+.resource-display {
+    margin-top: 5px;
+    font-size: 1em;
+}
+
+.game-area {
     display: flex;
-    justify-content: center;
-    gap: 15px; /* Reduced gap slightly */
-    margin-top: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.stat-item {
-    background-color: #34495e;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    font-size: 1rem; /* Slightly reduced font size */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    min-width: 100px; /* Ensure items have some width */
-    text-align: center;
-}
-
-main {
-    padding: 1rem; /* Adjusted padding */
-    max-width: 1400px; /* Increased max-width for wider layout */
-    margin: 0 auto;
-}
-
-.main-layout {
-    display: flex;
-    gap: 1.5rem;
+    flex-wrap: wrap; /* Allow wrapping for smaller screens if necessary */
+    padding: 15px;
+    gap: 15px; /* Space between columns */
 }
 
 .column {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.column-main {
-    flex: 2; /* Main content takes more space */
-}
-
-.column-side {
-    flex: 1; /* Side content takes less space */
-}
-
-
-section {
-    background-color: #fff;
-    margin-bottom: 0; /* Removed margin as gap is handled by flexbox */
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-section h2 {
-    color: #2c3e50;
-    border-bottom: 2px solid #e67e22;
-    padding-bottom: 0.5rem;
-    margin-top: 0;
-    margin-bottom: 1rem;
-}
-
-.property-list, .facility-list, .research-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
-}
-
-.owned-items-list { /* Specific styling for lists of owned things if needed */
-    /* grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); */ /* Example: slightly larger cards */
-}
-
-
-.property-card, .owned-property-card,
-.facility-card, .owned-facility-card,
-.research-item-card {
-    border: 1px solid #ddd;
-    background-color: #f9f9f9;
-    padding: 1rem;
+    background-color: #383838;
+    padding: 15px;
     border-radius: 5px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+    flex-grow: 1;
+    min-width: 280px; /* Minimum width before wrapping/shrinking */
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
 }
 
-.property-card, .facility-card, .research-item-card { /* For available items */
-    border-left: 5px solid #e67e22; /* Orange for buyable */
-}
-.owned-property-card, .owned-facility-card { /* For owned items */
-    border-left: 5px solid #27ae60; /* Green for owned */
-}
-
-
-.property-card h3, .owned-property-card h3,
-.facility-card h3, .owned-facility-card h3,
-.research-item-card h3 {
+.column h2 {
+    color: #ff851b; /* An unsettling orange */
     margin-top: 0;
-    color: #34495e;
-    font-size: 1.1rem;
+    border-bottom: 1px solid #555;
+    padding-bottom: 10px;
+    text-align: center;
 }
 
-.property-card p, .owned-property-card p,
-.facility-card p, .owned-facility-card p,
-.research-item-card p {
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem; /* Standardized paragraph font size */
+.column h3 {
+    color: #ccc;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    font-size: 0.95em;
 }
-
-.prop-cost, .facility-cost, .research-cost,
-.prop-upkeep, .facility-upkeep {
-    font-weight: bold;
-}
-.prop-cost, .facility-cost, .research-cost { color: #c0392b; } /* Red for costs */
-.prop-upkeep, .facility-upkeep { color: #e74c3c; } /* Lighter red for upkeep */
-.prop-rps, .facility-output, .prop-level { font-weight: bold; }
-.prop-rps, .facility-output { color: #27ae60; } /* Green for positive income/output */
-.prop-level { color: #2980b9; } /* Blue for level */
-
 
 button {
-    background-color: #e67e22;
-    color: white;
-    border: none;
-    padding: 0.6rem 1rem; /* Adjusted padding */
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 0.9rem; /* Adjusted font size */
-    border-radius: 5px;
+    background-color: #555;
+    color: #e0e0e0;
+    border: 1px solid #777;
+    padding: 10px 15px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-top: 0.5rem;
-    width: 100%; /* Make buttons take full width of their container */
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+    display: block; /* Make buttons take full width of their container section */
+    width: calc(100% - 0px); /* Adjust if padding on parent makes it overflow */
     box-sizing: border-box;
 }
-.upgrade-buttons-container button {
-    width: auto; /* Allow multiple upgrade buttons inline */
-    margin-right: 5px;
-}
-
 
 button:hover {
-    background-color: #d35400;
+    background-color: #666;
+}
+
+button:active {
+    background-color: #444;
+    transform: translateY(1px);
 }
 
 button:disabled {
-    background-color: #bdc3c7;
+    background-color: #404040;
+    color: #888;
     cursor: not-allowed;
+    border-color: #555;
 }
 
-.game-messages-section .message-log {
-    background-color: #ecf0f1;
-    border: 1px solid #bdc3c7;
-    padding: 0.75rem;
+.item-container {
+    background-color: #444;
+    padding: 10px;
+    margin-bottom: 8px;
     border-radius: 4px;
-    max-height: 150px;
-    overflow-y: auto;
-    font-size: 0.9rem;
+    border-left: 3px solid #ff851b;
 }
 
-.game-messages-section .message-log p {
-    margin: 0 0 0.5rem 0;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px dashed #bdc3c7;
-}
-.game-messages-section .message-log p:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-}
-
-.upgrade-buttons-container {
-    margin-top: 0.75rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.upgrade-buttons-container p {
-    width: 100%;
+.item-container .name {
     font-weight: bold;
-    margin-bottom: 0.25rem;
+    font-size: 1.05em;
+    color: #f0f0f0;
 }
 
+.item-container .description {
+    font-size: 0.85em;
+    color: #bbb;
+    margin: 4px 0;
+}
+
+.item-container .stats,
+.item-container .cost,
+.item-container .owned {
+    font-size: 0.9em;
+    color: #ddd;
+    margin: 2px 0;
+}
+
+.research-item.researched {
+    border-left-color: #01ff70; /* Green for researched */
+    opacity: 0.7;
+}
+
+.research-item.researched button {
+    display: none; /* Hide buy button if already researched */
+}
+
+#secondary-resources .resource-line {
+    font-size: 0.95em;
+    margin-bottom: 5px;
+    padding: 5px;
+    background-color: #333;
+    border-radius: 3px;
+}
 
 footer {
     text-align: center;
-    padding: 1.5rem;
-    background-color: #34495e;
-    color: #bdc3c7;
-    font-size: 0.9rem;
-    margin-top: 2rem;
+    padding: 15px;
+    background-color: #111;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    margin-top: 15px; /* Ensure it's below game-area if it wraps */
+}
+
+footer button {
+    margin: 5px;
+    display: inline-block;
+    width: auto; /* Override full width for footer buttons */
+}
+
+/* Tooltip (optional, for later use) */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 160px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Position the tooltip above the element */
+    left: 50%;
+    margin-left: -80px; /* Use half of the width (160/2 = 80) to center the tooltip */
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
 }
