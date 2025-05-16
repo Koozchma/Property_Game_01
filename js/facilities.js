@@ -1,139 +1,144 @@
-// Metropolis Estates - facilities.js (v0.4.8 - Sequential Unlocks)
+// Metropolis Estates - facilities.js (v0.4.10 - Reflecting specific cost updates and no labs)
 
+// --- Facility Type Definitions ---
+// These are the actual "buildings" the player constructs after their TYPE is unlocked by research.
+// They cost money/materials to build and may have upkeep or produce resources.
 const FACILITY_TYPES = [
     {
-        id: "lumber_mill", name: "Lumber Mill", cost: 300, materialsCost: 50, baseUpkeepRPS: 0.25, // Building it costs mats now
-        description: "Processes logs into usable Building Materials.", output: { resource: "buildingMaterials", amount: 0.5 },
+        id: "lumber_mill",
+        name: "Lumber Mill",
+        cost: 300,             // Monetary cost - As per your latest update
+        materialsCost: 0,      // Material cost - As per your latest update
+        baseUpkeepRPS: 0.25,   // Upkeep - As per your latest update
+        description: "Processes logs into usable Building Materials.",
+        output: { resource: "buildingMaterials", amount: 0.5 }, // Output - As per your latest update
         mainLevelMax: 5,
         upgrades: [
             { id: "sharper_saws", name: "Sharper Saws", cost: 2000, effect: { outputIncrease: 0.05 }, maxTier: 3, requiresMaterials: 100 },
-            { id: "efficiency_experts", name: "Efficiency Experts", cost: 3000, effect: { upkeepReduction: 0.05 }, maxTier: 2, requiresMaterials: 50 }
+            { id: "efficiency_experts", name: "Efficiency Experts", cost: 3000, effect: { upkeepReduction: 0.05 }, maxTier: 2, requiresMaterials: 50 } // Adjusted upkeep reduction
         ],
         requiredResearch: "unlock_basic_material_production" // This facility type is unlocked by this research
     },
     {
-        id: "small_science_lab", name: "Small Science Lab", cost: 1000, materialsCost: 75, baseUpkeepRPS: 1,
-        description: "A dedicated space for research. Generates Research Points (RP).", output: { resource: "researchPoints", amount: 0.2 },
+        id: "small_science_lab",
+        name: "Small Science Lab",
+        cost: 1000, // Example: Cheaper to build first lab
+        materialsCost: 75,
+        baseUpkeepRPS: 1,
+        description: "A dedicated space for research. Generates Research Points (RP).",
+        output: { resource: "researchPoints", amount: 0.2 }, // Example: Slightly better initial RP
         mainLevelMax: 5,
         upgrades: [
-            { id: "more_beakers", name: "More Beakers", cost: 10000, effect: { outputIncrease: 0.05 }, maxTier: 3 },
-            { id: "grant_application", name: "Grant Writing", cost: 12000, effect: { upkeepReduction: 0.2 }, maxTier: 1 }
+            { id: "more_beakers", name: "More Beakers", cost: 10000, effect: { outputIncrease: 0.05 }, maxTier: 3, requiresMaterials: 0 },
+            { id: "grant_application", name: "Grant Writing", cost: 12000, effect: { upkeepReduction: 0.2 }, maxTier: 1, requiresMaterials: 0 }
         ],
-        requiredResearch: "unlock_formal_science" // This facility type is unlocked by this research
+        requiredResearch: "basic_education" // This facility type is unlocked by "Basic Education"
     },
-    // Example for a next tier material facility
     {
-        id: "basic_workshop", name: "Basic Workshop", cost: 7500, materialsCost: 150, baseUpkeepRPS: 5,
+        id: "basic_workshop", // Example, ensure its unlock research exists
+        name: "Basic Workshop",
+        cost: 7500,
+        materialsCost: 40,
+        baseUpkeepRPS: 5, // Example upkeep
         description: "Enables crafting of components and provides minor buffs.",
         effects: [ { type: "property_rps_boost", propertyCategory: "cheap", percentage: 0.02 } ],
         mainLevelMax: 3,
         upgrades: [ { id: "better_tools", name: "Better Tools", cost: 5000, effect: { rpsBoostIncrease: 0.01 }, maxTier: 2, requiresMaterials: 75 } ],
-        requiredResearch: "unlock_basic_workshop_research"
+        requiredResearch: "unlock_basic_workshop_research" // Requires a research topic with this ID
     },
     {
-        id: "advanced_science_lab", name: "Advanced Science Lab", cost: 50000, materialsCost: 500, baseUpkeepRPS: 10,
-        description: "A larger, more efficient laboratory for complex research.", output: { resource: "researchPoints", amount: 1.0 },
+        id: "advanced_science_lab", // Example
+        name: "Advanced Science Lab",
+        cost: 50000,
+        materialsCost: 250,
+        baseUpkeepRPS: 10,
+        description: "A larger, more efficient laboratory for complex research.",
+        output: { resource: "researchPoints", amount: 1.0 },
         mainLevelMax: 5,
         upgrades: [ { id: "supercomputer_access", name: "Supercomputer", cost: 50000, effect: { outputIncrease: 0.2 }, maxTier: 2, requiresMaterials: 50 } ],
-        requiredResearch: "unlock_advanced_labs_research"
+        requiredResearch: "unlock_advanced_labs_research" // Requires a research topic with this ID
     }
 ];
 
 const RESEARCH_TOPICS = [
-    // --- INITIAL BOOTSTRAP RESEARCH (Costs Cash Only) ---
+    // TIER 0 - Initial
     {
-        id: "initiate_rental_development",
-        name: "Initiate Rental Development",
-        cost: 200, // Cash cost
-        description: "Lay the groundwork for residential construction. Unlocks the Dilapidated Shack.",
+        id: "basic_education",
+        name: "Basic Education",
+        cost: 300,             // Monetary cost
+        materialsCost: 100,    // Material cost
+        // requiredLabs: 0, // REMOVED
+        description: "Fundamental knowledge. Unlocks Small Science Labs. Costs $300 & 100 Materials.",
         prerequisites: [],
-        unlocksPropertyType: ["shack"], // Unlocks the first property type
-        unlocksResearch: ["unlock_urban_planning_1"] // Leads to the next rental research
+        unlocksFacilityType: ["small_science_lab"], // Allows building Small Science Labs
+        unlocksResearch: ["urban_planning_1", "unlock_basic_material_production", "scientific_method_1_research"] // Leads to next research
     },
+
+    // TIER 1 - Rental Path
+    {
+        id: "urban_planning_1",
+        name: "Unlock Basic Rentals",
+        costRP: 300, // Costs 300 RP as requested
+        // materialsCost: 50, // Example if it also costs materials
+        // requiredLabs removed
+        description: "Develop basic urban structures. Unlocks Small Apartments and Trailer Homes. Costs 300 RP.",
+        prerequisites: ["basic_education"],
+        unlocksPropertyType: ["small_apartment", "trailer_home"],
+        unlocksResearch: ["urban_planning_2"]
+    },
+
+    // TIER 1 - Material Path
     {
         id: "unlock_basic_material_production",
         name: "Basic Resource Extraction",
-        cost: 250, // Cash cost
-        description: "Establish initial methods for gathering building materials. Unlocks the Lumber Mill.",
-        prerequisites: [],
-        unlocksFacilityType: ["lumber_mill"], // Unlocks the first material facility
-        unlocksResearch: ["unlock_basic_workshop_research"] // Leads to next material facility research
+        costRP: 50, // Example RP cost
+        description: "Study basic resource gathering. Unlocks the Lumber Mill.",
+        prerequisites: ["basic_education"],
+        unlocksFacilityType: ["lumber_mill"],
+        unlocksResearch: ["unlock_basic_workshop_research"]
     },
-    {
-        id: "establish_foundational_science",
-        name: "Establish Foundational Science",
-        cost: 500, // Cash cost (as requested for first science unlock)
-        description: "Fund basic scientific inquiry. Starts passive RP generation and unlocks formal lab research.",
-        prerequisites: [],
-        grantsResourcePerSecond: { resource: "researchPoints", amount: 0.05 }, // Small passive RP gain
-        unlocksResearch: ["unlock_formal_science"] // Unlocks research that allows building labs
-    },
-
-    // --- TIER 1 RESEARCH (after initial bootstrap, costs vary) ---
-
-    // Rental Path (Tier 2+ Rentals cost Materials + RP)
-    {
-        id: "unlock_urban_planning_1",
-        name: "Urban Planning I",
-        costRP: 300, // Costs 300 RP as requested
-        materialsCost: 50, // ADDED: Also costs materials
-        description: "Develop basic urban structures. Unlocks Small Apartments and Trailer Homes.",
-        prerequisites: ["initiate_rental_development", "establish_foundational_science"], // Needs RP generation and initial rental unlock
-        unlocksPropertyType: ["small_apartment", "trailer_home"],
-        unlocksResearch: ["unlock_suburban_homes_research"]
-    },
-
-    // Material Acquisition Path (Tier 2+ Material Facilities cost Cash + RP)
     {
         id: "unlock_basic_workshop_research",
         name: "Workshop Schematics",
-        cost: 3000, // Cash cost
-        costRP: 75,  // RP cost
+        costRP: 75,  // Example RP cost
+        // cost: 3000, // Example if it also costs cash
         description: "Design and develop basic workshop capabilities.",
-        prerequisites: ["unlock_basic_material_production", "establish_foundational_science"],
+        prerequisites: ["unlock_basic_material_production"],
         unlocksFacilityType: ["basic_workshop"],
+        globalBuff: { type: "property_cost_reduction", percentage: 0.05, scope: "all" },
         unlocksResearch: ["advanced_material_processing_research"]
     },
 
-    // Science Path (Tier 2+ Science costs Cash + Materials)
+    // TIER 1 - Science Path
     {
-        id: "unlock_formal_science", // This research unlocks the ability to build the first actual Science Lab
-        name: "Formalize Scientific Method",
-        cost: 1000,      // Cash cost
-        materialsCost: 50, // Material cost
-        description: "Establish dedicated laboratories. Unlocks Small Science Labs for construction.",
-        prerequisites: ["establish_foundational_science"],
-        unlocksFacilityType: ["small_science_lab"], // Player can now BUILD Science Labs
-        unlocksResearch: ["scientific_method_1_research"]
-    },
-    {
-        id: "scientific_method_1_research",
+        id: "scientific_method_1_research", // Renamed for clarity
         name: "Scientific Method I",
-        cost: 2000,      // Cash cost
-        materialsCost: 100, // Material cost
-        description: "Improves overall research point generation from labs and unlocks advanced lab designs.",
-        prerequisites: ["unlock_formal_science"],
-        globalBuff: { type: "research_speed_boost", percentage: 0.10 }, // Boosts RP output of labs
+        costRP: 75, // Example RP cost
+        // cost: 2000, // Example if it also costs cash
+        // materialsCost: 100, // Example if it also costs materials
+        description: "Improves overall research point generation from labs.",
+        prerequisites: ["basic_education"],
+        globalBuff: { type: "research_speed_boost", percentage: 0.10 },
         unlocksResearch: ["unlock_advanced_labs_research"]
     },
 
-
-    // --- TIER 2+ RESEARCH EXAMPLES ---
+    // TIER 2 - Further Unlocks
     {
-        id: "unlock_suburban_homes_research",
+        id: "urban_planning_2",
         name: "Urban Planning II",
         costRP: 200,
         materialsCost: 150,
         description: "Advanced residential planning. Unlocks Suburban Houses.",
-        prerequisites: ["unlock_urban_planning_1"],
+        prerequisites: ["urban_planning_1"],
         unlocksPropertyType: ["suburban_house"],
         unlocksResearch: ["unlock_commercial_rentals_research"]
     },
     {
         id: "unlock_advanced_labs_research",
         name: "Advanced Lab Design",
-        cost: 25000,
-        materialsCost: 300,
+        costRP: 200, // Example RP cost
+        // cost: 25000, // Example if it also costs cash
+        // materialsCost: 300, // Example if it also costs materials
         description: "Develop schematics for Advanced Science Labs.",
         prerequisites: ["scientific_method_1_research"],
         unlocksFacilityType: ["advanced_science_lab"],
@@ -142,8 +147,8 @@ const RESEARCH_TOPICS = [
     {
         id: "advanced_material_processing_research",
         name: "Adv. Material Processing",
-        cost: 5000, // Cash cost
-        costRP: 100,  // RP cost
+        costRP: 100,
+        // cost: 5000,
         description: "More efficient use of building materials for upgrades.",
         prerequisites: ["unlock_basic_workshop_research"],
         globalBuff: { type: "material_usage_efficiency", percentage: 0.10 },
@@ -155,7 +160,7 @@ const RESEARCH_TOPICS = [
         costRP: 180,
         materialsCost: 200,
         description: "Zone for and develop basic commercial properties. Unlocks Corner Stores.",
-        prerequisites: ["unlock_suburban_homes_research"],
+        prerequisites: ["urban_planning_2"], // Or a parallel path
         unlocksPropertyType: ["corner_store"],
         unlocksResearch: []
     }
@@ -165,22 +170,14 @@ const RESEARCH_TOPICS = [
 let ownedFacilities = [];
 let nextFacilityId = 0;
 
-// --- Functions ---
-// (Ensure all functions like getFacilityTypeById, getResearchTopicById, calculateFacilityDynamicCost,
-//  isFacilityTypeUnlocked, isResearchAvailable, buyFacility, calculateFacilityStats,
-//  upgradeFacilityMainLevel, applySpecificFacilityUpgrade, calculateTotalFacilityUpkeep,
-//  applyFacilityOutputs, sellFacilityInstance, and the LATEST version of completeResearch
-//  that handles mixed costs and NO lab requirements are present and correct)
-
+// --- Helper Functions ---
 function getFacilityTypeById(id) { return FACILITY_TYPES.find(fac => fac.id === id); }
 function getResearchTopicById(id) { return RESEARCH_TOPICS.find(res => res.id === id); }
-function calculateFacilityDynamicCost(facilityType) { return facilityType.cost; } // Flat monetary cost
+function calculateFacilityDynamicCost(facilityType) { return facilityType.cost; } // Facilities have flat monetary cost
 
 function isFacilityTypeUnlocked(facilityTypeId) {
     const facType = getFacilityTypeById(facilityTypeId);
     if (!facType) return false;
-    // A facility type is unlocked if its requiredResearch ID is in gameState.unlockedResearch
-    // OR if it has no requiredResearch (e.g. an implicit starting facility if we had one)
     if (!facType.requiredResearch) return true; // Some facilities might be available by default
     return gameState.unlockedResearch.includes(facType.requiredResearch);
 }
@@ -194,6 +191,7 @@ function isResearchAvailable(researchTopicId) {
     return true;
 }
 
+// --- Core Functions for Facilities & Research ---
 function buyFacility(facilityTypeId) {
     const facilityType = getFacilityTypeById(facilityTypeId);
     if (!facilityType) { console.error("Buy Facility Error: Type not found - ", facilityTypeId); return false; }
@@ -244,18 +242,18 @@ function calculateFacilityStats(facilityInstance, facilityType) {
     upkeep *= mainLevelUpkeepMultiplier;
 
     if (facilityType.output && facilityType.output.resource === 'researchPoints') {
-        let researchSpeedMultiplier = 1; // Base multiplier
+        let researchSpeedMultiplier = 1; // Base multiplier from the lab itself
         // Additive stacking of research speed buffs from completed research
-        if(gameState.unlockedResearch.includes("scientific_method_1_research")) { // Ensure correct ID
+        if(gameState.unlockedResearch.includes("scientific_method_1_research")) {
             const buff = getResearchTopicById("scientific_method_1_research")?.globalBuff;
             if(buff && buff.type === "research_speed_boost") researchSpeedMultiplier += buff.percentage;
         }
-        // Add more buff checks here if other research topics boost RP generation
+        // Add more checks if other research topics (e.g., scientific_method_2_research) also boost RP
         outputAmount *= researchSpeedMultiplier;
     }
 
     facilityInstance.currentUpkeepRPS = Math.max(0, parseFloat(upkeep.toFixed(2)));
-    if (facilityType.output) {
+    if (facilityType.output) { // Ensure facility type is supposed to have an output
         facilityInstance.currentOutput = { 
             resource: facilityType.output.resource, 
             amount: parseFloat(outputAmount.toFixed(3)) 
@@ -263,55 +261,6 @@ function calculateFacilityStats(facilityInstance, facilityType) {
     } else {
         facilityInstance.currentOutput = null;
     }
-}
-
-function completeResearch(researchId) {
-    const topic = getResearchTopicById(researchId);
-    if (!topic) { console.error(`[GAME] Research topic ID "${researchId}" not found.`); return false; }
-    if (gameState.unlockedResearch.includes(researchId)) { console.log(`[GAME] Research "${topic.name}" already completed.`); return false; }
-    if (!isResearchAvailable(researchId)) { console.log(`[GAME] Cannot start research "${topic.name}": Prerequisites not met.`); return false; }
-
-    let canAfford = true;
-    let missingResourcesLog = []; 
-
-    if (topic.hasOwnProperty('cost') && typeof topic.cost === 'number' && topic.cost > 0) {
-        if (gameState.cash < topic.cost) { canAfford = false; missingResourcesLog.push(`$${formatNumber(topic.cost - gameState.cash, 0)}`); }
-    }
-    if (topic.hasOwnProperty('materialsCost') && typeof topic.materialsCost === 'number' && topic.materialsCost > 0) {
-        if (gameState.buildingMaterials < topic.materialsCost) { canAfford = false; missingResourcesLog.push(`${formatNumber(topic.materialsCost - gameState.buildingMaterials, 0)} Materials`); }
-    }
-    if (topic.hasOwnProperty('costRP') && typeof topic.costRP === 'number' && topic.costRP > 0) {
-        if (gameState.researchPoints < topic.costRP) { canAfford = false; missingResourcesLog.push(`${formatNumber(topic.costRP - gameState.researchPoints, 1)} RP`); }
-    }
-    
-    if (!canAfford) {
-        console.log(`[GAME] Cannot research "${topic.name}". Need: ${missingResourcesLog.join(' + ')}.`);
-        return false;
-    }
-
-    if (topic.hasOwnProperty('cost') && typeof topic.cost === 'number') gameState.cash -= topic.cost;
-    if (topic.hasOwnProperty('materialsCost') && typeof topic.materialsCost === 'number' && topic.materialsCost > 0) gameState.buildingMaterials -= topic.materialsCost;
-    if (topic.hasOwnProperty('costRP') && typeof topic.costRP === 'number' && topic.costRP > 0) gameState.researchPoints -= topic.costRP;
-
-    gameState.unlockedResearch.push(researchId);
-
-    if (topic.grantsResourcePerSecond) {
-        const resKey = topic.grantsResourcePerSecond.resource + "PerSecond";
-        gameState[resKey] = (gameState[resKey] || 0) + topic.grantsResourcePerSecond.amount;
-        console.log(`[GAME] "${topic.name}" now grants +${topic.grantsResourcePerSecond.amount}/s ${topic.grantsResourcePerSecond.resource}.`);
-    }
-    
-    let unlockMessages = [];
-    if (topic.unlocksFacilityType) topic.unlocksFacilityType.forEach(id => unlockMessages.push(`construction: ${getFacilityTypeById(id)?.name || id}`));
-    if (topic.unlocksPropertyType) topic.unlocksPropertyType.forEach(id => unlockMessages.push(`rental: ${getPropertyTypeById(id)?.name || id}`));
-    if (topic.unlocksResearch) topic.unlocksResearch.forEach(id => unlockMessages.push(`research: ${getResearchTopicById(id)?.name || id}`));
-    if (topic.globalBuff) unlockMessages.push(`buff: ${topic.globalBuff.type}`);
-    let message = `Research "${topic.name}" completed!`;
-    if (unlockMessages.length > 0) message += " Unlocked: " + unlockMessages.join(', ') + ".";
-    console.log(`[GAME] ${message}`);
-    
-    updateGameData(); 
-    return true;
 }
 
 function upgradeFacilityMainLevel(facilityUniqueId) {
@@ -349,8 +298,8 @@ function applySpecificFacilityUpgrade(facilityUniqueId, specificUpgradeId) {
     const costForNextTier = Math.floor(upgradeDef.cost * Math.pow(1.6, currentTier));
     const materialsNeededBase = upgradeDef.requiresMaterials ? Math.floor(upgradeDef.requiresMaterials * Math.pow(1.2, currentTier)) : 0;
     let materialUsageEfficiency = 1;
-    if (gameState.unlockedResearch.includes("advanced_material_processing")) {
-        const buffResearch = getResearchTopicById("advanced_material_processing");
+    if (gameState.unlockedResearch.includes("advanced_material_processing_research")) { // Ensure correct ID
+        const buffResearch = getResearchTopicById("advanced_material_processing_research");
         if (buffResearch && buffResearch.globalBuff && buffResearch.globalBuff.type === "material_usage_efficiency") {
             materialUsageEfficiency = 1 - buffResearch.globalBuff.percentage;
         }
@@ -374,11 +323,11 @@ function calculateTotalFacilityUpkeep() {
     return ownedFacilities.reduce((sum, fac) => sum + fac.currentUpkeepRPS, 0);
 }
 
-function applyFacilityOutputs() {
+function applyFacilityOutputs() { // This is called each game tick
     ownedFacilities.forEach(fac => {
         if (fac.currentOutput && fac.currentOutput.amount > 0) {
             const resource = fac.currentOutput.resource;
-            const amount = fac.currentOutput.amount;
+            const amount = fac.currentOutput.amount; // Amount per second
             gameState[resource] = (gameState[resource] || 0) + amount;
         }
     });
@@ -412,4 +361,54 @@ function sellFacilityInstance(facilityUniqueId) {
     ownedFacilities.splice(facilityIndex, 1);
     updateGameData();
     console.log(`[GAME] Demolished ${facilityInstance.name} for $${sellPrice.toLocaleString()}`+ (materialsReturned > 0 ? ` & ${materialsReturned} mats.` : '.'));
+}
+
+function completeResearch(researchId) {
+    const topic = getResearchTopicById(researchId);
+    if (!topic) { console.error(`[GAME] Research topic ID "${researchId}" not found.`); return false; }
+    if (gameState.unlockedResearch.includes(researchId)) { console.log(`[GAME] Research "${topic.name}" already completed.`); return false; }
+    if (!isResearchAvailable(researchId)) { console.log(`[GAME] Cannot start research "${topic.name}": Prerequisites not met.`); return false; }
+
+    let canAfford = true;
+    let missingResourcesLog = []; 
+
+    if (topic.hasOwnProperty('cost') && typeof topic.cost === 'number' && topic.cost > 0) {
+        if (gameState.cash < topic.cost) { canAfford = false; missingResourcesLog.push(`$${formatNumber(topic.cost - gameState.cash, 0)}`); }
+    }
+    if (topic.hasOwnProperty('materialsCost') && typeof topic.materialsCost === 'number' && topic.materialsCost > 0) {
+        if (gameState.buildingMaterials < topic.materialsCost) { canAfford = false; missingResourcesLog.push(`${formatNumber(topic.materialsCost - gameState.buildingMaterials, 0)} Materials`); }
+    }
+    if (topic.hasOwnProperty('costRP') && typeof topic.costRP === 'number' && topic.costRP > 0) {
+        if (gameState.researchPoints < topic.costRP) { canAfford = false; missingResourcesLog.push(`${formatNumber(topic.costRP - gameState.researchPoints, 1)} RP`); }
+    }
+    
+    if (!canAfford) {
+        console.log(`[GAME] Cannot research "${topic.name}". Need: ${missingResourcesLog.join(' + ')}.`);
+        return false;
+    }
+
+    if (topic.hasOwnProperty('cost') && typeof topic.cost === 'number') gameState.cash -= topic.cost;
+    if (topic.hasOwnProperty('materialsCost') && typeof topic.materialsCost === 'number' && topic.materialsCost > 0) gameState.buildingMaterials -= topic.materialsCost;
+    if (topic.hasOwnProperty('costRP') && typeof topic.costRP === 'number' && topic.costRP > 0) gameState.researchPoints -= topic.costRP;
+
+    gameState.unlockedResearch.push(researchId);
+
+    // Apply direct resource-per-second grants from research
+    if (topic.grantsResourcePerSecond) {
+        const resKey = topic.grantsResourcePerSecond.resource + "PerSecond"; // e.g., researchPointsPerSecond
+        gameState[resKey] = (gameState[resKey] || 0) + topic.grantsResourcePerSecond.amount;
+        console.log(`[GAME] "${topic.name}" now grants +${topic.grantsResourcePerSecond.amount}/s ${topic.grantsResourcePerSecond.resource}.`);
+    }
+    
+    let unlockMessages = [];
+    if (topic.unlocksFacilityType) topic.unlocksFacilityType.forEach(id => unlockMessages.push(`construction: ${getFacilityTypeById(id)?.name || id}`));
+    if (topic.unlocksPropertyType) topic.unlocksPropertyType.forEach(id => unlockMessages.push(`rental: ${getPropertyTypeById(id)?.name || id}`)); // getPropertyTypeById is from properties.js
+    if (topic.unlocksResearch) topic.unlocksResearch.forEach(id => unlockMessages.push(`research: ${getResearchTopicById(id)?.name || id}`));
+    if (topic.globalBuff) unlockMessages.push(`buff: ${topic.globalBuff.type}`);
+    let message = `Research "${topic.name}" completed!`;
+    if (unlockMessages.length > 0) message += " Unlocked: " + unlockMessages.join(', ') + ".";
+    console.log(`[GAME] ${message}`);
+    
+    updateGameData(); 
+    return true;
 }
