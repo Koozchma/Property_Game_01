@@ -1,56 +1,62 @@
+/* General Body and Page Structure */
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f0f2f5;
-    color: #333;
+    background-color: #f0f2f5; /* Light grey background */
+    color: #333; /* Default text color */
     line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ensure page takes at least full viewport height */
 }
 
+/* Header Styling */
 header {
-    background-color: #2c3e50;
-    color: #ecf0f1;
+    background-color: #2c3e50; /* Dark blue-grey */
+    color: #ecf0f1; /* Light grey text */
     padding: 1rem 2rem;
     text-align: center;
-    border-bottom: 4px solid #e67e22;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+    border-bottom: 4px solid #e67e22; /* Orange accent */
+    /* position: sticky; /* Uncomment if you want a sticky header */
+    /* top: 0; */
+    /* z-index: 1000; */
 }
 
 header h1 {
     margin: 0;
-    font-size: 2.5rem;
+    font-size: 2.2rem; /* Main title size */
 }
 
 .stats-container {
     display: flex;
     justify-content: center;
-    gap: 15px; /* Reduced gap slightly */
+    gap: 12px; /* Space between stat items */
     margin-top: 0.5rem;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* Allow stats to wrap on smaller screens */
 }
 
 .stat-item {
-    background-color: #34495e;
-    padding: 0.5rem 1rem;
+    background-color: #34495e; /* Slightly lighter blue-grey */
+    padding: 0.4rem 0.8rem;
     border-radius: 5px;
-    font-size: 1rem; /* Slightly reduced font size */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    min-width: 100px; /* Ensure items have some width */
+    font-size: 0.9rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    min-width: 90px;
     text-align: center;
 }
 
+/* Main Navigation Bar Styling */
 .main-navigation {
     display: flex;
     justify-content: center;
-    background-color: #34495e; /* Darker background for nav */
+    background-color: #34495e; /* Consistent with stat items background */
     padding: 0.75rem 0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .nav-button {
-    background-color: #7f8c8d; /* Neutral color */
+    background-color: #7f8c8d; /* Neutral grey for inactive buttons */
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -59,174 +65,108 @@ header h1 {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.1s ease;
-    border-bottom: 3px solid transparent;
+    border-bottom: 3px solid transparent; /* For active state accent */
 }
 
 .nav-button:hover {
-    background-color: #95a5a6;
+    background-color: #95a5a6; /* Lighter grey on hover */
 }
 
 .nav-button.active-nav {
-    background-color: #e67e22; /* Active color */
+    background-color: #e67e22; /* Orange for active button */
     color: white;
     font-weight: bold;
-    border-bottom: 3px solid #c0392b; /* Darker orange accent */
-    transform: translateY(-2px); /* Slight lift effect */
+    border-bottom: 3px solid #c0392b; /* Darker orange accent for active */
+    transform: translateY(-2px); /* Slight "lift" effect for active button */
 }
 
-.content-area { /* Replaces 'main' for styling */
+/* Main Content Area Styling (holds the two columns) */
+.content-area {
     padding: 1.5rem;
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex; /* Two columns */
-    gap: 1.5rem;
-    flex-grow: 1; /* Allows main content to take available space */
+    max-width: 1400px; /* Max width of the content area */
+    margin: 0 auto; /* Center the content area */
+    display: flex;
+    gap: 1.5rem; /* Space between the two columns */
+    flex-grow: 1; /* Allows content area to fill available vertical space */
     width: 100%;
     box-sizing: border-box;
 }
 
+/* Column Styling (for the two main content columns) */
 .column {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem; /* Spacing between sections if multiple were in a column */
-    flex-basis: 50%; /* Each column takes half width */
-    min-width: 0; /* Important for flexbox and overflow */
+    /* gap: 1.5rem; /* Not strictly needed if each column only has one section */
+    flex-basis: 50%; /* Each column tries to take up half the space */
+    min-width: 0; /* Important for flexbox item sizing and preventing overflow */
 }
 
-.column-left {
-    /* flex: 2; */ /* Adjust flex proportions if needed */
-}
-
-.column-right {
-    /* flex: 1; */
-}
-
-#left-column-section, #right-column-section {
-    background-color: #fff;
+/* Individual Section Styling (within each column) */
+#left-column-section,
+#right-column-section {
+    background-color: #fff; /* White background for sections */
     padding: 1.5rem;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    display: flex; /* Allow h2 and list to be flex items */
-    flex-direction: column; /* Stack h2 above list */
-    flex-grow: 1; /* Section takes up column space */
-    overflow: hidden; /* Prevent content from breaking out before scrolling */
+    display: flex;
+    flex-direction: column; /* Stack title (h2) above list */
+    flex-grow: 1; /* Section fills its column */
+    overflow: hidden; /* Important for containing the scrollable list */
 }
 
-#left-column-section h2, #right-column-section h2 {
-    color: #2c3e50;
-    border-bottom: 2px solid #e67e22;
+#left-column-section h2,
+#right-column-section h2 {
+    color: #2c3e50; /* Dark blue-grey for titles */
+    border-bottom: 2px solid #e67e22; /* Orange accent under titles */
     padding-bottom: 0.5rem;
     margin-top: 0;
     margin-bottom: 1rem;
-    flex-shrink: 0; /* Prevent title from shrinking */
+    flex-shrink: 0; /* Prevent title from shrinking if content is too large */
 }
 
-.item-list { /* Generic class for lists */
+/* Item List Styling (for the lists within sections) */
+.item-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); /* Slightly smaller min for cards */
-    gap: 1rem;
-    flex-grow: 1; /* List takes remaining space in section */
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); /* Responsive grid for cards */
+    gap: 1rem; /* Space between cards */
+    flex-grow: 1; /* List takes up available space within its section */
 }
 
 .scrollable-list {
-    max-height: 65vh; /* Adjust as needed, viewport height relative */
-    overflow-y: auto;
-    padding-right: 10px; /* Space for scrollbar */
+    max-height: 65vh; /* Max height before scrolling (viewport height relative) */
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding-right: 10px; /* Space for scrollbar to avoid content overlap */
+    /* Consider custom scrollbar styling for better aesthetics if desired */
 }
 
-/* Card styling (property-card, facility-card, etc.) remains largely the same */
+/* Card Styling (for properties, facilities, research items) */
 .property-card, .owned-property-card,
 .facility-card, .owned-facility-card,
 .research-item-card {
-    border: 1px solid #ddd;
-    background-color: #f9f9f9;
+    border: 1px solid #ddd; /* Light grey border */
+    background-color: #f9f9f9; /* Off-white card background */
     padding: 1rem;
     border-radius: 5px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: space-between; /* Pushes buttons to bottom if card height varies */
 }
 
-main {
-    padding: 1rem; /* Adjusted padding */
-    max-width: 1400px; /* Increased max-width for wider layout */
-    margin: 0 auto;
-}
-
-.main-layout {
-    display: flex;
-    gap: 1.5rem;
-}
-
-.column {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.column-main {
-    flex: 2; /* Main content takes more space */
-}
-
-.column-side {
-    flex: 1; /* Side content takes less space */
-}
-
-
-section {
-    background-color: #fff;
-    margin-bottom: 0; /* Removed margin as gap is handled by flexbox */
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-section h2 {
-    color: #2c3e50;
-    border-bottom: 2px solid #e67e22;
-    padding-bottom: 0.5rem;
-    margin-top: 0;
-    margin-bottom: 1rem;
-}
-
-.property-list, .facility-list, .research-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
-}
-
-.owned-items-list { /* Specific styling for lists of owned things if needed */
-    /* grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); */ /* Example: slightly larger cards */
-}
-
-
-.property-card, .owned-property-card,
-.facility-card, .owned-facility-card,
-.research-item-card {
-    border: 1px solid #ddd;
-    background-color: #f9f9f9;
-    padding: 1rem;
-    border-radius: 5px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
+/* Specific border accents for different card types */
 .property-card, .facility-card, .research-item-card { /* For available items */
-    border-left: 5px solid #e67e22; /* Orange for buyable */
+    border-left: 5px solid #e67e22; /* Orange accent for buyable/researchable items */
 }
 .owned-property-card, .owned-facility-card { /* For owned items */
-    border-left: 5px solid #27ae60; /* Green for owned */
+    border-left: 5px solid #27ae60; /* Green accent for owned items */
 }
 
-
+/* Typography within cards */
 .property-card h3, .owned-property-card h3,
 .facility-card h3, .owned-facility-card h3,
 .research-item-card h3 {
     margin-top: 0;
-    color: #34495e;
+    color: #34495e; /* Darker text for card titles */
     font-size: 1.1rem;
 }
 
@@ -237,19 +177,22 @@ section h2 {
     font-size: 0.9rem;
 }
 
+/* Specific text styling (costs, income, levels) */
 .prop-cost, .facility-cost, .research-cost,
 .prop-upkeep, .facility-upkeep {
     font-weight: bold;
 }
-.prop-cost, .facility-cost, .research-cost { color: #c0392b; }
-.prop-upkeep, .facility-upkeep { color: #e74c3c; }
+.prop-cost, .facility-cost, .research-cost { color: #c0392b; } /* Red for costs */
+.prop-upkeep, .facility-upkeep { color: #e74c3c; } /* Lighter red for upkeep */
+
 .prop-rps, .facility-output, .prop-level { font-weight: bold; }
-.prop-rps, .facility-output { color: #27ae60; }
-.prop-level { color: #2980b9; }
+.prop-rps, .facility-output { color: #27ae60; } /* Green for positive income/output */
+.prop-level { color: #2980b9; } /* Blue for level indicators */
 
 
-button { /* General button styling */
-    background-color: #e67e22;
+/* General Button Styling (buy, build, upgrade, sell) */
+button {
+    background-color: #e67e22; /* Default orange */
     color: white;
     border: none;
     padding: 0.6rem 1rem;
@@ -259,44 +202,54 @@ button { /* General button styling */
     font-size: 0.9rem;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, box-shadow 0.1s ease; /* Added box-shadow transition */
     margin-top: 0.5rem;
-    width: 100%;
+    width: 100%; /* Buttons within cards take full width */
     box-sizing: border-box;
+    box-shadow: 0 2px 2px rgba(0,0,0,0.1); /* Subtle shadow */
 }
 
-.upgrade-buttons-container button {
+.upgrade-buttons-container button { /* Specific upgrade buttons can be auto-width */
     width: auto;
-    margin-right: 5px;
+    margin-right: 5px; /* Space between multiple upgrade buttons */
+    flex-grow: 1; /* Allow them to share space if wrapped */
 }
 
 button:hover {
-    background-color: #d35400;
+    background-color: #d35400; /* Darker orange on hover */
+    box-shadow: 0 3px 4px rgba(0,0,0,0.15);
 }
 
 button:disabled {
-    background-color: #bdc3c7;
+    background-color: #bdc3c7; /* Greyed out for disabled */
+    color: #7f8c8d;
     cursor: not-allowed;
+    box-shadow: none;
 }
 
+/* Container for multiple specific upgrade buttons */
 .upgrade-buttons-container {
     margin-top: 0.75rem;
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    flex-wrap: wrap; /* Allow buttons to wrap */
+    gap: 0.5rem; /* Space between buttons */
 }
 
-.upgrade-buttons-container p {
+.upgrade-buttons-container p { /* "Specific Upgrades:" text */
     width: 100%;
     font-weight: bold;
     margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+    color: #555;
 }
 
+/* Footer Styling */
 footer {
     text-align: center;
-    padding: 1rem; /* Reduced padding */
-    background-color: #34495e;
-    color: #bdc3c7;
-    font-size: 0.85rem; /* Reduced font size */
-    margin-top: auto; /* Pushes footer to bottom if content is short */
+    padding: 1rem;
+    background-color: #34495e; /* Consistent with header elements */
+    color: #bdc3c7; /* Light text for footer */
+    font-size: 0.85rem;
+    margin-top: auto; /* Pushes footer to the bottom of the page */
+    flex-shrink: 0; /* Prevent footer from shrinking */
 }
