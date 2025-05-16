@@ -136,6 +136,7 @@ header h1 {
     flex-direction: column;
     flex-grow: 1;
     overflow: hidden;
+    height: 400px;
 }
 
 #left-column-section h2,
@@ -158,7 +159,7 @@ header h1 {
     /* For owned items, maybe 1 column for more detail, for available, 2 columns */
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Default, can be overridden */
     gap: 1rem;
-    flex-grow: 1;
+/*     flex-grow: 1; */
 }
 
 /* Specific override for portfolio to usually be single column for more detail */
@@ -167,12 +168,13 @@ header h1 {
 }
 
 
-.scrollable-list {
-    /* max-height: 65vh; */ /* Comment out or remove the old vh value */
-    max-height: 350px;   /* ADJUST THIS VALUE AS NEEDED */
+.scrollable-list { /* This is the div that gets overflow-y: auto */
+/*     max-height: calc(100vh - 250px); /* Let's change this */ */
     overflow-y: auto;
     padding-right: 10px;
-    padding-bottom: 20px;
+    padding-bottom: 10px;
+    flex-grow: 1; /* Make the scrollable container try to take space */
+    min-height: 0; /* Crucial for flex children that scroll */
 }
 
 /* Custom Scrollbar (Webkit browsers) */
