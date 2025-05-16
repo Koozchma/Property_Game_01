@@ -3,77 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metropolis Estates</title>
+    <title>Psychopath - The Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>Metropolis Estates</h1>
-        <div class="stats-container">
-            <div id="cash-display" class="stat-item">Cash: $0</div>
-            <div id="rps-display" class="stat-item">Net RPS: $0/s</div>
-            <div id="owned-properties-count" class="stat-item">Properties: 0</div>
-            <div id="building-materials-display" class="stat-item" style="display:none;">Materials: 0</div>
-            <div id="research-points-display" class="stat-item" style="display:none;">RP: 0</div>
-            <div id="total-upkeep-display" class="stat-item" style="display:none;">Upkeep: $0/s</div>
-        </div>
-    </header>
-
-    <main>
-        <section id="game-messages" class="game-messages-section">
-            <h2>Log</h2>
-            <div id="message-log" class="message-log">
-                Welcome to Metropolis Estates! Start by buying some property.
+    <div class="container">
+        <header>
+            <h1>Psychopath</h1>
+            <div class="resource-display">
+                Manipulation Points (MP): <span id="mp-count">0</span>
             </div>
-        </section>
+            <div class="resource-display">
+                MP per second: <span id="mps-count">0</span>
+            </div>
+        </header>
 
-        <div class="main-layout">
-            <div class="column column-main">
-                <section id="available-properties-section">
-                    <h2>Available Properties</h2>
-                    <div id="available-properties-list" class="property-list">
-                        </div>
-                </section>
-
-                <section id="owned-properties-section">
-                    <h2>My Portfolio</h2>
-                    <div id="owned-properties-list" class="property-list owned-items-list">
-                        <p>You don't own any properties yet.</p>
-                        </div>
-                </section>
+        <div class="game-area">
+            <div class="column" id="actions-column">
+                <h2>Actions</h2>
+                <button id="manipulate-button">Manipulate (Earn <span id="click-power-display">1</span> MP)</button>
+                <div id="idle-generators">
+                    <h3>Idle MP Generators</h3>
+                    </div>
             </div>
 
-            <div class="column column-side">
-                <section id="available-facilities-section">
-                    <h2>Available Facilities</h2>
-                    <div id="available-facilities-list" class="facility-list">
-                        <p>No facilities available yet or unlocked.</p>
-                        </div>
-                </section>
+            <div class="column" id="production-column">
+                <h2>Production</h2>
+                <div id="secondary-resources">
+                    </div>
+                <div id="production-facilities">
+                    <h3>Production Facilities</h3>
+                    </div>
+            </div>
 
-                <section id="owned-facilities-section">
-                    <h2>My Facilities</h2>
-                    <div id="owned-facilities-list" class="facility-list owned-items-list">
-                        <p>You don't own any facilities yet.</p>
-                        </div>
-                </section>
+            <div class="column" id="research-column">
+                <h2>Research</h2>
+                <div id="research-tree">
+                    </div>
+            </div>
 
-                <section id="research-section" style="display:none;">
-                    <h2>Research & Development</h2>
-                    <div id="research-options-list" class="research-list">
-                        <p>Unlock Science Facilities to begin research.</p>
-                        </div>
-                </section>
+            <div class="column" id="assets-column">
+                <h2>Assets</h2>
+                <div id="game-assets">
+                    </div>
             </div>
         </div>
-    </main>
 
-    <footer>
-        <p>&copy; 2025 Metropolis Estates - Alpha v0.1.0</p>
-    </footer>
+        <footer>
+            <p>Psychopath - Idle Game</p>
+            <button id="save-button">Save Game</button>
+            <button id="load-button">Load Game</button>
+            <button id="reset-button">Reset Game</button>
+        </footer>
+    </div>
 
-    <script src="js/properties.js"></script>
-    <script src="js/facilities.js"></script>
+    <script src="js/gamedata.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/main.js"></script>
 </body>
