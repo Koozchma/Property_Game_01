@@ -133,8 +133,8 @@ header h1 {
     display: flex;
     flex-direction: column;
     overflow: hidden; 
-    height: 450px; /* <<< KEY CHANGE: Fixed height for both columns. Adjust this value! */
-                   /* Estimate based on ~2.5 card heights + title + padding */
+    /* ADJUSTED HEIGHT: Increased to better fit ~2.5 portfolio items + title */
+    height: 500px; /* Fine-tune this value based on actual card heights */
 }
 
 #left-column-section h2,
@@ -154,26 +154,25 @@ header h1 {
 /* --- Item Lists & Scrollability --- */
 .item-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: 1fr; /* Default to single column for all lists now */
+                                /* This helps with consistent card sizing and scrolling behavior */
     gap: 1rem;
 }
 
-#right-column-list.item-list { /* My Portfolio - usually single column */
-    grid-template-columns: 1fr;
-}
-/* Available Rentals - can be multiple columns if many items fit */
+/* If you specifically want multi-column for "Available" sections when space allows: */
+/*
 #left-column-list.item-list {
-     /* Default grid-template-columns from .item-list will apply, allowing multiple cards if space */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
-
+*/
 
 .scrollable-list {
     overflow-y: auto;
     padding-right: 8px;
     padding-left: 2px;
     padding-bottom: 10px;
-    flex-grow: 1; /* Takes available space within its fixed-height parent section */
-    min-height: 0; /* Essential for scrolling within a flex item */
+    flex-grow: 1; 
+    min-height: 0; 
 }
 
 .scrollable-list::-webkit-scrollbar { width: 6px; }
@@ -185,7 +184,7 @@ header h1 {
 .property-card, .owned-property-card,
 .facility-card, .owned-facility-card,
 .research-item-card,
-.unlock-rental-card { /* NEW CLASS FOR THE UNLOCK CARD */
+.unlock-rental-card { 
     background: linear-gradient(145deg, rgba(30, 40, 60, 0.85), rgba(25, 35, 55, 0.9));
     border: 1px solid #2a3f5f;
     padding: 0.75rem;
@@ -193,7 +192,7 @@ header h1 {
     box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(0, 170, 255, 0.1);
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Default for most cards */
+    justify-content: space-between; 
     transition: all 0.3s ease;
     position: relative;
 }
@@ -216,19 +215,19 @@ header h1 {
     content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
     background: linear-gradient(to bottom, #00ffaa, #00dd90); border-radius: 6px 0 0 6px;
 }
-.unlock-rental-card { /* Specific style for this new card type */
-    border-color: #ffc107; /* Gold/Yellow border */
+.unlock-rental-card { 
+    border: 1px solid #ffc107; /* Gold/Yellow border for unlock card */
     justify-content: center;
     align-items: center;
     text-align: center;
-    min-height: 130px; /* Or adjust to match other cards */
+    min-height: 130px; 
+    padding: 1rem; /* More padding for unlock card text */
 }
 .unlock-rental-card::before { /* Unique accent for unlock card */
     content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
-    background: linear-gradient(to bottom, #ffc107, #ff8f00); /* Gold/Orange gradient */
+    background: linear-gradient(to bottom, #ffc107, #ff8f00); 
     border-radius: 6px 0 0 6px;
 }
-
 
 /* Typography within cards */
 .property-card h3, .owned-property-card h3,
@@ -237,7 +236,7 @@ header h1 {
     margin-top: 0; margin-bottom: 0.6rem; color: #00d4ff; font-size: 1.05rem;
     font-family: 'Orbitron', sans-serif; text-align: center; text-shadow: 0 0 3px rgba(0, 170, 255, 0.5);
 }
-.unlock-rental-card h3 { color: #ffc107; font-size: 1.1rem; margin-bottom: 0.5rem; }
+.unlock-rental-card h3 { color: #ffc107; font-size: 1.15rem; margin-bottom: 0.5rem; }
 
 
 .property-card p, .owned-property-card p,
@@ -245,7 +244,7 @@ header h1 {
 .research-item-card p, .unlock-rental-card p {
     margin-bottom: 0.4rem; font-size: 0.85rem; color: #a0b8d0;
 }
-.unlock-rental-card p { font-size: 0.9rem; margin-bottom: 0.6rem; color: #c0c8d8; }
+.unlock-rental-card p { font-size: 0.9rem; margin-bottom: 0.6rem; color: #c0c8d8; max-width: 95%; }
 
 
 /* Specific text styling in cards */
@@ -296,24 +295,24 @@ button:disabled {
 }
 
 /* Unlock New Rental Button (on the .unlock-rental-card) */
-.unlock-rental-card button {
-    background: linear-gradient(145deg, #ffc107, #ff8f00); /* Gold/Orange gradient */
-    border-color: #ffda63;
-    color: #1a1a2e; /* Dark text for contrast */
+.unlock-rental-card button { /* This is the button INSIDE the .unlock-rental-card */
+    background: linear-gradient(145deg, #e67e22, #c0392b); /* Orange gradient for unlock */
+    border-color: #ffb74d;
+    color: #fff;
     width: auto;
     padding: 0.6rem 1.5rem;
     font-weight: 700;
+    text-transform: uppercase; /* Keep consistent with other main buttons */
 }
 .unlock-rental-card button:hover {
-    background: linear-gradient(145deg, #ffd54f, #ffa000);
-    border-color: #ffe082;
+    background: linear-gradient(145deg, #f39c12, #d35400);
+    border-color: #ffcc80;
 }
 .unlock-rental-card button:disabled {
-    background: #7c6000;
-    color: #bca04f;
+    background: #795548; /* Brownish disabled */
+    color: #bcaaa4;
     border-color: #a1887f;
 }
-
 
 /* Upgrade Buttons (inside containers/details) */
 .upgrade-buttons-container button,
@@ -362,7 +361,6 @@ button:disabled {
 .property-upgrades-detail .specific-upgrade-btn-detail {
     background: linear-gradient(145deg, #8e44ad, #703090); border-color: #c377e0; color: #fff;
 }
-
 
 /* --- Footer --- */
 footer {
