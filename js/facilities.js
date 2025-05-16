@@ -1,6 +1,6 @@
-// Metropolis Estates - facilities.js
+// Metropolis Estates - facilities.js (v0.4.8 - Sequential Unlocks)
 
-const FACILITY_TYPES = [ // Ensure these costs are balanced for your game
+const FACILITY_TYPES = [
     {
         id: "lumber_mill", name: "Lumber Mill", cost: 300, materialsCost: 0, baseUpkeepRPS: 0.25,
         description: "Processes logs into usable Building Materials.", output: { resource: "buildingMaterials", amount: 0.5 },
@@ -9,15 +9,15 @@ const FACILITY_TYPES = [ // Ensure these costs are balanced for your game
             { id: "sharper_saws", name: "Sharper Saws", cost: 2000, effect: { outputIncrease: 0.05 }, maxTier: 3, requiresMaterials: 100 },
             { id: "efficiency_experts", name: "Efficiency Experts", cost: 3000, effect: { upkeepReduction: 0.05 }, maxTier: 2, requiresMaterials: 50 }
         ],
-        requiredResearch: null
+        requiredResearch: null // Available from start
     },
     {
         id: "basic_workshop", name: "Basic Workshop", cost: 7500, materialsCost: 40, baseUpkeepRPS: 20,
-        description: "Provides RPS boost to cheap properties and enables advanced construction research.",
+        description: "Provides RPS boost to cheap properties. Unlocks advanced construction research.",
         effects: [ { type: "property_rps_boost", propertyCategory: "cheap", percentage: 0.02 } ],
         mainLevelMax: 3,
         upgrades: [ { id: "better_tools", name: "Better Tools", cost: 5000, effect: { rpsBoostIncrease: 0.01 }, maxTier: 2, requiresMaterials: 75 } ],
-        requiredResearch: "basic_construction_techniques"
+        requiredResearch: "unlock_basic_workshop" // Unlocked by its own research
     },
     {
         id: "small_science_lab", name: "Small Science Lab", cost: 15000, materialsCost: 75, baseUpkeepRPS: 40,
@@ -27,101 +27,126 @@ const FACILITY_TYPES = [ // Ensure these costs are balanced for your game
             { id: "more_beakers", name: "More Beakers", cost: 10000, effect: { outputIncrease: 0.05 }, maxTier: 3 },
             { id: "grant_application", name: "Grant Writing", cost: 12000, effect: { upkeepReduction: 10}, maxTier: 1 }
         ],
-        requiredResearch: "basic_education"
+        requiredResearch: "basic_education" // Unlocked by Basic Education
     },
     {
         id: "advanced_science_lab", name: "Advanced Science Lab", cost: 100000, materialsCost: 300, baseUpkeepRPS: 150,
         description: "Generates more RP and allows for cutting-edge research.", output: { resource: "researchPoints", amount: 0.5 },
         mainLevelMax: 5,
         upgrades: [ { id: "supercomputer_access", name: "Supercomputer", cost: 50000, effect: { outputIncrease: 0.2 }, maxTier: 2, requiresMaterials: 50 } ],
-        requiredResearch: "scientific_method_2"
+        requiredResearch: "unlock_advanced_labs" // Unlocked by its own research
     }
+    // Example for a new material facility
+    // {
+    //     id: "basic_mine", name: "Basic Mine", cost: 10000, materialsCost: 100, baseUpkeepRPS: 15,
+    //     description: "Extracts raw ore, a versatile building component.", output: { resource: "rawOre", amount: 0.3 }, // Assuming you add rawOre to gameState
+    //     mainLevelMax: 5, upgrades: [], requiredResearch: "unlock_basic_mining"
+    // }
 ];
 
 const RESEARCH_TOPICS = [
+    // --- CORE & SCIENCE PROGRESSION ---
     {
         id: "basic_education", name: "Basic Education", cost: 300, materialsCost: 100,
-        description: "Fundamental knowledge. Unlocks Small Science Labs. Costs $300 & 100 Materials.",
+        description: "Fundamental knowledge. Unlocks Small Science Labs.",
         prerequisites: [],
         unlocksFacilityType: ["small_science_lab"],
-        unlocksResearch: ["urban_planning_1", "basic_construction_techniques", "scientific_method_1"]
-    },
-    { // This research unlocks the first set of new rentals
-        id: "urban_planning_1", name: "Urban Planning I", costRP: 300, // Cost 300 RP
-        description: "Develop basic urban structures. Unlocks Small Apartments and Trailer Homes.",
-        prerequisites: ["basic_education"],
-        unlocksPropertyType: ["small_apartment", "trailer_home"], // Explicitly lists properties it unlocks
-        unlocksResearch: ["urban_planning_2", "commercial_development_1"]
-    },
-    {
-        id: "basic_construction_techniques", name: "Basic Construction", costRP: 25,
-        description: "Unlocks Basic Workshops. Reduces property monetary costs.",
-        prerequisites: ["basic_education"],
-        unlocksFacilityType: ["basic_workshop"],
-        globalBuff: { type: "property_cost_reduction", percentage: 0.05, scope: "all" },
-        unlocksResearch: ["advanced_material_processing"]
+        unlocksResearch: ["unlock_basic_rentals", "unlock_basic_workshop", "scientific_method_1"] // Next available research
     },
     {
         id: "scientific_method_1", name: "Scientific Method I", costRP: 30,
-        description: "Improves research efficiency slightly.",
+        description: "Improves research efficiency slightly. Unlocks further science studies.",
         prerequisites: ["basic_education"],
         globalBuff: { type: "research_speed_boost", percentage: 0.05 },
-        unlocksResearch: ["scientific_method_2", "commercial_logistics"]
-    },
-    { // This research unlocks the next rental
-        id: "urban_planning_2", name: "Urban Planning II", costRP: 150,
-        description: "Advanced residential planning. Unlocks Suburban Houses.",
-        prerequisites: ["urban_planning_1"],
-        unlocksPropertyType: ["suburban_house"],
-        unlocksResearch: ["urban_planning_3"]
+        unlocksResearch: ["unlock_advanced_labs", "commercial_logistics"] // Leads to lab unlock and other branches
     },
     {
-        id: "commercial_development_1", name: "Commercial Dev. I", costRP: 40,
-        description: "Unlocks basic commercial properties.",
-        prerequisites: ["urban_planning_1"],
-        unlocksPropertyType: ["corner_store"],
-        unlocksResearch: [] // Can lead to commercial_logistics if desired
+        id: "unlock_advanced_labs", name: "Advanced Lab Design", costRP: 75,
+        description: "Develop schematics for Advanced Science Labs.",
+        prerequisites: ["scientific_method_1"],
+        unlocksFacilityType: ["advanced_science_lab"],
+        unlocksResearch: [/* "quantum_research_principles" */] // Next tier of science research topics
     },
+
+    // --- RENTAL PROPERTY UNLOCKS ---
+    {
+        id: "unlock_basic_rentals", name: "Urban Planning I", costRP: 300, // This is the 300 RP unlock
+        description: "Develop basic urban structures. Unlocks Small Apartments and Trailer Homes.",
+        prerequisites: ["basic_education"],
+        unlocksPropertyType: ["small_apartment", "trailer_home"],
+        unlocksResearch: ["unlock_suburban_homes"] // Next rental unlock research
+    },
+    {
+        id: "unlock_suburban_homes", name: "Urban Planning II", costRP: 150,
+        description: "Advanced residential planning. Unlocks Suburban Houses.",
+        prerequisites: ["unlock_basic_rentals"],
+        unlocksPropertyType: ["suburban_house"],
+        unlocksResearch: ["unlock_commercial_rentals", "unlock_luxury_rentals"] // Example next steps
+    },
+    {
+        id: "unlock_commercial_rentals", name: "Commercial Zoning", costRP: 120,
+        description: "Zone for and develop basic commercial properties. Unlocks Corner Stores.",
+        prerequisites: ["unlock_suburban_homes"], // Or could be parallel to suburban
+        unlocksPropertyType: ["corner_store"],
+        unlocksResearch: []
+    },
+    // {
+    //     id: "unlock_luxury_rentals", name: "Urban Planning III", costRP: 250,
+    //     description: "Unlocks more advanced residential options like Luxury Condos.",
+    //     prerequisites: ["unlock_suburban_homes"],
+    //     unlocksPropertyType: ["luxury_condo"], // Assuming luxury_condo is defined in properties.js
+    //     unlocksResearch: []
+    // },
+
+
+    // --- CONSTRUCTION / MATERIAL FACILITY UNLOCKS ---
+    {
+        id: "unlock_basic_workshop", name: "Basic Construction Tech", costRP: 25,
+        description: "Improves building methods. Unlocks Basic Workshops. Reduces property monetary costs.",
+        prerequisites: ["basic_education"],
+        unlocksFacilityType: ["basic_workshop"],
+        globalBuff: { type: "property_cost_reduction", percentage: 0.05, scope: "all" },
+        unlocksResearch: ["advanced_material_processing" /*, "unlock_basic_mining" */]
+    },
+    // {
+    //     id: "unlock_basic_mining", name: "Prospecting & Mining", costRP: 70,
+    //     description: "Learn to identify and extract raw ore. Unlocks Basic Mines.",
+    //     prerequisites: ["unlock_basic_workshop"], // Example prerequisite
+    //     unlocksFacilityType: ["basic_mine"],
+    //     unlocksResearch: []
+    // },
+
+    // --- GENERAL BUFFS / OTHER BRANCHES ---
     {
         id: "advanced_material_processing", name: "Adv. Material Processing", costRP: 60,
         description: "More efficient use of building materials for upgrades.",
-        prerequisites: ["basic_construction_techniques"],
+        prerequisites: ["unlock_basic_workshop"],
         globalBuff: { type: "material_usage_efficiency", percentage: 0.10 },
         unlocksResearch: []
     },
     {
         id: "commercial_logistics", name: "Commercial Logistics", costRP: 50,
         description: "Improves RPS for commercial properties.",
-        prerequisites: ["scientific_method_1"], // Or commercial_development_1
+        prerequisites: ["scientific_method_1"], // Or from a commercial development research
         globalBuff: { type: "property_rps_boost", percentage: 0.05, scope: "commercial" },
-        unlocksResearch: []
-    },
-    {
-        id: "scientific_method_2", name: "Scientific Method II", costRP: 75,
-        description: "Unlocks Advanced Science Labs. Further improves research efficiency.",
-        prerequisites: ["scientific_method_1"],
-        unlocksFacilityType: ["advanced_science_lab"],
-        globalBuff: { type: "research_speed_boost", percentage: 0.10 },
-        unlocksResearch: []
-    },
-    {
-        id: "urban_planning_3", name: "Urban Planning III", costRP: 250,
-        description: "Unlocks more advanced residential options.",
-        prerequisites: ["urban_planning_2"],
-        unlocksPropertyType: [/* "luxury_condo_id_here" */], // Add property IDs here
         unlocksResearch: []
     }
 ];
 
-// Stores instances of facilities the player has built. Each object will have a uniqueId, typeId, level, etc.
-let ownedFacilities = []; // <<<< INITIALIZATION OF ownedFacilities
+// --- Game State Variables for Facilities ---
+let ownedFacilities = [];
+let nextFacilityId = 0;
 
-// Counter to ensure each built facility instance gets a unique ID.
-let nextFacilityId = 0;   // <<<< INITIALIZATION OF nextFacilityId
+// --- Functions ---
+// (Ensure all functions like getFacilityTypeById, getResearchTopicById, calculateFacilityDynamicCost,
+//  isFacilityTypeUnlocked, isResearchAvailable, buyFacility, calculateFacilityStats,
+//  upgradeFacilityMainLevel, applySpecificFacilityUpgrade, calculateTotalFacilityUpkeep,
+//  applyFacilityOutputs, sellFacilityInstance, and the LATEST version of completeResearch
+//  that handles mixed costs and NO lab requirements are present and correct)
 
 function getFacilityTypeById(id) { return FACILITY_TYPES.find(fac => fac.id === id); }
 function getResearchTopicById(id) { return RESEARCH_TOPICS.find(res => res.id === id); }
-function calculateFacilityDynamicCost(facilityType) { return facilityType.cost; }
+function calculateFacilityDynamicCost(facilityType) { return facilityType.cost; } // Flat monetary cost
 
 function isFacilityTypeUnlocked(facilityTypeId) {
     const facType = getFacilityTypeById(facilityTypeId);
@@ -133,6 +158,7 @@ function isFacilityTypeUnlocked(facilityTypeId) {
             return true;
         }
     }
+    // Fallback for direct requiredResearch field if not found in any unlocksFacilityType array
     return gameState.unlockedResearch.includes(facType.requiredResearch);
 }
 
