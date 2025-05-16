@@ -113,6 +113,12 @@ const RESEARCH_TOPICS = [
     }
 ];
 
+// Stores instances of facilities the player has built. Each object will have a uniqueId, typeId, level, etc.
+let ownedFacilities = []; // <<<< INITIALIZATION OF ownedFacilities
+
+// Counter to ensure each built facility instance gets a unique ID.
+let nextFacilityId = 0;   // <<<< INITIALIZATION OF nextFacilityId
+
 function getFacilityTypeById(id) { return FACILITY_TYPES.find(fac => fac.id === id); }
 function getResearchTopicById(id) { return RESEARCH_TOPICS.find(res => res.id === id); }
 function calculateFacilityDynamicCost(facilityType) { return facilityType.cost; }
