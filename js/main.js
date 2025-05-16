@@ -3,24 +3,31 @@
 const GameLogic = {
     init: function() {
         console.log("Initializing Psychopath Game...");
-        this.loadGame(); // Load game data or set defaults
+        this.loadGame();
 
-        document.getElementById('manipulate-button').addEventListener('click', () => this.manualManipulate());
+        // Updated event listener to the image
+        const manipulateImageElement = document.getElementById('manipulate-image');
+        if (manipulateImageElement) {
+            manipulateImageElement.addEventListener('click', () => this.manualManipulate());
+        } else {
+            console.error("Manipulate image element not found!");
+        }
+
         document.getElementById('save-button').addEventListener('click', () => this.saveGame());
-        document.getElementById('load-button').addEventListener('click', () => { this.loadGame(); /* UIManager.updateAll() is called within loadGame */ });
+        document.getElementById('load-button').addEventListener('click', () => { this.loadGame(); });
         document.getElementById('reset-button').addEventListener('click', () => this.resetGame());
 
-        // Costs are calculated dynamically or upon load/purchase.
-        // UIManager.updateAll() will render initial state.
         this.gameLoop();
     },
 
     manualManipulate: function() {
         gameData.mp += gameData.clickPower;
-        // No need to call UIManager.updateAll() fully, just relevant parts if optimization needed.
-        // For simplicity, updateAll is fine for now.
-        UIManager.updateAll();
+        // Optional: Trigger JS-based animation if you prefer it over pure CSS :active
+        // UIManager.triggerClickAnimation();
+        UIManager.updateAll(); // This will update MP count and also click power display text
     },
+
+    // ... (rest of GameLogic object remains the same)
 
     buyIdleGenerator: function(generatorId) {
         const generator = gameData.idleGenerators.find(g => g.id === generatorId);
@@ -72,13 +79,6 @@ const GameLogic = {
             );
             if (!tierUnlockerMet) return false;
         }
-        //Also check if isInitiallyLocked is true and tier is > 1 but currentResearchTier is still 1
-        if(item.isInitiallyLocked && item.tier > gameData.currentResearchTier && !item.requirements.some(r => r.type === "tier" && r.id === item.tier)) {
-            //This condition means the item belongs to a higher tier that is not yet unlocked globally.
-            //However, if the direct requirement IS the tier unlocker research, this check is redundant.
-            //The tier > gameData.currentResearchTier check above should handle most of this.
-        }
-
         return this.areResearchRequirementsMet(item);
     },
 
@@ -88,7 +88,7 @@ const GameLogic = {
             gameData.mp -= item.cost;
             item.isResearched = true;
             if (item.applyEffect) {
-                item.applyEffect(); // This function will modify the global gameData
+                item.applyEffect();
             }
             item.unlocks.forEach(unlock => {
                 if (unlock.type === "generator") {
@@ -106,7 +106,7 @@ const GameLogic = {
                     if (asset) asset.isUnlocked = true;
                 }
             });
-            gameData.mps = calculateMPS(); // Recalculate if an effect changed MPS (e.g. new generator type)
+            gameData.mps = calculateMPS();
             UIManager.updateAll();
         }
     },
@@ -172,27 +172,26 @@ const GameLogic = {
 
         setInterval(() => {
             this.updatePerSecond();
-            UIManager.updateResourceDisplay();
+            UIManager.updateResourceDisplay(); // MP, MPS, Click Power
             UIManager.updateSecondaryResourceDisplay();
 
-            if (this.frameCount % 5 === 0) { // Update buy buttons/full lists less frequently
+            if (this.frameCount % 5 === 0) {
                  UIManager.renderIdleGenerators();
                  UIManager.renderProductionFacilities();
                  UIManager.renderResearchTree();
                  UIManager.renderAssets();
             }
-            this.frameCount = (this.frameCount + 1) % 1000; // Modulo to prevent excessively large number
+            this.frameCount = (this.frameCount + 1) % 1000;
         }, this.tickRate);
     },
 
     saveGame: function() {
         try {
-            // Save only the state, not the definitions with functions
             const saveData = {
                 mp: gameData.mp,
                 clickPower: gameData.clickPower,
                 currentResearchTier: gameData.currentResearchTier,
-                secondaryResources: {}, // Only save amounts
+                secondaryResources: {},
                 idleGeneratorsOwned: gameData.idleGenerators.map(g => ({ id: g.id, owned: g.owned, isUnlocked: g.isUnlocked, level: g.level })),
                 productionFacilitiesOwned: gameData.productionFacilities.map(f => ({ id: f.id, owned: f.owned, isUnlocked: f.isUnlocked })),
                 researchResearched: gameData.research.map(r => ({ id: r.id, isResearched: r.isResearched })),
@@ -213,13 +212,11 @@ const GameLogic = {
 
     setDefaultGameData: function() {
         console.log("Setting default game data...");
-        gameData = getInitialGameDefinitions(); // This reassigns the global gameData to a pristine state
-
-        // Ensure calculations are updated after reset
+        gameData = getInitialGameDefinitions();
         gameData.mps = calculateMPS();
         calculateSecondaryResourcePS();
         console.log("Default game data set.");
-        UIManager.updateAll(); // Update UI to reflect the reset state
+        UIManager.updateAll();
     },
 
     loadGame: function() {
@@ -228,13 +225,10 @@ const GameLogic = {
             try {
                 const loadedData = JSON.parse(savedGame);
                 console.log("Loading game data:", loadedData);
-
-                // Start with a fresh gameData structure from definitions
                 gameData = getInitialGameDefinitions();
 
-                // Apply saved state
                 gameData.mp = loadedData.mp || 0;
-                gameData.clickPower = loadedData.clickPower || gameData.clickPower; // Default to initial if not in save
+                gameData.clickPower = loadedData.clickPower || gameData.clickPower;
                 gameData.currentResearchTier = loadedData.currentResearchTier || gameData.currentResearchTier;
 
                 if (loadedData.secondaryResources) {
@@ -251,9 +245,8 @@ const GameLogic = {
                         if (gameGen) {
                             gameGen.owned = savedGen.owned || 0;
                             gameGen.level = savedGen.level || 1;
-                            // Ensure isUnlocked is explicitly boolean from save, else use initial definition
                             gameGen.isUnlocked = typeof savedGen.isUnlocked === 'boolean' ? savedGen.isUnlocked : gameGen.isUnlocked;
-                            gameGen.cost = calculateCost(gameGen); // Recalculate current cost
+                            gameGen.cost = calculateCost(gameGen);
                         }
                     });
                 }
@@ -274,11 +267,7 @@ const GameLogic = {
                         const gameResearch = gameData.research.find(r => r.id === savedResearch.id);
                         if (gameResearch) {
                             gameResearch.isResearched = savedResearch.isResearched || false;
-                            // Re-apply unlocks based on loaded research state
                             if (gameResearch.isResearched) {
-                                // The applyEffect itself is part of the definition from getInitialGameDefinitions()
-                                // gameResearch.applyEffect(); // NO! This applies the effect again. clickPower is loaded directly.
-                                // Unlockables based on this research need to be re-processed for isUnlocked status
                                 gameResearch.unlocks.forEach(unlock => {
                                     if (unlock.type === "generator") {
                                         const gen = gameData.idleGenerators.find(g => g.id === unlock.id);
@@ -304,16 +293,12 @@ const GameLogic = {
                         if (gameAsset) {
                             gameAsset.isPurchased = savedAsset.isPurchased || false;
                             gameAsset.isUnlocked = typeof savedAsset.isUnlocked === 'boolean' ? savedAsset.isUnlocked : gameAsset.isUnlocked;
-                            // if (gameAsset.isPurchased && gameAsset.applyEffect) gameAsset.applyEffect(); // Careful with re-applying asset effects
                         }
                     });
                 }
-
-                // Recalculate all derived stats
                 gameData.mps = calculateMPS();
                 calculateSecondaryResourcePS();
                 console.log("Game Loaded Successfully!");
-
             } catch (e) {
                 console.error("Error loading game:", e);
                 alert("Error loading saved game. It might be corrupted. Starting new game.");
@@ -323,15 +308,14 @@ const GameLogic = {
             console.log("No saved game found. Starting new game.");
             this.setDefaultGameData();
         }
-        UIManager.updateAll(); // Crucial: Update UI after gameData is fully set up
+        UIManager.updateAll();
     },
 
     resetGame: function() {
         if (confirm("Are you sure you want to reset all progress? This cannot be undone.")) {
             localStorage.removeItem('psychopathGameSave');
-            this.setDefaultGameData(); // This now correctly resets gameData to initial definitions
+            this.setDefaultGameData();
             console.log("Game Reset!");
-            // UIManager.updateAll() is called at the end of setDefaultGameData
         }
     }
 };
