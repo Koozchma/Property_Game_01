@@ -1,186 +1,122 @@
-/* General Body and Page Structure */
-body {
-    font-family: 'Arial', sans-serif;
+/* --- Global Resets & Futuristic Base --- */
+* {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    background-color: #f0f2f5; /* Light grey background */
-    color: #333; /* Default text color */
+}
+
+body {
+    font-family: 'Exo 2', 'Rajdhani', sans-serif; /* Modern, clean font */
+    background-color: #0a0f18; /* Very dark desaturated blue */
+    color: #c0c8d8; /* Light grey-blue text for readability */
     line-height: 1.6;
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* Ensure page takes at least full viewport height */
+    min-height: 100vh;
+    overflow-x: hidden; /* Prevent horizontal scroll from subtle glows */
 }
 
-/* Header Styling */
+/* --- Header & Stats --- */
 header {
-    background-color: #2c3e50; /* Dark blue-grey */
-    color: #ecf0f1; /* Light grey text */
-    padding: 1rem 2rem;
+    background-color: rgba(15, 20, 35, 0.85); /* Slightly transparent dark panel */
+    backdrop-filter: blur(5px); /* Frosted glass effect */
+    color: #e0e8ff;
+    padding: 1rem 1.5rem;
     text-align: center;
-    border-bottom: 4px solid #e67e22; /* Orange accent */
+    border-bottom: 2px solid #00aaff; /* Electric blue accent */
+    position: sticky; /* Make header sticky */
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 15px rgba(0, 170, 255, 0.1);
 }
 
 header h1 {
+    font-family: 'Orbitron', sans-serif; /* More stylized futuristic font for main title */
     margin: 0;
-    font-size: 2.2rem; /* Main title size */
-}
-
-.owned-property-card {
-    border: 1px solid #ddd;
-    background-color: #f9f9f9;
-    padding: 0.75rem; /* Reduced padding */
-    border-radius: 6px; /* Slightly more rounded */
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    border-left: 5px solid #27ae60; /* Green accent for owned items */
-}
-
-.owned-property-card h3 {
-    margin-top: 0;
-    margin-bottom: 0.5rem; /* Reduced margin */
-    color: #34495e;
-    font-size: 1rem; /* Slightly smaller title */
-    text-align: center;
-}
-
-.property-info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Two columns for stats */
-    gap: 0.3rem 0.5rem; /* Row and column gap */
-    font-size: 0.85rem; /* Smaller font for stats */
-    margin-bottom: 0.5rem;
-}
-
-.property-info-grid p {
-    margin: 0; /* Remove default paragraph margins */
-    padding: 0.1rem 0;
-    white-space: nowrap; /* Prevent wrapping if possible */
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.property-info-grid .label {
-    font-weight: bold;
-    color: #555;
-}
-.property-info-grid .value {
-    text-align: right;
-    color: #333;
-}
-
-
-.owned-property-card .card-actions {
-    display: flex;
-    justify-content: space-around; /* Space out buttons */
-    gap: 0.5rem; /* Gap between buttons */
-    margin-top: 0.75rem;
-}
-
-.owned-property-card .card-actions button {
-    width: auto; /* Allow buttons to size to content */
-    flex-grow: 1; /* Make buttons share space if needed */
-    padding: 0.4rem 0.6rem; /* Smaller padding for action buttons */
-    font-size: 0.8rem; /* Smaller font for action buttons */
-    margin-top: 0; /* Remove top margin from individual buttons */
-}
-
-.owned-property-card .manage-upgrades-btn {
-    background-color: #3498db;
-}
-.owned-property-card .manage-upgrades-btn:hover {
-    background-color: #2980b9;
-}
-
-.owned-property-card .sell-btn {
-    background-color: #e74c3c; /* Red for sell */
-}
-.owned-property-card .sell-btn:hover {
-    background-color: #c0392b;
-}
-
-
-/* Styles for the expanded upgrade section remain similar */
-.property-upgrades-detail {
-    /* display: none; /* Controlled by .visible class */
-    padding: 0.75rem; /* Slightly reduced padding */
-    margin-top: 0.75rem;
-    background-color: #ecf0f1;
-    border-top: 1px solid #bdc3c7;
-    border-radius: 0 0 4px 4px;
-}
-.property-upgrades-detail:not(.visible) {
-    display: none;
-}
-.property-upgrades-detail.visible {
-    display: block;
+    font-size: 2.2rem;
+    color: #00d4ff; /* Bright cyan */
+    text-shadow: 0 0 5px #00aaff, 0 0 10px #00aaff; /* Neon glow */
+    letter-spacing: 1px;
 }
 
 .stats-container {
     display: flex;
     justify-content: center;
-    gap: 12px; /* Space between stat items */
-    margin-top: 0.5rem;
-    flex-wrap: wrap; /* Allow stats to wrap on smaller screens */
+    gap: 10px;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
 }
 
 .stat-item {
-    background-color: #34495e; /* Slightly lighter blue-grey */
-    padding: 0.4rem 0.8rem;
-    border-radius: 5px;
+    background-color: rgba(30, 40, 60, 0.7); /* Semi-transparent dark cards */
+    padding: 0.5rem 0.9rem;
+    border-radius: 4px;
     font-size: 0.9rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    min-width: 90px;
+    color: #b0c8e0;
+    border: 1px solid #2a3f5f; /* Subtle border */
+    box-shadow: inset 0 0 3px rgba(0, 170, 255, 0.2), 0 1px 2px rgba(0,0,0,0.3);
+    min-width: 95px;
     text-align: center;
+    transition: all 0.3s ease;
+}
+.stat-item:hover {
+    border-color: #00aaff;
+    box-shadow: inset 0 0 8px rgba(0, 170, 255, 0.3), 0 0 10px rgba(0, 170, 255, 0.2);
 }
 
-/* Main Navigation Bar Styling */
+
+/* --- Main Navigation --- */
 .main-navigation {
     display: flex;
     justify-content: center;
-    background-color: #34495e;
-    padding: 0.75rem 0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: #0f1423; /* Dark base for nav */
+    padding: 0.6rem 0;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid #2a3f5f;
 }
 
 .nav-button {
-    background-color: #7f8c8d; /* Neutral grey for inactive buttons */
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    margin: 0 0.5rem;
-    font-size: 1rem;
-    border-radius: 5px;
+    background-color: transparent;
+    color: #9cb0d0; /* Muted blue text */
+    border: 1px solid #2a3f5f;
+    padding: 0.6rem 1.2rem;
+    margin: 0 0.4rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease, border-bottom-color 0.3s ease;
-    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease-in-out;
+    position: relative; /* For pseudo-elements if needed */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .nav-button:hover {
-    background-color: #95a5a6; /* Lighter grey on hover */
+    background-color: rgba(0, 170, 255, 0.1); /* Subtle hover glow */
+    color: #00d4ff;
+    border-color: #00aaff;
+    box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
 }
 
 .nav-button.active-nav {
-    background-color: #e67e22; /* Orange for active button */
-    color: white;
-    font-weight: bold;
-    border-bottom: 3px solid #c0392b; /* Darker orange accent for active */
-    transform: translateY(-2px);
+    background-color: #00aaff; /* Electric blue for active */
+    color: #0a0f18; /* Dark text on active */
+    border-color: #00d4ff;
+    box-shadow: 0 0 15px rgba(0, 170, 255, 0.5), inset 0 0 5px rgba(255,255,255,0.2);
+    transform: translateY(0px);
 }
 
-/* Main Content Area Styling */
+/* --- Content Area & Columns --- */
 .content-area {
     padding: 1.5rem;
-    max-width: 1400px;
+    max-width: 1500px; /* Slightly wider */
     margin: 0 auto;
     display: flex;
     gap: 1.5rem;
     flex-grow: 1;
     width: 100%;
-    box-sizing: border-box;
 }
 
-/* Column Styling */
 .column {
     display: flex;
     flex-direction: column;
@@ -188,13 +124,14 @@ header h1 {
     min-width: 0;
 }
 
-/* Individual Section Styling (within each column) */
 #left-column-section,
 #right-column-section {
-    background-color: #fff;
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    background-color: rgba(20, 28, 48, 0.7); /* Semi-transparent dark panel */
+    backdrop-filter: blur(3px);
+    padding: 1.25rem;
+    border-radius: 6px;
+    border: 1px solid #2a3f5f; /* Techy border */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2), inset 0 0 8px rgba(0,0,0,0.2);
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -203,207 +140,274 @@ header h1 {
 
 #left-column-section h2,
 #right-column-section h2 {
-    color: #2c3e50;
-    border-bottom: 2px solid #e67e22;
-    padding-bottom: 0.5rem;
+    font-family: 'Orbitron', sans-serif;
+    color: #00d4ff; /* Bright cyan title */
+    border-bottom: 1px solid #00aaff;
+    padding-bottom: 0.6rem;
     margin-top: 0;
     margin-bottom: 1rem;
     flex-shrink: 0;
+    font-size: 1.5rem;
+    text-align: center;
+    text-shadow: 0 0 3px rgba(0, 170, 255, 0.7);
 }
 
-/* Item List Styling */
+/* --- Item Lists & Scrollability --- */
 .item-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    /* For owned items, maybe 1 column for more detail, for available, 2 columns */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Default, can be overridden */
     gap: 1rem;
     flex-grow: 1;
 }
 
-.scrollable-list {
-    max-height: 65vh;
-    overflow-y: auto;
-    padding-right: 10px; /* Space for scrollbar */
-    padding-bottom: 20px; /* Padding at the bottom of scrollable area */
+/* Specific override for portfolio to usually be single column for more detail */
+#right-column-list.item-list { /* If it's showing owned items, usually better as 1 column */
+    grid-template-columns: 1fr; /* Single column for owned items */
 }
 
-/* Card Styling (properties, facilities, research) */
+
+.scrollable-list {
+    max-height: calc(100vh - 250px); /* Dynamic height calculation, adjust 250px based on header/nav/footer */
+    overflow-y: auto;
+    padding: 5px; /* Padding inside scroll area */
+}
+
+/* Custom Scrollbar (Webkit browsers) */
+.scrollable-list::-webkit-scrollbar {
+    width: 8px;
+}
+.scrollable-list::-webkit-scrollbar-track {
+    background: rgba(42, 63, 95, 0.3); /* Dark track */
+    border-radius: 4px;
+}
+.scrollable-list::-webkit-scrollbar-thumb {
+    background-color: #00aaff; /* Blue thumb */
+    border-radius: 4px;
+    border: 2px solid transparent; /* Creates padding around thumb */
+    background-clip: content-box;
+}
+.scrollable-list::-webkit-scrollbar-thumb:hover {
+    background-color: #00d4ff;
+}
+
+/* --- Card Styling (Futuristic) --- */
 .property-card, .owned-property-card,
 .facility-card, .owned-facility-card,
 .research-item-card {
-    border: 1px solid #ddd;
-    background-color: #f9f9f9;
-    padding: 1rem;
-    border-radius: 5px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    background: linear-gradient(145deg, rgba(30, 40, 60, 0.85), rgba(25, 35, 55, 0.9)); /* Dark gradient */
+    border: 1px solid #2a3f5f; /* Tech border */
+    padding: 0.75rem; /* Using compact card padding */
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(0, 170, 255, 0.1); /* Inner glow illusion */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    transition: all 0.3s ease;
+    position: relative; /* For potential pseudo-element accents */
 }
 
-.property-card, .facility-card, .research-item-card { /* Available items */
-    border-left: 5px solid #e67e22;
+.property-card:hover, .owned-property-card:hover,
+.facility-card:hover, .owned-facility-card:hover,
+.research-item-card:hover {
+    border-color: #00aaff;
+    box-shadow: 0 4px 12px rgba(0, 170, 255, 0.2), 0 0 15px rgba(0, 170, 255, 0.1), inset 0 0 0 1px rgba(0, 170, 255, 0.3);
+    transform: translateY(-2px);
 }
-.owned-property-card, .owned-facility-card { /* Owned items */
-    border-left: 5px solid #27ae60; /* Green accent */
+
+/* Card Accents */
+.property-card::before, .facility-card::before, .research-item-card::before { /* Available items */
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: linear-gradient(to bottom, #00aaff, #00d4ff); /* Cyan/Blue gradient */
+    border-radius: 6px 0 0 6px;
 }
+.owned-property-card::before, .owned-facility-card::before { /* Owned items */
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: linear-gradient(to bottom, #00ffaa, #00dd90); /* Greenish tech accent */
+    border-radius: 6px 0 0 6px;
+}
+
 
 /* Typography within cards */
 .property-card h3, .owned-property-card h3,
 .facility-card h3, .owned-facility-card h3,
 .research-item-card h3 {
     margin-top: 0;
-    color: #34495e;
-    font-size: 1.1rem;
+    margin-bottom: 0.6rem;
+    color: #00d4ff; /* Bright cyan for titles */
+    font-size: 1.05rem;
+    font-family: 'Orbitron', sans-serif;
+    text-align: center;
+    text-shadow: 0 0 3px rgba(0, 170, 255, 0.5);
 }
 
 .property-card p, .owned-property-card p,
 .facility-card p, .owned-facility-card p,
 .research-item-card p {
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem; /* Compact text */
+    color: #a0b8d0; /* Lighter, softer text */
 }
 
-/* Specific text styling (costs, income, levels) */
-.prop-cost, .facility-cost, .research-cost,
-.prop-upkeep, .facility-upkeep {
-    font-weight: bold;
+/* Specific text styling in cards (costs, income, levels) */
+.prop-cost, .facility-cost, .research-cost { color: #ff6b6b; font-weight: bold; } /* Bright red for costs */
+.prop-upkeep, .facility-upkeep { color: #ff8f8f; font-weight: normal;} /* Lighter red for upkeep */
+.prop-rps, .facility-output { color: #50fa7b; font-weight: bold; } /* Bright green for positive */
+.prop-level { color: #8be9fd; font-weight: bold; } /* Light blue/cyan for level */
+
+/* Property Info Grid (for owned property cards) */
+.property-info-grid {
+    display: grid;
+    grid-template-columns: auto 1fr; /* Label and value */
+    gap: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+    margin-bottom: 0.6rem;
+    color: #b0c8e0;
 }
-.prop-cost, .facility-cost, .research-cost { color: #c0392b; } /* Red for costs */
-.prop-upkeep, .facility-upkeep { color: #e74c3c; }
+.property-info-grid .label {
+    font-weight: 600; /* Rajdhani regular or medium */
+    color: #8098b0;
+}
+.property-info-grid .value {
+    text-align: right;
+    font-weight: 600;
+    color: #d0e0f0;
+}
 
-.prop-rps, .facility-output, .prop-level { font-weight: bold; }
-.prop-rps, .facility-output { color: #27ae60; } /* Green */
-.prop-level { color: #2980b9; } /* Blue */
+/* Card Actions (for Manage Upgrades & Sell buttons on owned cards) */
+.owned-property-card .card-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+.owned-property-card .card-actions button {
+    flex-grow: 1;
+    padding: 0.5rem 0.5rem;
+    font-size: 0.8rem;
+    margin-top: 0;
+}
 
-/* General Button Styling */
-button {
-    background-color: #e67e22;
-    color: white;
-    border: none;
-    padding: 0.6rem 1rem;
+/* --- Buttons --- */
+button { /* General futuristic button */
+    background: linear-gradient(145deg, #2a3f5f, #1e2b40); /* Dark gradient */
+    color: #00d4ff; /* Cyan text */
+    border: 1px solid #00aaff;
+    padding: 0.7rem 1.2rem; /* More padding for general buttons */
     text-align: center;
-    text-decoration: none;
-    display: inline-block;
     font-size: 0.9rem;
-    border-radius: 5px;
+    font-weight: 600;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s ease, box-shadow 0.1s ease;
-    margin-top: 0.5rem;
+    transition: all 0.2s ease-in-out;
+    margin-top: 0.75rem; /* More margin for primary action buttons */
     width: 100%;
     box-sizing: border-box;
-    box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3), inset 0 0 2px rgba(0, 170, 255, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
-
-.upgrade-buttons-container button,
-.property-upgrades-detail button { /* Target buttons inside upgrade containers */
-    width: auto; /* Allow multiple upgrade buttons to sit inline or wrap naturally */
-    margin-right: 5px;
-    margin-bottom: 5px; /* Ensure some space when they wrap */
-    flex-grow: 1; /* Allow them to share space better if their container is flex */
-}
-
-
 button:hover {
-    background-color: #d35400;
-    box-shadow: 0 3px 4px rgba(0,0,0,0.15);
+    background: linear-gradient(145deg, #3a4f6f, #2e3b50);
+    border-color: #00d4ff;
+    color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4), 0 0 10px rgba(0, 170, 255, 0.3), inset 0 0 3px rgba(0, 170, 255, 0.3);
+    transform: translateY(-1px);
 }
-
 button:disabled {
-    background-color: #bdc3c7;
-    color: #7f8c8d;
+    background: #1a2230; /* Darker, desaturated */
+    color: #4a5f7f; /* Muted text */
+    border-color: #2a3f5f;
     cursor: not-allowed;
-    box-shadow: none;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    transform: translateY(0);
 }
 
-/* Container for multiple specific upgrade buttons (on the main card, if any were still there) */
-.upgrade-buttons-container {
-    margin-top: 0.75rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.upgrade-buttons-container p {
-    width: 100%;
-    font-weight: bold;
-    margin-bottom: 0.25rem;
+/* Upgrade Buttons (inside containers/details) */
+.upgrade-buttons-container button,
+.property-upgrades-detail button {
+    width: auto;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    flex-grow: 1;
+    padding: 0.5rem 0.8rem; /* Smaller padding for these */
     font-size: 0.85rem;
-    color: #555;
+    text-transform: none; /* Normal case for upgrade names */
+    letter-spacing: 0;
 }
 
-/* Styling for the new elements within owned property cards (Expandable Upgrades) */
+/* Manage Upgrades Button on Card */
 .owned-property-card .manage-upgrades-btn {
-    background-color: #3498db; /* Distinct blue for manage button */
-    margin-top: 10px;
-    /* width: calc(100% - 20px); /* Removed to allow natural button width with padding */
-    /* margin-left: 10px; */ /* Use auto margins or rely on card padding */
-    /* margin-right: 10px; */
-    width: auto; /* Let it size to content + padding */
-    display: block; /* To allow margin auto to center if needed */
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 200px; /* Prevent it from being overly wide */
+    background: linear-gradient(145deg, #007acc, #005c99); /* Blue gradient */
+    border-color: #00aaff;
+    color: #fff;
 }
-
 .owned-property-card .manage-upgrades-btn:hover {
-    background-color: #2980b9;
+    background: linear-gradient(145deg, #008becc, #006cb9);
+    border-color: #00d4ff;
 }
 
+/* Sell Button on Card */
+.owned-property-card .sell-btn {
+    background: linear-gradient(145deg, #c0392b, #a0291b); /* Red gradient */
+    border-color: #ff6b6b;
+    color: #fff;
+}
+.owned-property-card .sell-btn:hover {
+    background: linear-gradient(145deg, #d0493b, #b0392b);
+    border-color: #ff8f8f;
+}
+
+/* --- Expandable Upgrade Detail Section --- */
 .property-upgrades-detail {
-    /* display: none; /* Initially hidden - now controlled by class .visible */
-    padding: 10px;
-    margin-top: 10px;
-    background-color: #ecf0f1; /* Slightly different background */
-    border-top: 1px solid #bdc3c7;
+    padding: 0.75rem;
+    margin-top: 0.75rem;
+    background-color: rgba(15, 20, 35, 0.9); /* Darker panel inside card */
+    border-top: 1px solid #2a3f5f;
     border-radius: 0 0 4px 4px;
 }
+.property-upgrades-detail:not(.visible) { display: none; }
+.property-upgrades-detail.visible { display: block; }
 
-.property-upgrades-detail:not(.visible) { /* New rule to hide it */
-    display: none;
-}
-
-.property-upgrades-detail.visible {
-    display: block; /* Or flex, grid as needed for internal layout of buttons */
-}
-
-.property-upgrades-detail .upgrade-main-btn-detail,
-.property-upgrades-detail .specific-upgrade-btn-detail {
-    width: calc(100% - 10px); /* Full width within its padding */
-    margin: 5px auto; /* Centered with auto margins for left/right */
-    display: block; /* Ensure they take up the line */
-    box-sizing: border-box;
-}
-.property-upgrades-detail .upgrade-main-btn-detail {
-    background-color: #1abc9c; /* Teal for main level upgrade in detail */
-}
-.property-upgrades-detail .upgrade-main-btn-detail:hover {
-    background-color: #16a085;
-}
-
-.property-upgrades-detail .specific-upgrade-btn-detail {
-    background-color: #9b59b6; /* Purple for specific upgrades in detail */
-}
-.property-upgrades-detail .specific-upgrade-btn-detail:hover {
-    background-color: #8e44ad;
-}
-
-.property-upgrades-detail > p { /* For "Specific Upgrades:" title inside detail view */
-    font-weight: bold;
-    margin-top: 10px;
-    margin-bottom: 5px;
+.property-upgrades-detail > p { /* "Specific Upgrades:" title */
+    font-family: 'Orbitron', sans-serif;
+    font-weight: normal;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
     font-size: 0.9em;
-    color: #34495e;
+    color: #00aaff; /* Blue accent for this title */
     text-align: center;
+    border-bottom: 1px dashed #2a3f5f;
+    padding-bottom: 0.3rem;
+}
+
+/* Buttons inside the upgrade detail panel */
+.property-upgrades-detail .upgrade-main-btn-detail {
+    background: linear-gradient(145deg, #16a085, #108065); /* Teal gradient */
+    border-color: #50fa7b; /* Greenish border */
+    color: #fff;
+}
+.property-upgrades-detail .specific-upgrade-btn-detail {
+    background: linear-gradient(145deg, #8e44ad, #703090); /* Purple gradient */
+    border-color: #c377e0; /* Lighter purple border */
+    color: #fff;
 }
 
 
-/* Footer Styling */
+/* --- Footer --- */
 footer {
     text-align: center;
     padding: 1rem;
-    background-color: #34495e;
-    color: #bdc3c7;
-    font-size: 0.85rem;
-    margin-top: auto; /* Pushes footer to the bottom */
-    flex-shrink: 0; /* Prevent footer from shrinking */
+    background-color: #0f111a; /* Match darker header elements */
+    color: #607090; /* Muted text */
+    font-size: 0.8rem;
+    margin-top: auto;
+    flex-shrink: 0;
+    border-top: 1px solid #2a3f5f;
 }
