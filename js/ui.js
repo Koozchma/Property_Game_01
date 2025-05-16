@@ -260,3 +260,16 @@ function formatNumber(num, decimals = 0) {
     const fixedDecimals = i === 0 ? decimals : Math.max(0, Math.min(2, decimals - (scaled >= 100 ? 2 : (scaled >= 10 ? 1 : 0)) )); // Adjust decimals for larger numbers
     return scaled.toFixed(fixedDecimals) + suffixes[i];
 }
+
+// Helper function for formatting numbers (simple version)
+function formatNumber(num, decimals = 0) {
+    if (num === undefined || num === null) return '0';
+    if (num < 1000 && decimals === 0) return num.toFixed(0);
+    if (num < 1000) return num.toFixed(decimals);
+
+    const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc"];
+    const i = Math.floor(Math.log10(Math.abs(num)) / 3);
+    const scaled = num / Math.pow(1000, i);
+    const fixedDecimals = i === 0 ? decimals : Math.max(0, Math.min(2, decimals - (scaled >= 100 ? 2 : (scaled >= 10 ? 1 : 0)) ));
+    return scaled.toFixed(fixedDecimals) + suffixes[i];
+}
