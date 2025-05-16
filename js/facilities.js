@@ -64,24 +64,37 @@ const FACILITY_TYPES = [
 ];
 
 const RESEARCH_TOPICS = [
-    // TIER 0 - Initial
+    // TIER 0 - Initial (Costs Money & Materials)
     {
-        id: "basic_education", name: "Basic Education", costRP: 10, requiredLabs: 0,
-        description: "Fundamental knowledge paving the way for scientific endeavors. Unlocks the Small Science Lab.",
+        id: "basic_education",
+        name: "Basic Education",
+        cost: 300,             // Monetary cost
+        materialsCost: 100,    // Material cost
+        // costRP: 0, // Explicitly no RP cost or remove if your logic handles missing costRP
+        // requiredLabs: 0, // REMOVED
+        description: "Fundamental knowledge paving the way for scientific endeavors. Unlocks the Small Science Lab. Costs $300 & 100 Materials.",
         prerequisites: [],
         unlocksFacilityType: ["small_science_lab"],
         unlocksResearch: ["urban_planning_1", "basic_construction_techniques", "scientific_method_1"]
     },
-    // TIER 1 - Unlocked by Basic Education
+
+    // TIER 1 - Unlocked by Basic Education (Costs RP)
     {
-        id: "urban_planning_1", name: "Unlock Basic Rentals", costRP: 100, requiredLabs: 1, // Cost as per previous request
+        id: "urban_planning_1",
+        name: "Unlock Basic Rentals",
+        costRP: 100,
+        // materialsCost: 0, // Research generally shouldn't cost materials unless specifically intended
+        // requiredLabs: 1, // REMOVED
         description: "Learn to build basic new rental types like apartments and trailer homes.",
         prerequisites: ["basic_education"],
         unlocksPropertyType: ["small_apartment", "trailer_home"],
         unlocksResearch: ["urban_planning_2", "commercial_development_1"]
     },
     {
-        id: "basic_construction_techniques", name: "Basic Construction", costRP: 25, requiredLabs: 1,
+        id: "basic_construction_techniques",
+        name: "Basic Construction",
+        costRP: 25,
+        // requiredLabs: 1, // REMOVED
         description: "Improves building methods. Unlocks Basic Workshops and enables some property upgrades. Reduces property monetary costs.",
         prerequisites: ["basic_education"],
         unlocksFacilityType: ["basic_workshop"],
@@ -89,51 +102,69 @@ const RESEARCH_TOPICS = [
         unlocksResearch: ["advanced_material_processing"]
     },
     {
-        id: "scientific_method_1", name: "Scientific Method I", costRP: 30, requiredLabs: 1,
+        id: "scientific_method_1",
+        name: "Scientific Method I",
+        costRP: 30,
+        // requiredLabs: 1, // REMOVED
         description: "Improves research efficiency slightly.",
         prerequisites: ["basic_education"],
         globalBuff: { type: "research_speed_boost", percentage: 0.05 },
         unlocksResearch: ["scientific_method_2", "commercial_logistics"]
     },
-    // TIER 2 - Branching out
+
+    // TIER 2 - Branching out (Costs RP)
     {
-        id: "urban_planning_2", name: "Urban Planning II", costRP: 50, requiredLabs: 1,
+        id: "urban_planning_2",
+        name: "Urban Planning II",
+        costRP: 50,
+        // requiredLabs: 1, // REMOVED
         description: "Unlocks Suburban Houses.",
         prerequisites: ["urban_planning_1"],
         unlocksPropertyType: ["suburban_house"],
         unlocksResearch: []
     },
     {
-        id: "commercial_development_1", name: "Commercial Dev. I", costRP: 40, requiredLabs: 1,
+        id: "commercial_development_1",
+        name: "Commercial Dev. I",
+        costRP: 40,
+        // requiredLabs: 1, // REMOVED
         description: "Unlocks basic commercial properties.",
         prerequisites: ["urban_planning_1"],
         unlocksPropertyType: ["corner_store"],
         unlocksResearch: []
     },
     {
-        id: "advanced_material_processing", name: "Adv. Material Processing", costRP: 60, requiredLabs: 1,
+        id: "advanced_material_processing",
+        name: "Adv. Material Processing",
+        costRP: 60,
+        // requiredLabs: 1, // REMOVED
         description: "More efficient use of building materials for upgrades.",
         prerequisites: ["basic_construction_techniques"],
         globalBuff: { type: "material_usage_efficiency", percentage: 0.10 },
         unlocksResearch: []
     },
     {
-        id: "commercial_logistics", name: "Commercial Logistics", costRP: 50, requiredLabs: 1,
+        id: "commercial_logistics",
+        name: "Commercial Logistics",
+        costRP: 50,
+        // requiredLabs: 1, // REMOVED
         description: "Improves RPS for commercial properties.",
         prerequisites: ["scientific_method_1"],
         globalBuff: { type: "property_rps_boost", percentage: 0.05, scope: "commercial" },
         unlocksResearch: []
     },
     {
-        id: "scientific_method_2", name: "Scientific Method II", costRP: 75, requiredLabs: 2,
+        id: "scientific_method_2",
+        name: "Scientific Method II",
+        costRP: 75,
+        // requiredLabs: 2, // REMOVED
         description: "Further improves research efficiency and unlocks Advanced Science Labs.",
         prerequisites: ["scientific_method_1"],
         unlocksFacilityType: ["advanced_science_lab"],
         globalBuff: { type: "research_speed_boost", percentage: 0.10 },
-        unlocksResearch: []
+        unlocksResearch: [] // End of this branch for now
     }
 ];
-
 
 let ownedFacilities = [];
 let nextFacilityId = 0;
