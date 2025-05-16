@@ -101,8 +101,9 @@ function getResearchTopicById(id) {
 }
 
 function calculateFacilityDynamicCost(facilityType) {
-    const ownedCount = ownedFacilities.filter(f => f.typeId === facilityType.id).length;
-    return Math.floor(facilityType.cost * Math.pow(1.20, ownedCount)); // 20% increase per facility
+    // const ownedCount = ownedFacilities.filter(f => f.typeId === facilityType.id).length;
+    // return Math.floor(facilityType.cost * Math.pow(1.20, ownedCount)); // 20% increase per facility
+    return facilityType.cost; // New: Flat cost (research buffs for facility costs could be added here too if desired)
 }
 
 function isFacilityTypeUnlocked(facilityTypeId) {
