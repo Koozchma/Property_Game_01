@@ -142,65 +142,127 @@ function displayCurrentViewContent() {
 // ---- Specific List Display Functions ----
 function displayAvailablePropertiesList(targetElement) {
     ensureUIInitialized();
-    if (!targetElement) return;
-    targetElement.innerHTML = '';
-    let displayedCount = 0;
-    const firstRentalUnlockResearchID = "urban_planning_1"; // Assumed ID for first rental tier unlock
+    if (!targetElement) {
+        console.error("Target element for available rentals not provided or initialized.");
+        return;
+    }
+    targetElement.innerHTML = ''; // Clear previous content
+    let displayedItemCount = 0;
 
-    // 1. Shack
-    const shack = getPropertyTypeById("shack");
-    if (shack && isPropertyTypeUnlocked(shack.id)) {
-        displayedCount++;
-        const currentMonetaryCost = calculateDynamicPropertyCost(shack);
+    // 1. Always display the Shack if it's defined and unlocked (it should be by default)
+    const shack = getPropertyTypeById("shack"); // from properties.js
+    if (shack && isPropertyTypeUnlocked(shack.id)) { // isPropertyTypeUnlocked from properties.js
+        displayedItemCount++;
+        const currentMonetaryCost = calculateDynamicPropertyCost(shack); // from properties.js
         const materialsCost = shack.materialsCost || 0;
         const card = document.createElement('div');
-        card.className = 'property-card';
-        card.innerHTML = `<h3>${shack.name}</h3><p>${shack.description}</p>
+        card.className = 'property-card'; // Use your futuristic card style
+        card.innerHTML = `
+            <h3>${shack.name}</h3>
+            <p>${shack.description}</p>
             <p class="prop-cost">Cost: $${formatNumber(currentMonetaryCost,0)}${materialsCost > 0 ? ` + ${materialsCost} Mats` : ''}</p>
-            <p>Base RPS: $${formatNumber(shack.baseRPS,1)}/s</p><p>Max Lvl: ${shack.mainLevelMax || 'N/A'}</p>
-            <button onclick="buyProperty('${shack.id}')" id="buy-prop-${shack.id}-btn">Buy</button>`;
+            <p>Base RPS: $${formatNumber(shack.baseRPS,1)}/s</p>
+            <p>Max Lvl: ${shack.mainLevelMax || 'N/A'}</p>
+            <button onclick="buyProperty('${shack.id}')" id="buy-prop-${shack.id}-btn">Buy</button>
+        `;
         targetElement.appendChild(card);
     }
 
-    // 2. Unlock Placeholder or Next Tier Rentals
-    const firstRentalsUnlockedByResearch = gameState.unlockedResearch.includes(firstRentalUnlockResearchID);
+    // 2. Determine the next set of properties to unlock or display
+    let nextUnlockableTierFound = false;
+    for (const research of RESEARCH_TOPICS) { // from facilities.js
+        if (research.unlocksPropertyType && research.unlocksPropertyType.length > 0) {
+            const allPropertiesInThisTierUnlocked = research.unlocksPropertyType.every(propId =>
+                isPropertyTypeUnlocked(propId) // This means the research is done
+            );
 
-    if (!firstRentalsUnlockedByResearch) {
-        displayedCount++;
-        const researchTopic = getResearchTopicById(firstRentalUnlockResearchID);
-        const rpCost = researchTopic ? researchTopic.costRP : "N/A"; // Handle if researchTopic isn't found
-        const placeholderCard = document.createElement('div');
-        placeholderCard.className = 'unlock-placeholder-card';
-        placeholderCard.innerHTML = `
-            <h3>Unlock Next Tier Rentals</h3>
-            <p>More rentals available via research.</p>
-            <p>Required: "${researchTopic ? researchTopic.name : "Unlock Basic Rentals"}"</p>
-            <p>Cost: <span class="research-cost-display">${formatNumber(rpCost, 0)} RP</span></p>
-            <button onclick="switchView('research')" title="Go to Research & Development">View Research</button>
-        `;
-        targetElement.appendChild(placeholderCard);
-    } else {
-        PROPERTY_TYPES.forEach(propType => {
-            if (propType.id === "shack") return; // Already handled
-            if (isPropertyTypeUnlocked(propType.id)) {
-                if (!propType || typeof propType.baseCost === 'undefined') { console.error("Invalid rental type:", propType); return; }
-                displayedCount++;
-                const currentMonetaryCost = calculateDynamicPropertyCost(propType);
-                const materialsCost = propType.materialsCost || 0;
-                const card = document.createElement('div');
-                card.className = 'property-card';
-                card.innerHTML = `<h3>${propType.name}</h3><p>${propType.description}</p>
-                    <p class="prop-cost">Cost: $${formatNumber(currentMonetaryCost,0)}${materialsCost > 0 ? ` + ${materialsCost} Mats` : ''}</p>
-                    <p>Base RPS: $${formatNumber(propType.baseRPS,1)}/s</p><p>Max Lvl: ${propType.mainLevelMax}</p>
-                    <button onclick="buyProperty('${propType.id}')" id="buy-prop-${propType.id}-btn">Buy</button>`;
-                targetElement.appendChild(card);
+            if (allPropertiesInThisTierUnlocked) {
+                // This research is done, so its properties should be displayed IF they are the "current" ones to show
+                // We need to ensure we are not re-displaying already unlocked and potentially purchased items
+                // or jumping too far ahead.
+                // For simplicity here, we'll show all unlocked properties after the shack.
+                // A more advanced system might only show the *next immediate available tier*.
+                research.unlocksPropertyType.forEach(propId => {
+                    // Avoid re-listing if already shown due to another logic path (though unlikely here)
+                    if (targetElement.querySelector(`#buy-prop-${propId}-btn`)) return;
+
+                    const propType = getPropertyTypeById(propId);
+                    if (propType && isPropertyTypeUnlocked(propType.id)) { // Double check unlock
+                        displayedItemCount++;
+                        const currentMonetaryCost = calculateDynamicPropertyCost(propType);
+                        const materialsCost = propType.materialsCost || 0;
+                        const card = document.createElement('div');
+                        card.className = 'property-card';
+                        card.innerHTML = `
+                            <h3>${propType.name}</h3>
+                            <p>${propType.description}</p>
+                            <p class="prop-cost">Cost: $${formatNumber(currentMonetaryCost,0)}${materialsCost > 0 ? ` + ${materialsCost} Mats` : ''}</p>
+                            <p>Base RPS: $${formatNumber(propType.baseRPS,1)}/s</p>
+                            <p>Max Lvl: ${propType.mainLevelMax || 'N/A'}</p>
+                            <button onclick="buyProperty('${propType.id}')" id="buy-prop-${propType.id}-btn">Buy</button>
+                        `;
+                        targetElement.appendChild(card);
+                    }
+                });
+
+            } else if (isResearchAvailable(research.id)) { // Research is available but not done
+                // This is a candidate for the "Unlock" card
+                displayedItemCount++;
+                nextUnlockableTierFound = true;
+                const placeholderCard = document.createElement('div');
+                placeholderCard.className = 'unlock-placeholder-card'; // Use your placeholder style
+
+                let costStrings = [];
+                if (research.hasOwnProperty('cost') && typeof research.cost === 'number' && research.cost > 0) {
+                    costStrings.push(`$${formatNumber(research.cost, 0)}`);
+                }
+                if (research.hasOwnProperty('materialsCost') && typeof research.materialsCost === 'number' && research.materialsCost > 0) {
+                    costStrings.push(`${formatNumber(research.materialsCost, 0)} Materials`);
+                }
+                if (research.hasOwnProperty('costRP') && typeof research.costRP === 'number' && research.costRP > 0) {
+                    costStrings.push(`${formatNumber(research.costRP, 1)} RP`);
+                }
+                let costText = costStrings.length > 0 ? costStrings.join(' + ') : "Free";
+
+                placeholderCard.innerHTML = `
+                    <h3>Unlock: ${research.name}</h3>
+                    <p>Unlocks: ${research.unlocksPropertyType.map(id => getPropertyTypeById(id)?.name || 'New Rentals').join(', ')}</p>
+                    <p>Cost: <span class="research-cost-display">${costText}</span></p>
+                    <button onclick="completeResearchAndRefreshUI('${research.id}')" id="unlock- μέσω-${research.id}-btn">Unlock</button>
+                `;
+                targetElement.appendChild(placeholderCard);
+                break; // Show only the first available unlock research for properties
             }
-        });
+        }
     }
 
-    if (displayedCount === 0) {
-        targetElement.innerHTML = "<p>No rentals currently available. Check Research & Development.</p>";
+
+    if (displayedItemCount === 0) { // If only shack was displayed, or nothing
+        targetElement.innerHTML = "<p>No more rentals currently available. Check Research & Development for further unlocks.</p>";
+    } else if (displayedItemCount === 1 && shack && !nextUnlockableTierFound && RESEARCH_TOPICS.some(r => r.unlocksPropertyType && r.unlocksPropertyType.length > 0 && !isResearchAvailable(r.id) && !gameState.unlockedResearch.includes(r.id))) {
+        // Only shack is shown, no immediate unlock research available, but there IS future property research
+        targetElement.innerHTML += "<p>Further rental tiers require more advanced research.</p>";
     }
+
+    // The actual scrolling behavior is managed by CSS on .scrollable-list
+    // We just need to ensure the content causes overflow.
+    // If targetElement has few items, it won't scroll.
+    // If you want to FORCE a minimum height to show scrollbar even with 1 item, that's CSS.
+    // The request "When the next is unlocked it scrolls" implies that adding a 3rd item (Shack + Unlocked Tier + Next Unlock placeholder)
+    // should make the list scroll if the CSS max-height for .scrollable-list is set to show ~2 items.
+
+// New helper function to complete research and then trigger a UI refresh for the current view
+function completeResearchAndRefreshUI(researchId) {
+    const success = completeResearch(researchId); // from facilities.js
+    if (success) {
+        // updateGameData(); // This is already called by completeResearch if successful
+        // Ensure the current view refreshes its content if it was the research view,
+        // or if the unlock affects the current view (like rentals).
+        // updateGameData() handles refreshing all lists and button states.
+    }
+    // If the current view was 'research', it will be updated by updateGameData.
+    // If the current view was 'rentals' and this research unlocked a rental,
+    // updateGameData called by completeResearch will refresh the rentals list.
 }
 
 function displayOwnedPropertiesList(targetElement) {
@@ -470,14 +532,23 @@ function updateAllButtonStatesForCurrentView() {
 
 // ---- Specific Button State Update Functions ----
 function updatePropertyBuyButtonStates() {
-    // ... (implementation as provided in previous full ui.js, ensuring it targets buttons in leftColumnListElement)
+    ensureUIInitialized();
+    if (!leftColumnListElement) return; // Ensure the list element is available
+
     PROPERTY_TYPES.forEach(propType => {
-        const buyButton = leftColumnListElement.querySelector(`#buy-prop-${propType.id}-btn`); // Target within current view
+        // Buy buttons are only in the left column for the 'rentals' view
+        const buyButton = leftColumnListElement.querySelector(`#buy-prop-${propType.id}-btn`);
         if (buyButton) {
             if(!isPropertyTypeUnlocked(propType.id)) {
-                if(buyButton.closest('.property-card')) buyButton.closest('.property-card').style.display = 'none'; return;
+                // If card exists but shouldn't, hide it (though displayAvailablePropertiesList should prevent this)
+                if(buyButton.closest('.property-card')) buyButton.closest('.property-card').style.display = 'none';
+                return;
             }
-            if(buyButton.closest('.property-card')) buyButton.closest('.property-card').style.display = 'flex'; // Or 'block'
+            // Ensure card is visible if it should be
+            if(buyButton.closest('.property-card') && buyButton.closest('.property-card').style.display === 'none') {
+                buyButton.closest('.property-card').style.display = 'flex'; // or 'block' based on your card styling
+            }
+
             const monetaryCost = calculateDynamicPropertyCost(propType);
             const materialsCost = propType.materialsCost || 0;
             let reason = "";
@@ -485,6 +556,40 @@ function updatePropertyBuyButtonStates() {
             else if (materialsCost > 0 && gameState.buildingMaterials < materialsCost) reason = `(Need ${materialsCost} Mats)`;
             buyButton.disabled = !!reason;
             buyButton.textContent = `Buy ${reason}`;
+        }
+    });
+
+    // Handle the "Unlock" button on placeholder cards
+    RESEARCH_TOPICS.forEach(topic => {
+        if (topic.unlocksPropertyType && topic.unlocksPropertyType.length > 0) {
+            const unlockButton = leftColumnListElement.querySelector(`#unlock-via-${topic.id}-btn`);
+            if (unlockButton) {
+                if (gameState.unlockedResearch.includes(topic.id) || !isResearchAvailable(topic.id)) {
+                    if (unlockButton.closest('.unlock-placeholder-card')) unlockButton.closest('.unlock-placeholder-card').style.display = 'none';
+                    return;
+                }
+                if (unlockButton.closest('.unlock-placeholder-card')) unlockButton.closest('.unlock-placeholder-card').style.display = 'flex'; // or 'block'
+
+                let canAfford = true;
+                let disabledReason = "";
+
+                if (topic.hasOwnProperty('cost') && typeof topic.cost === 'number' && topic.cost > 0) {
+                    if (gameState.cash < topic.cost) { canAfford = false; disabledReason += ` $${formatNumber(topic.cost,0)}`; }
+                }
+                if (topic.hasOwnProperty('materialsCost') && typeof topic.materialsCost === 'number' && topic.materialsCost > 0) {
+                    if (gameState.buildingMaterials < topic.materialsCost) { canAfford = false; disabledReason += ` ${topic.materialsCost} Mats`; }
+                }
+                if (topic.hasOwnProperty('costRP') && typeof topic.costRP === 'number' && topic.costRP > 0) {
+                    if (gameState.researchPoints < topic.costRP) { canAfford = false; disabledReason += ` ${formatNumber(topic.costRP,1)} RP`; }
+                }
+                
+                unlockButton.disabled = !canAfford;
+                if (!canAfford && disabledReason) {
+                    unlockButton.textContent = `Unlock (Need ${disabledReason.trim()})`;
+                } else {
+                    unlockButton.textContent = `Unlock`;
+                }
+            }
         }
     });
 }
