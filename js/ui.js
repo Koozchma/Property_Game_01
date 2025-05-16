@@ -4,7 +4,9 @@ const UIManager = {
     elements: {
         mpCount: document.getElementById('mp-count'),
         mpsCount: document.getElementById('mps-count'),
-        clickPowerDisplay: document.getElementById('click-power-display'),
+        // The manipulate-image is for event listener, clickPowerDisplay is for text
+        manipulateImage: document.getElementById('manipulate-image'), // Added for animation if needed
+        clickPowerDisplay: document.getElementById('click-power-display'), // This ID remains
         idleGeneratorsDiv: document.getElementById('idle-generators'),
         researchTreeDiv: document.getElementById('research-tree'),
         secondaryResourcesDiv: document.getElementById('secondary-resources'),
@@ -15,7 +17,10 @@ const UIManager = {
     updateResourceDisplay: function() {
         this.elements.mpCount.textContent = formatNumber(gameData.mp);
         this.elements.mpsCount.textContent = formatNumber(gameData.mps, 2);
-        this.elements.clickPowerDisplay.textContent = formatNumber(gameData.clickPower);
+        // Update the click power display text
+        if(this.elements.clickPowerDisplay) { // Check if element exists
+            this.elements.clickPowerDisplay.textContent = formatNumber(gameData.clickPower);
+        }
     },
 
     updateSecondaryResourceDisplay: function() {
@@ -221,21 +226,24 @@ const UIManager = {
          document.getElementById('assets-column').style.display = hasVisibleAsset ? 'flex' : 'none';
     },
 
-
     updateAll: function() {
         this.updateResourceDisplay();
-        this.updateSecondaryResourceDisplay(); // Needs to be called before rendering items that might depend on its visibility
+        this.updateSecondaryResourceDisplay();
         this.renderIdleGenerators();
-        this.renderProductionFacilities(); // Render before research if research depends on production visibility
-        this.renderResearchTree(); // Research might unlock production/assets
-        this.renderAssets(); // Assets might be unlocked by research
+        this.renderProductionFacilities();
+        this.renderResearchTree();
+        this.renderAssets();
 
-        // Initial hide for columns that might be empty
-        if (!gameData.productionFacilities.some(pf => pf.isUnlocked) && Object.values(gameData.secondaryResources).every(sr => sr.amount === 0)) {
+        if (!gameData.productionFacilities.some(pf => pf.isUnlocked) && Object.values(gameData.secondaryResources).every(sr => sr.amount === 0 && sr.perSecond === 0)) {
             document.getElementById('production-column').style.display = 'none';
+        } else {
+            document.getElementById('production-column').style.display = 'flex';
         }
+
         if (!gameData.assets.some(a => a.isUnlocked || a.isPurchased)) {
             document.getElementById('assets-column').style.display = 'none';
+        } else {
+             document.getElementById('assets-column').style.display = 'flex';
         }
     }
 };
