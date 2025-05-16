@@ -533,20 +533,17 @@ function updateAllButtonStatesForCurrentView() {
 // ---- Specific Button State Update Functions ----
 function updatePropertyBuyButtonStates() {
     ensureUIInitialized();
-    if (!leftColumnListElement) return; // Ensure the list element is available
+    if (!leftColumnListElement) return; 
 
     PROPERTY_TYPES.forEach(propType => {
-        // Buy buttons are only in the left column for the 'rentals' view
-        const buyButton = leftColumnListElement.querySelector(`#buy-prop-${propType.id}-btn`);
+        const buyButton = leftColumnListElement.querySelector(`#buy-prop-${propType.id}-btn`); 
         if (buyButton) {
             if(!isPropertyTypeUnlocked(propType.id)) {
-                // If card exists but shouldn't, hide it (though displayAvailablePropertiesList should prevent this)
                 if(buyButton.closest('.property-card')) buyButton.closest('.property-card').style.display = 'none';
                 return;
             }
-            // Ensure card is visible if it should be
             if(buyButton.closest('.property-card') && buyButton.closest('.property-card').style.display === 'none') {
-                buyButton.closest('.property-card').style.display = 'flex'; // or 'block' based on your card styling
+                buyButton.closest('.property-card').style.display = 'flex'; 
             }
 
             const monetaryCost = calculateDynamicPropertyCost(propType);
@@ -559,7 +556,6 @@ function updatePropertyBuyButtonStates() {
         }
     });
 
-    // Handle the "Unlock" button on placeholder cards
     RESEARCH_TOPICS.forEach(topic => {
         if (topic.unlocksPropertyType && topic.unlocksPropertyType.length > 0) {
             const unlockButton = leftColumnListElement.querySelector(`#unlock-via-${topic.id}-btn`);
@@ -568,7 +564,7 @@ function updatePropertyBuyButtonStates() {
                     if (unlockButton.closest('.unlock-placeholder-card')) unlockButton.closest('.unlock-placeholder-card').style.display = 'none';
                     return;
                 }
-                if (unlockButton.closest('.unlock-placeholder-card')) unlockButton.closest('.unlock-placeholder-card').style.display = 'flex'; // or 'block'
+                if (unlockButton.closest('.unlock-placeholder-card')) unlockButton.closest('.unlock-placeholder-card').style.display = 'flex'; 
 
                 let canAfford = true;
                 let disabledReason = "";
@@ -592,21 +588,23 @@ function updatePropertyBuyButtonStates() {
             }
         }
     });
-}
+} // <<<< Closing brace for updatePropertyBuyButtonStates
 
 function updateFacilityBuyButtonStates(filterType) {
-    // ... (implementation as provided in previous full ui.js, ensuring it targets buttons in leftColumnListElement)
+    ensureUIInitialized();
+    if (!leftColumnListElement) return;
+
     FACILITY_TYPES.filter(facTypeF => {
         if (filterType === 'material') return facTypeF.output?.resource === 'buildingMaterials' || facTypeF.effects?.some(e => e.propertyCategory || e.type.includes("cost") || e.type.includes("material"));
         if (filterType === 'science') return facTypeF.output?.resource === 'researchPoints';
         return true;
     }).forEach(facType => {
-        const buyButton = leftColumnListElement.querySelector(`#buy-fac-${facType.id}-btn`); // Target within current view
+        const buyButton = leftColumnListElement.querySelector(`#buy-fac-${facType.id}-btn`); 
         if (buyButton) {
             if (!isFacilityTypeUnlocked(facType.id)) {
                 if(buyButton.closest('.facility-card')) buyButton.closest('.facility-card').style.display = 'none'; return;
             }
-            if(buyButton.closest('.facility-card')) buyButton.closest('.facility-card').style.display = 'flex'; // Or 'block'
+            if(buyButton.closest('.facility-card')) buyButton.closest('.facility-card').style.display = 'flex'; 
             const monetaryCost = calculateFacilityDynamicCost(facType);
             const materialsCost = facType.materialsCost || 0;
             let reason = "";
@@ -616,33 +614,25 @@ function updateFacilityBuyButtonStates(filterType) {
             buyButton.textContent = `Build ${reason}`;
         }
     });
-}
+} // <<<< Closing brace for updateFacilityBuyButtonStates
 
 function updateResearchButtonStatesList() {
-    ensureUIInitialized(); // Ensure DOM elements are ready
+    ensureUIInitialized(); 
+    if (!leftColumnListElement) return;
+
     RESEARCH_TOPICS.forEach(topic => {
-        const researchButton = document.getElementById(`research-${topic.id}-btn`); // Target button directly
-        
+        const researchButton = leftColumnListElement.querySelector(`#research-${topic.id}-btn`); 
         if (researchButton && researchButton.closest('.research-item-card')) {
             const cardElement = researchButton.closest('.research-item-card');
 
             if (gameState.unlockedResearch.includes(topic.id) || !isResearchAvailable(topic.id)) {
-                cardElement.style.display = 'none'; // Hide the entire card if not available or done
+                cardElement.style.display = 'none'; 
                 return;
             }
-            cardElement.style.display = 'flex'; // Or 'block', ensure card is visible if research is available
-
-            // REMOVED: Lab requirement check
-            // const requiredLabsCount = topic.requiredLabs || 0;
-            // const ownedScienceLabs = ownedFacilities.filter(f => getFacilityTypeById(f.typeId)?.output?.resource === 'researchPoints').length;
+            cardElement.style.display = 'flex'; 
             
             let disabledReason = "";
             let canAfford = true;
-
-            // if (ownedScienceLabs < requiredLabsCount) { // REMOVED
-            //     disabledReason = `(Need ${requiredLabsCount} Lab(s))`;
-            //     canAfford = false;
-            // } else // REMOVED 'else'
             
             if (topic.hasOwnProperty('cost') && typeof topic.cost === 'number' && topic.cost > 0) {
                 if (gameState.cash < topic.cost) {
@@ -662,22 +652,35 @@ function updateResearchButtonStatesList() {
                     canAfford = false;
                 }
             }
-            // If no cost properties, canAfford remains true.
 
             researchButton.disabled = !canAfford;
             researchButton.textContent = `Research ${disabledReason.trim()}`;
         }
     });
-}
+} // <<<< Closing brace for updateResearchButtonStatesList
 
 // ---- Initial Render ----
 function initialRender() {
-    initializeUIElements(); // Initialize all DOM element variables FIRST
+    initializeUIElements(); 
     if (!uiInitialized) {
-        // Error message already handled in initializeUIElements if criticals are missing
-        return;
+        console.error("UI FAILED TO INITIALIZE FROM initialRender - Aborting initialRender to prevent further errors.");
+        // ... (error display logic from previous response) ...
+        const criticalErrorDiv = document.createElement('div');
+        criticalErrorDiv.style.padding = "20px";
+        criticalErrorDiv.style.textAlign = "center";
+        criticalErrorDiv.style.fontSize = "18px";
+        criticalErrorDiv.style.color = "red";
+        criticalErrorDiv.style.fontFamily = "Arial, sans-serif";
+        criticalErrorDiv.innerHTML = `<h1>Critical UI Initialization Error</h1><p>Essential HTML elements for the game could not be found. Please check the browser console (F12) for more details and verify the HTML element IDs in your index.html file match those expected by the JavaScript.</p>`;
+        if (document.body) {
+            document.body.innerHTML = ''; 
+            document.body.appendChild(criticalErrorDiv);
+        } else {
+            alert("Critical UI Initialization Error. Check console.");
+        }
+        return; 
     }
-    // Initial stat displays based on gameState
+
     updateCashDisplay();
     updateNetRPSDisplay();
     updateOwnedPropertiesCountDisplay();
@@ -685,5 +688,5 @@ function initialRender() {
     updateResearchPointsDisplay();
     updateTotalUpkeepDisplay();
 
-    switchView(currentView); // Setup the default view ('rentals') and its content
-}
+    switchView(currentView); 
+} // <<<< Closing brace for initialRend
