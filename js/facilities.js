@@ -441,23 +441,67 @@ function completeResearch(researchId) {
     }
     // isResearchAvailable also checks prerequisites
     if (!isResearchAvailable(researchId)) {
-        console.log(`[GAME] Cannot start research "${topic.name}": Prerequisites not met or already researched.`);
+        console.log(`[GAME] Cannot start research "${topic.name}": Prerequisites not met or research already completed.`);
         return false;
     }
 
-    const requiredLabsCount = topic.requiredLabs || 0;
-    const ownedScienceLabs = ownedFacilities.filter(f => {
-        const facType = getFacilityTypeById(f.typeId);
-        return facType && facType.output && facType.output.resource === 'researchPoints';
-    }).length;
+    // REMOVED: Lab requirement check
+    // const requiredLabsCount = topic.requiredLabs || 0;
+    // const ownedScienceLabs = ownedFacilities.filter(f => {
+    //     const facType = getFacilityTypeById(f.typeId);
+    //     return facType && facType.output && facType.output.resource === 'researchPoints';
+    // }).length;
+    // if (ownedScienceLabs < requiredLabsCount) {
+    //     console.log(`[GAME] Cannot research "${topic.name}": Requires ${requiredLabsCount} Science Lab(s) (You have ${ownedScienceLabs}).`);
+    //     return false;
+    // }
 
-    if (ownedScienceLabs < requiredLabsCount) {
-        console.log(`[GAME] Cannot research "${topic.name}": Requires ${requiredLabsCount} Science Lab(s) (You have ${ownedScienceLabs}). Build more or upgrade existing labs.`);
-        return false;
+    let canAfford = true;
+    let missingResources = [];
+
+    // Check for monetary cost (topic.cost)
+    if (topic.hasOwnProperty('cost') && typeof topic.cost === 'number') {
+        if (gameState.cash < topic.cost) {
+            canAfford = false;
+            missingResources.push(`$${formatNumber(topic.cost - gameState.cash, 0)} more cash`);
+        }
     }
 
-    if (gameState.researchPoints >= topic.costRP) {
-        gameState.researchPoints -= topic.costRP;
+    // Check for material cost (topic.materialsCost)
+    if (topic.hasOwnProperty('materialsCost') && typeof topic.materialsCost === 'number' && topic.materialsCost > 0) {
+        if (gameState.buildingMaterials < topic.materialsCost) {
+            canAfford = false;
+            missingResources.push(`${formatNumber(topic.materialsCost - gameState.buildingMaterials, 0)} more materials`);
+        }
+    }
+
+    // Check for RP cost (topic.costRP)
+    if (topic.hasOwnProperty('costRP') && typeof topic.costRP === 'number' && topic.costRP > 0) {
+        if (gameState.researchPoints < topic.costRP) {
+            canAfford = false;
+            missingResources.push(`${formatNumber(topic.costRP - gameState.researchPoints, 1)} more RP`);
+        }
+    }
+
+    // If it's free (no cost properties defined, or all costs are 0)
+    if (!topic.hasOwnProperty('cost') && !topic.hasOwnProperty('materialsCost') && !topic.hasOwnProperty('costRP')) {
+        // This branch assumes free if no cost type is specified.
+        // If all research must have a cost, you might want to error here.
+    }
+
+
+    if (canAfford) {
+        // Deduct costs
+        if (topic.hasOwnProperty('cost') && typeof topic.cost === 'number') {
+            gameState.cash -= topic.cost;
+        }
+        if (topic.hasOwnProperty('materialsCost') && typeof topic.materialsCost === 'number' && topic.materialsCost > 0) {
+            gameState.buildingMaterials -= topic.materialsCost;
+        }
+        if (topic.hasOwnProperty('costRP') && typeof topic.costRP === 'number' && topic.costRP > 0) {
+            gameState.researchPoints -= topic.costRP;
+        }
+
         gameState.unlockedResearch.push(researchId);
 
         let unlockMessages = [];
@@ -487,11 +531,11 @@ function completeResearch(researchId) {
         if (unlockMessages.length > 0) {
             message += " Unlocked: " + unlockMessages.join(', ') + ".";
         }
-        console.log(`[GAME] ${message}`); // Log science related messages to console
-        updateGameData(); // This will refresh UI including available research, properties, facilities
+        console.log(`[GAME] ${message}`);
+        updateGameData(); // This will refresh UI
         return true;
     } else {
-        console.log(`[GAME] Not enough Research Points for "${topic.name}". Need ${topic.costRP.toFixed(1)} RP (You have ${gameState.researchPoints.toFixed(1)} RP).`);
+        console.log(`[GAME] Cannot research "${topic.name}". Missing: ${missingResources.join(', ')}.`);
         return false;
     }
 }
