@@ -25,6 +25,97 @@ header h1 {
     font-size: 2.2rem; /* Main title size */
 }
 
+.owned-property-card {
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    padding: 0.75rem; /* Reduced padding */
+    border-radius: 6px; /* Slightly more rounded */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-left: 5px solid #27ae60; /* Green accent for owned items */
+}
+
+.owned-property-card h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem; /* Reduced margin */
+    color: #34495e;
+    font-size: 1rem; /* Slightly smaller title */
+    text-align: center;
+}
+
+.property-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two columns for stats */
+    gap: 0.3rem 0.5rem; /* Row and column gap */
+    font-size: 0.85rem; /* Smaller font for stats */
+    margin-bottom: 0.5rem;
+}
+
+.property-info-grid p {
+    margin: 0; /* Remove default paragraph margins */
+    padding: 0.1rem 0;
+    white-space: nowrap; /* Prevent wrapping if possible */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.property-info-grid .label {
+    font-weight: bold;
+    color: #555;
+}
+.property-info-grid .value {
+    text-align: right;
+    color: #333;
+}
+
+
+.owned-property-card .card-actions {
+    display: flex;
+    justify-content: space-around; /* Space out buttons */
+    gap: 0.5rem; /* Gap between buttons */
+    margin-top: 0.75rem;
+}
+
+.owned-property-card .card-actions button {
+    width: auto; /* Allow buttons to size to content */
+    flex-grow: 1; /* Make buttons share space if needed */
+    padding: 0.4rem 0.6rem; /* Smaller padding for action buttons */
+    font-size: 0.8rem; /* Smaller font for action buttons */
+    margin-top: 0; /* Remove top margin from individual buttons */
+}
+
+.owned-property-card .manage-upgrades-btn {
+    background-color: #3498db;
+}
+.owned-property-card .manage-upgrades-btn:hover {
+    background-color: #2980b9;
+}
+
+.owned-property-card .sell-btn {
+    background-color: #e74c3c; /* Red for sell */
+}
+.owned-property-card .sell-btn:hover {
+    background-color: #c0392b;
+}
+
+
+/* Styles for the expanded upgrade section remain similar */
+.property-upgrades-detail {
+    /* display: none; /* Controlled by .visible class */
+    padding: 0.75rem; /* Slightly reduced padding */
+    margin-top: 0.75rem;
+    background-color: #ecf0f1;
+    border-top: 1px solid #bdc3c7;
+    border-radius: 0 0 4px 4px;
+}
+.property-upgrades-detail:not(.visible) {
+    display: none;
+}
+.property-upgrades-detail.visible {
+    display: block;
+}
+
 .stats-container {
     display: flex;
     justify-content: center;
