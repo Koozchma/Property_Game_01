@@ -1,110 +1,102 @@
 // Metropolis Estates - ui.js
 
 // Declare variables that will hold DOM elements
-let cashDisplay, netRpsDisplay, ownedPropertiesCountDisplay,
+let cashDisplay, netRpsDisplay, ownedPropertiesCountDisplay, // Stat displays in header
     buildingMaterialsDisplay, researchPointsDisplay, totalUpkeepDisplay,
-    availablePropertiesList, ownedPropertiesList, messageLogElement,
-    availableFacilitiesList, ownedFacilitiesList, researchOptionsList,
-    propertiesSectionTitleElement, facilitiesSectionTitleElement, researchSectionElement;
+    leftColumnTitleElement, leftColumnListElement, // Generic left column parts
+    rightColumnTitleElement, rightColumnListElement, // Generic right column parts
+    navRentalsButton, navMaterialsButton, navResearchButton, // Navigation buttons
+    researchSectionElement; // Keep for specific toggling if needed for R&D view
 
-let uiInitialized = false; // Flag to track if UI elements have been initialized
+let uiInitialized = false;
+let currentView = 'rentals'; // Default view
 
 function initializeUIElements() {
-    if (uiInitialized) return; // Prevent re-initialization
+    if (uiInitialized) return;
 
     cashDisplay = document.getElementById('cash-display');
     netRpsDisplay = document.getElementById('rps-display');
-    ownedPropertiesCountDisplay = document.getElementById('owned-properties-count');
+    ownedPropertiesCountDisplay = document.getElementById('owned-properties-count'); // Will now show "Rentals: X"
     buildingMaterialsDisplay = document.getElementById('building-materials-display');
     researchPointsDisplay = document.getElementById('research-points-display');
     totalUpkeepDisplay = document.getElementById('total-upkeep-display');
 
-    availablePropertiesList = document.getElementById('available-properties-list');
-    ownedPropertiesList = document.getElementById('owned-properties-list');
-    messageLogElement = document.getElementById('message-log');
+    leftColumnTitleElement = document.getElementById('left-column-title');
+    leftColumnListElement = document.getElementById('left-column-list');
+    rightColumnTitleElement = document.getElementById('right-column-title');
+    rightColumnListElement = document.getElementById('right-column-list');
 
-    availableFacilitiesList = document.getElementById('available-facilities-list');
-    ownedFacilitiesList = document.getElementById('owned-facilities-list');
-    researchOptionsList = document.getElementById('research-options-list');
-
-    researchSectionElement = document.getElementById('research-section');
-
-    // Get references to section title H2 elements using parentElement from the list container
-    // This is safer as the list containers are what we primarily interact with for content.
-    const apl = document.getElementById('available-properties-list');
-    if (apl && apl.parentElement) {
-        propertiesSectionTitleElement = apl.parentElement.querySelector('h2');
-    } else {
-        console.error("Could not find available-properties-list or its parent to get title element.");
-    }
-
-    const afl = document.getElementById('available-facilities-list');
-    if (afl && afl.parentElement) {
-        facilitiesSectionTitleElement = afl.parentElement.querySelector('h2');
-    } else {
-        console.error("Could not find available-facilities-list or its parent to get title element.");
-    }
+    navRentalsButton = document.getElementById('nav-rentals');
+    navMaterialsButton = document.getElementById('nav-materials');
+    navResearchButton = document.getElementById('nav-research');
     
-    if (propertiesSectionTitleElement && facilitiesSectionTitleElement) { // Check if titles were found
+    // researchSectionElement is not directly used in this new layout as research options go into left-column-list
+
+    if (leftColumnTitleElement && rightColumnTitleElement && navRentalsButton) { // Check a few critical elements
         uiInitialized = true;
-        console.log("UI Elements Initialized.");
+        console.log("UI Elements Initialized for new layout.");
+
+        // Add event listeners for navigation
+        navRentalsButton.addEventListener('click', () => switchView('rentals'));
+        navMaterialsButton.addEventListener('click', () => switchView('materials'));
+        navResearchButton.addEventListener('click', () => switchView('research'));
+
     } else {
-        console.error("One or more critical UI elements (like section titles or list containers) not found during initialization. UI might not function correctly.");
+        console.error("One or more critical UI elements not found during initialization. UI might not function correctly.");
+        document.body.innerHTML = `<div style="padding: 20px; text-align: center; font-size: 18px; color: red;">
+            <h1>Critical UI Error</h1><p>Essential HTML elements for navigation or content display are missing. Check console.</p></div>`;
+        return; // Stop further UI setup
     }
 }
 
-function ensureUIInitialized() {
+function ensureUIInitialized() { // Keep this as a safeguard
     if (!uiInitialized) {
         console.warn("UI not initialized, attempting to initialize now.");
         initializeUIElements();
-        if(!uiInitialized) {
+        if (!uiInitialized) {
             console.error("FORCE INITIALIZATION FAILED. DOM elements might not be ready or IDs are incorrect.");
-            //This is a critical failure point.
-            //You might want to throw an error or have a more robust fallback.
         }
     }
 }
 
+function switchView(viewName) {
+    ensureUIInitialized();
+    currentView = viewName;
+
+    // Update navigation button active states
+    [navRentalsButton, navMaterialsButton, navResearchButton].forEach(btn => btn.classList.remove('active-nav'));
+    if (viewName === 'rentals' && navRentalsButton) navRentalsButton.classList.add('active-nav');
+    else if (viewName === 'materials' && navMaterialsButton) navMaterialsButton.classList.add('active-nav');
+    else if (viewName === 'research' && navResearchButton) navResearchButton.classList.add('active-nav');
+
+    // Update content based on the view
+    // This will trigger re-rendering of lists and button states via updateGameData
+    updateGameData();
+}
 
 function formatNumber(num, decimals = 2) {
-    if (typeof num !== 'number' || isNaN(num)) {
-        return 'N/A';
-    }
+    if (typeof num !== 'number' || isNaN(num)) return 'N/A';
     return num.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
 
-// ---- Stat Update Functions ----
-function updateCashDisplay() {
-    ensureUIInitialized();
-    if (cashDisplay) cashDisplay.textContent = `Cash: $${formatNumber(gameState.cash)}`;
-}
-function updateNetRPSDisplay() {
-    ensureUIInitialized();
-    if (netRpsDisplay) netRpsDisplay.textContent = `Net RPS: $${formatNumber(gameState.netRentPerSecond)}/s`;
-}
-function updateOwnedPropertiesCountDisplay() {
-    ensureUIInitialized();
-    if (ownedPropertiesCountDisplay) ownedPropertiesCountDisplay.textContent = `Properties: ${ownedProperties.length}`;
-}
+// ---- Stat Update Functions ---- (largely the same, just ensure elements are checked)
+function updateCashDisplay() { ensureUIInitialized(); if (cashDisplay) cashDisplay.textContent = `Cash: $${formatNumber(gameState.cash)}`; }
+function updateNetRPSDisplay() { ensureUIInitialized(); if (netRpsDisplay) netRpsDisplay.textContent = `Net RPS: $${formatNumber(gameState.netRentPerSecond)}/s`; }
+function updateOwnedPropertiesCountDisplay() { ensureUIInitialized(); if (ownedPropertiesCountDisplay) ownedPropertiesCountDisplay.textContent = `Rentals: ${ownedProperties.length}`; } // Changed "Properties" to "Rentals"
 function updateBuildingMaterialsDisplay() {
-    ensureUIInitialized(); // Make sure buildingMaterialsDisplay is assigned
+    ensureUIInitialized();
     if (buildingMaterialsDisplay) {
         buildingMaterialsDisplay.textContent = `Materials: ${formatNumber(gameState.buildingMaterials, 0)}`;
         const materialsAreUsed = PROPERTY_TYPES.some(p => p.materialsCost > 0) || FACILITY_TYPES.some(ft => ft.materialsCost > 0);
         buildingMaterialsDisplay.style.display = gameState.buildingMaterials > 0 || ownedFacilities.some(f => f.currentOutput?.resource === 'buildingMaterials') || materialsAreUsed ? 'inline-block' : 'none';
-    } else {
-        // This console log will tell you if the element itself is the problem
-        // console.error("updateBuildingMaterialsDisplay: buildingMaterialsDisplay element not found/initialized.");
     }
 }
 function updateResearchPointsDisplay() {
     ensureUIInitialized();
-    if (researchPointsDisplay && researchSectionElement) {
+    if (researchPointsDisplay) {
         researchPointsDisplay.textContent = `RP: ${formatNumber(gameState.researchPoints, 1)}`;
-        const researchIsActive = RESEARCH_TOPICS.length > 0;
-        const shouldDisplay = gameState.researchPoints > 0 || ownedFacilities.some(f => f.currentOutput?.resource === 'researchPoints') || researchIsActive;
-        researchPointsDisplay.style.display = shouldDisplay ? 'inline-block' : 'none';
-        researchSectionElement.style.display = shouldDisplay ? 'block' : 'none';
+        const researchIsRelevant = RESEARCH_TOPICS.length > 0 || ownedFacilities.some(f => f.currentOutput?.resource === 'researchPoints');
+        researchPointsDisplay.style.display = gameState.researchPoints > 0 || researchIsRelevant ? 'inline-block' : 'none';
     }
 }
 function updateTotalUpkeepDisplay() {
@@ -115,17 +107,42 @@ function updateTotalUpkeepDisplay() {
     }
 }
 
-// ---- List Display Functions ----
-function displayAvailableProperties() {
+
+// ---- Dynamic Content Display Functions ----
+// These now populate the generic #left-column-list and #right-column-list
+
+function displayCurrentViewContent() {
     ensureUIInitialized();
-    if (!availablePropertiesList || !propertiesSectionTitleElement) {
-        console.error("displayAvailableProperties: Required DOM elements not initialized.");
+    if (!leftColumnListElement || !rightColumnListElement || !leftColumnTitleElement || !rightColumnTitleElement) {
+        console.error("Generic list/title elements not ready for displayCurrentViewContent");
         return;
     }
-    propertiesSectionTitleElement.textContent = 'Available Rentals';
-    availablePropertiesList.innerHTML = '';
-    let displayedCount = 0;
 
+    leftColumnListElement.innerHTML = ''; // Clear previous content
+    rightColumnListElement.innerHTML = ''; // Clear previous content
+
+    if (currentView === 'rentals') {
+        leftColumnTitleElement.textContent = 'Available Rentals';
+        rightColumnTitleElement.textContent = 'My Portfolio';
+        displayAvailablePropertiesList(leftColumnListElement);
+        displayOwnedPropertiesList(rightColumnListElement);
+    } else if (currentView === 'materials') {
+        leftColumnTitleElement.textContent = 'Available Construction';
+        rightColumnTitleElement.textContent = 'My Constructions';
+        displayAvailableFacilitiesList(leftColumnListElement, 'material'); // Pass a filter type
+        displayOwnedFacilitiesList(rightColumnListElement, 'material');   // Pass a filter type
+    } else if (currentView === 'research') {
+        leftColumnTitleElement.textContent = 'Available Research';
+        rightColumnTitleElement.textContent = 'My Science Labs';
+        displayResearchOptionsList(leftColumnListElement);
+        displayOwnedFacilitiesList(rightColumnListElement, 'science');    // Pass a filter type for science labs
+    }
+    // After populating, update all button states
+    updateAllButtonStatesForCurrentView();
+}
+
+function displayAvailablePropertiesList(targetElement) {
+    let displayedCount = 0;
     PROPERTY_TYPES.forEach(propType => {
         if (!isPropertyTypeUnlocked(propType.id)) return;
         if (!propType || typeof propType.baseCost === 'undefined' || typeof propType.baseRPS === 'undefined') {
@@ -135,7 +152,7 @@ function displayAvailableProperties() {
         const currentMonetaryCost = calculateDynamicPropertyCost(propType);
         const materialsCost = propType.materialsCost || 0;
         const card = document.createElement('div');
-        card.className = 'property-card';
+        card.className = 'property-card'; // Use generic .item-card or specific if needed
         card.innerHTML = `
             <h3>${propType.name || 'Unnamed Rental'}</h3>
             <p>${propType.description || 'N/A'}</p>
@@ -145,19 +162,15 @@ function displayAvailableProperties() {
             <p>Main Level Max: ${propType.mainLevelMax || 'N/A'}</p>
             <button onclick="buyProperty('${propType.id}')" id="buy-prop-${propType.id}-btn">Buy</button>
         `;
-        availablePropertiesList.appendChild(card);
+        targetElement.appendChild(card);
     });
-    if (displayedCount === 0) availablePropertiesList.innerHTML = PROPERTY_TYPES.some(pt => pt.requiredResearch && !isPropertyTypeUnlocked(pt.id)) ? "<p>More rentals available via research.</p>" : "<p>No rentals currently available or defined.</p>";
+    if (displayedCount === 0) targetElement.innerHTML = PROPERTY_TYPES.some(pt => pt.requiredResearch && !isPropertyTypeUnlocked(pt.id)) ? "<p>More rentals available via research.</p>" : "<p>No rentals currently available or defined.</p>";
 }
 
-function displayOwnedProperties() {
-    ensureUIInitialized();
-    if (!ownedPropertiesList) return;
-    ownedPropertiesList.innerHTML = '';
+function displayOwnedPropertiesList(targetElement) {
     if (ownedProperties.length === 0) {
-        ownedPropertiesList.innerHTML = '<p>You don\'t own any rentals yet.</p>'; return;
+        targetElement.innerHTML = '<p>You don\'t own any rentals yet.</p>'; return;
     }
-
     ownedProperties.forEach(propInst => {
         const propType = getPropertyTypeById(propInst.typeId);
         if (!propType) { console.error("Orphaned owned rental:", propInst); return; }
@@ -187,29 +200,25 @@ function displayOwnedProperties() {
             ${upgradesHTML}
             <button class="sell-btn" style="margin-top:10px;" onclick="sellPropertyInstance(${propInst.uniqueId})">Sell</button>
         `;
-        ownedPropertiesList.appendChild(card);
+        targetElement.appendChild(card);
     });
 }
 
-function displayAvailableFacilities() {
-    ensureUIInitialized();
-    if (!availableFacilitiesList || !facilitiesSectionTitleElement) {
-        console.error("displayAvailableFacilities: Required DOM elements not initialized.");
-        return;
-    }
-    facilitiesSectionTitleElement.textContent = 'Available Construction';
-    availableFacilitiesList.innerHTML = '';
+function displayAvailableFacilitiesList(targetElement, filterType) { // filterType: 'material' or 'science' (or 'all')
     let displayedCount = 0;
-
-    FACILITY_TYPES.forEach(facType => {
-        if (!isFacilityTypeUnlocked(facType.id)) return;
+    FACILITY_TYPES.filter(facType => {
+        if (!isFacilityTypeUnlocked(facType.id)) return false;
+        if (filterType === 'material') return facType.output?.resource === 'buildingMaterials' || facType.effects?.some(e => e.type === "property_cost_reduction" || e.type === "material_usage_efficiency" || e.propertyCategory); // Material producers or construction buffs
+        if (filterType === 'science') return facType.output?.resource === 'researchPoints'; // Science labs
+        return true; // Default if no filter or unknown filter
+    }).forEach(facType => {
         if (!facType || typeof facType.cost === 'undefined' || typeof facType.baseUpkeepRPS === 'undefined') {
             console.error("Skipping invalid construction type:", facType); return;
         }
         displayedCount++;
         const currentMonetaryCost = calculateFacilityDynamicCost(facType);
         const materialsCost = facType.materialsCost || 0;
-        let outputText = facType.output ? `${formatNumber(facType.output.amount,3)}/s ${facType.output.resource}` : (facType.effects ? "Global Buff" : "No direct output");
+        let outputText = facType.output ? `${formatNumber(facType.output.amount,3)}/s ${facType.output.resource}` : (facType.effects ? "Provides Global Buff(s)" : "No direct output");
         const card = document.createElement('div');
         card.className = 'facility-card';
         card.innerHTML = `
@@ -221,19 +230,24 @@ function displayAvailableFacilities() {
             <p class="facility-output">Base Output: ${outputText}</p>
             <button onclick="buyFacility('${facType.id}')" id="buy-fac-${facType.id}-btn">Build</button>
         `;
-        availableFacilitiesList.appendChild(card);
+        targetElement.appendChild(card);
     });
-    if (displayedCount === 0) availableFacilitiesList.innerHTML = FACILITY_TYPES.some(ft => ft.requiredResearch && !isFacilityTypeUnlocked(ft.id)) ? "<p>More construction options available via research.</p>" : "<p>No construction options currently available or defined.</p>";
+    if (displayedCount === 0) targetElement.innerHTML = FACILITY_TYPES.some(ft => ft.requiredResearch && !isFacilityTypeUnlocked(ft.id)) ? `<p>More ${filterType || ''} construction available via research.</p>` : `<p>No ${filterType || ''} construction options currently available or defined.</p>`;
 }
 
-function displayOwnedFacilities() {
-    ensureUIInitialized();
-    if (!ownedFacilitiesList) return;
-    ownedFacilitiesList.innerHTML = '';
-    if (ownedFacilities.length === 0) {
-        ownedFacilitiesList.innerHTML = '<p>You don\'t own any constructions yet.</p>'; return;
+function displayOwnedFacilitiesList(targetElement, filterType) {
+    const filteredOwnedFacilities = ownedFacilities.filter(facInst => {
+        const facType = getFacilityTypeById(facInst.typeId);
+        if (!facType) return false;
+        if (filterType === 'material') return facType.output?.resource === 'buildingMaterials' || facType.effects?.some(e => e.type === "property_cost_reduction" || e.type === "material_usage_efficiency" || e.propertyCategory);
+        if (filterType === 'science') return facType.output?.resource === 'researchPoints';
+        return true;
+    });
+
+    if (filteredOwnedFacilities.length === 0) {
+        targetElement.innerHTML = `<p>You don't own any ${filterType || ''} constructions yet.</p>`; return;
     }
-    ownedFacilities.forEach(facInst => {
+    filteredOwnedFacilities.forEach(facInst => {
         const facType = getFacilityTypeById(facInst.typeId);
         if (!facType) { console.error("Orphaned owned construction:", facInst); return; }
         const card = document.createElement('div');
@@ -250,7 +264,7 @@ function displayOwnedFacilities() {
             });
         } else { upgradesHTML += '<p>No specific upgrades.</p>'; }
         upgradesHTML += '</div>';
-        let outputText = facInst.currentOutput ? `${formatNumber(facInst.currentOutput.amount,3)}/s ${facInst.currentOutput.resource}` : (facType.effects ? "Provides Global Buff" : "No direct output");
+        let outputText = facInst.currentOutput ? `${formatNumber(facInst.currentOutput.amount,3)}/s ${facInst.currentOutput.resource}` : (facType.effects ? "Provides Global Buff(s)" : "No direct output");
         card.innerHTML = `
             <h3>${facInst.name} (ID: ${facInst.uniqueId})</h3>
             <p class="prop-level">Main Level: ${facInst.mainLevel}/${facType.mainLevelMax}</p>
@@ -262,19 +276,15 @@ function displayOwnedFacilities() {
             ${upgradesHTML}
             <button class="sell-btn" style="margin-top:10px;" onclick="sellFacilityInstance(${facInst.uniqueId})">Demolish</button>
         `;
-        ownedFacilitiesList.appendChild(card);
+        targetElement.appendChild(card);
     });
 }
 
-function displayResearchOptions() {
-    ensureUIInitialized();
-    if (!researchOptionsList) return;
-    researchOptionsList.innerHTML = '';
+function displayResearchOptionsList(targetElement) {
     let displayedCount = 0;
     RESEARCH_TOPICS.forEach(topic => {
-        if (gameState.unlockedResearch.includes(topic.id)) return; // Don't display if already researched
-        if (!isResearchAvailable(topic.id)) return; // Don't display if prerequisites not met
-
+        if (gameState.unlockedResearch.includes(topic.id)) return;
+        if (!isResearchAvailable(topic.id)) return;
         if (!topic || typeof topic.costRP === 'undefined') {
             console.error("Skipping invalid research topic:", topic); return;
         }
@@ -287,26 +297,34 @@ function displayResearchOptions() {
             <p class="research-cost">Cost: ${formatNumber(topic.costRP,1)} RP. Labs Req: ${topic.requiredLabs || 0}</p>
             <button onclick="completeResearch('${topic.id}')" id="research-${topic.id}-btn">Research</button>
         `;
-        researchOptionsList.appendChild(card);
+        targetElement.appendChild(card);
     });
     if (displayedCount === 0) {
-        if (RESEARCH_TOPICS.every(topic => gameState.unlockedResearch.includes(topic.id))) {
-            researchOptionsList.innerHTML = '<p>All research completed!</p>';
-        } else {
-            researchOptionsList.innerHTML = '<p>No new research available. Check prerequisites or build more labs.</p>';
-        }
+        targetElement.innerHTML = RESEARCH_TOPICS.every(topic => gameState.unlockedResearch.includes(topic.id)) ? '<p>All research completed!</p>' : '<p>No new research available. Check prerequisites or build more labs.</p>';
     }
 }
 
 // ---- Button State Update Functions ----
-function updateAllBuyButtonStates() {
+function updateAllButtonStatesForCurrentView() {
     ensureUIInitialized();
+    if (currentView === 'rentals') {
+        updatePropertyBuyButtonStates();
+        updatePropertyUpgradeButtonStates();
+    } else if (currentView === 'materials') {
+        updateFacilityBuyButtonStates('material');
+        updateFacilityUpgradeButtonStates('material');
+    } else if (currentView === 'research') {
+        updateResearchButtonStatesList();
+        updateFacilityUpgradeButtonStates('science'); // For science lab upgrades on the right
+    }
+}
+
+function updatePropertyBuyButtonStates() {
     PROPERTY_TYPES.forEach(propType => {
         const buyButton = document.getElementById(`buy-prop-${propType.id}-btn`);
-        if (buyButton) { // Button might not exist if card wasn't rendered (e.g. not unlocked)
-            if(!isPropertyTypeUnlocked(propType.id)) { // from properties.js
-                if(buyButton.parentElement) buyButton.parentElement.style.display = 'none';
-                return;
+        if (buyButton) {
+            if(!isPropertyTypeUnlocked(propType.id)) {
+                if(buyButton.parentElement) buyButton.parentElement.style.display = 'none'; return;
             }
             if(buyButton.parentElement) buyButton.parentElement.style.display = 'flex';
             const monetaryCost = calculateDynamicPropertyCost(propType);
@@ -320,14 +338,16 @@ function updateAllBuyButtonStates() {
     });
 }
 
-function updateAllFacilityBuyButtonStates() {
-    ensureUIInitialized();
-    FACILITY_TYPES.forEach(facType => {
+function updateFacilityBuyButtonStates(filterType) {
+    FACILITY_TYPES.filter(facType => {
+        if (filterType === 'material') return facType.output?.resource === 'buildingMaterials' || facType.effects?.some(e => e.type === "property_cost_reduction" || e.type === "material_usage_efficiency" || e.propertyCategory);
+        if (filterType === 'science') return facType.output?.resource === 'researchPoints';
+        return true;
+    }).forEach(facType => {
         const buyButton = document.getElementById(`buy-fac-${facType.id}-btn`);
         if (buyButton) {
-            if (!isFacilityTypeUnlocked(facType.id)) { // from facilities.js
-                if(buyButton.parentElement) buyButton.parentElement.style.display = 'none';
-                return;
+            if (!isFacilityTypeUnlocked(facType.id)) {
+                if(buyButton.parentElement) buyButton.parentElement.style.display = 'none'; return;
             }
             if(buyButton.parentElement) buyButton.parentElement.style.display = 'flex';
             const monetaryCost = calculateFacilityDynamicCost(facType);
@@ -341,8 +361,7 @@ function updateAllFacilityBuyButtonStates() {
     });
 }
 
-function updateAllUpgradeButtonStates() {
-    ensureUIInitialized();
+function updatePropertyUpgradeButtonStates() {
     ownedProperties.forEach(propInst => {
         const propType = getPropertyTypeById(propInst.typeId);
         if (!propType) return;
@@ -359,6 +378,7 @@ function updateAllUpgradeButtonStates() {
             propType.upgrades.forEach(upgDef => {
                 const specificUpgradeButton = document.getElementById(`upgrade-prop-${propInst.uniqueId}-${upgDef.id}-btn`);
                 if (specificUpgradeButton) {
+                    // ... (full button text and disable logic as in previous version)
                     const currentTier = propInst.appliedUpgrades[upgDef.id] || 0;
                     const costNextTier = Math.floor(upgDef.cost * Math.pow(1.5, currentTier));
                     const materialsNeededBase = upgDef.requiresMaterials ? Math.floor(upgDef.requiresMaterials * Math.pow(1.2, currentTier)) : 0;
@@ -384,9 +404,15 @@ function updateAllUpgradeButtonStates() {
         }
     });
 }
-function updateAllFacilityUpgradeButtonStates() {
-    ensureUIInitialized();
-    ownedFacilities.forEach(facInst => {
+
+function updateFacilityUpgradeButtonStates(filterType) {
+    ownedFacilities.filter(facInst => {
+        const facType = getFacilityTypeById(facInst.typeId);
+        if (!facType) return false;
+        if (filterType === 'material') return facType.output?.resource === 'buildingMaterials' || facType.effects?.some(e => e.type === "property_cost_reduction" || e.type === "material_usage_efficiency" || e.propertyCategory);
+        if (filterType === 'science') return facType.output?.resource === 'researchPoints';
+        return true;
+    }).forEach(facInst => {
         const facType = getFacilityTypeById(facInst.typeId);
         if (!facType) return;
         const mainUpgradeButton = document.getElementById(`upgrade-main-fac-${facInst.uniqueId}-btn`);
@@ -402,6 +428,7 @@ function updateAllFacilityUpgradeButtonStates() {
             facType.upgrades.forEach(upgDef => {
                 const specificUpgradeButton = document.getElementById(`upgrade-fac-${facInst.uniqueId}-${upgDef.id}-btn`);
                 if (specificUpgradeButton) {
+                    // ... (full button text and disable logic as in previous version)
                     const currentTier = facInst.appliedUpgrades[upgDef.id] || 0;
                     const costNextTier = Math.floor(upgDef.cost * Math.pow(1.6, currentTier));
                     const materialsNeededBase = upgDef.requiresMaterials ? Math.floor(upgDef.requiresMaterials * Math.pow(1.2, currentTier)) : 0;
@@ -427,17 +454,14 @@ function updateAllFacilityUpgradeButtonStates() {
     });
 }
 
-function updateResearchButtonStates() {
-    ensureUIInitialized();
+function updateResearchButtonStatesList() { // Renamed to avoid conflict if there was a global one
     RESEARCH_TOPICS.forEach(topic => {
         const researchButton = document.getElementById(`research-${topic.id}-btn`);
-        if (researchButton && researchButton.parentElement) { // Check if button and its card exist
-            if (!isResearchAvailable(topic.id) || gameState.unlockedResearch.includes(topic.id)) {
-                researchButton.parentElement.style.display = 'none'; // Hide card if not available or done
-                return;
+        if (researchButton && researchButton.parentElement) {
+            if (gameState.unlockedResearch.includes(topic.id) || !isResearchAvailable(topic.id)) {
+                researchButton.parentElement.style.display = 'none'; return;
             }
-            researchButton.parentElement.style.display = 'flex'; // Make sure card is visible
-
+            researchButton.parentElement.style.display = 'flex';
             const requiredLabsCount = topic.requiredLabs || 0;
             const ownedScienceLabs = ownedFacilities.filter(f => getFacilityTypeById(f.typeId)?.output?.resource === 'researchPoints').length;
             let disabledReason = "";
@@ -449,55 +473,22 @@ function updateResearchButtonStates() {
     });
 }
 
-// ---- Utility Functions ----
-function logMessage(message, type = "info") {
-    ensureUIInitialized();
-    if (!messageLogElement) return;
-    const p = document.createElement('p');
-    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    p.textContent = `[${timestamp}] ${message}`;
-    p.className = `log-${type}`;
-    messageLogElement.prepend(p);
-    const maxMessages = 30;
-    while (messageLogElement.children.length > maxMessages) {
-        messageLogElement.removeChild(messageLogElement.lastChild);
-    }
-}
+// Log Message function removed as per request
+// function logMessage(message, type = "info") { ... }
 
-// This function is called ONCE when the game starts, after the DOM is ready.
+
 function initialRender() {
-    initializeUIElements(); // Initialize all DOM element variables FIRST
-
+    initializeUIElements();
     if (!uiInitialized) {
-        console.error("UI FAILED TO INITIALIZE - Aborting initialRender to prevent further errors.");
-        // Display a critical error message to the user in the game body itself
-        document.body.innerHTML = `<div style="padding: 20px; text-align: center; font-size: 18px; color: red;">
-            <h1>Critical Error</h1>
-            <p>The game UI could not be initialized. This usually means there's an issue with the HTML structure (missing element IDs) or a severe JavaScript problem.</p>
-            <p>Please check the browser console (F12) for detailed error messages.</p>
-        </div>`;
-        return; // Stop further rendering
+        document.body.innerHTML = `<div style="padding: 20px; text-align: center; font-size: 18px; color: red;"><h1>Critical UI Error</h1><p>UI could not be initialized. Check console.</p></div>`;
+        return;
     }
-
-    // Now that elements are initialized, update their content based on initial gameState
-    updateCashDisplay(); // These need to be called to set initial text based on gameState
+    updateCashDisplay();
     updateNetRPSDisplay();
     updateOwnedPropertiesCountDisplay();
     updateBuildingMaterialsDisplay();
     updateResearchPointsDisplay();
     updateTotalUpkeepDisplay();
 
-    // Display initial lists
-    displayAvailableProperties();
-    displayOwnedProperties();
-    displayAvailableFacilities();
-    displayOwnedFacilities();
-    displayResearchOptions();
-
-    // Update initial button states (important after lists are first drawn)
-    updateAllBuyButtonStates();
-    updateAllFacilityBuyButtonStates();
-    updateAllUpgradeButtonStates();
-    updateAllFacilityUpgradeButtonStates();
-    updateResearchButtonStates();
+    switchView(currentView); // Initial view setup (defaults to 'rentals')
 }
