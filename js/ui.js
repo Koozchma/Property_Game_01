@@ -405,19 +405,52 @@ function displayResearchOptionsList(targetElement) {
     if (!targetElement) return;
     targetElement.innerHTML = '';
     let displayedCount = 0;
-    RESEARCH_TOPICS.forEach(topic => {
-        if (gameState.unlockedResearch.includes(topic.id)) return;
-        if (!isResearchAvailable(topic.id)) return;
-        if (!topic || typeof topic.costRP === 'undefined') { console.error("Invalid research topic:", topic); return; }
+
+    RESEARCH_TOPICS.forEach(topic => { // from facilities.js
+        if (gameState.unlockedResearch.includes(topic.id)) return; // Don't display if already researched
+        if (!isResearchAvailable(topic.id)) return; // Don't display if prerequisites not met
+
+        // Check if at least one cost type is defined
+        if (!topic || (typeof topic.cost === 'undefined' && typeof topic.materialsCost === 'undefined' && typeof topic.costRP === 'undefined')) {
+            console.error("Skipping invalid research topic (missing any cost type):", topic);
+            return;
+        }
         displayedCount++;
         const card = document.createElement('div');
         card.className = 'research-item-card';
-        card.innerHTML = `<h3>${topic.name}</h3><p>${topic.description}</p>
-            <p class="research-cost">Cost: ${formatNumber(topic.costRP,1)} RP. Labs Req: ${topic.requiredLabs||0}</p>
-            <button onclick="completeResearch('${topic.id}')" id="research-${topic.id}-btn">Research</button>`;
+
+        let costStrings = [];
+        if (topic.hasOwnProperty('cost') && typeof topic.cost === 'number' && topic.cost > 0) {
+            costStrings.push(`$${formatNumber(topic.cost, 0)}`);
+        }
+        if (topic.hasOwnProperty('materialsCost') && typeof topic.materialsCost === 'number' && topic.materialsCost > 0) {
+            costStrings.push(`${formatNumber(topic.materialsCost, 0)} Materials`);
+        }
+        if (topic.hasOwnProperty('costRP') && typeof topic.costRP === 'number' && topic.costRP > 0) {
+            costStrings.push(`${formatNumber(topic.costRP, 1)} RP`);
+        }
+
+        let costText = "Cost: " + (costStrings.length > 0 ? costStrings.join(' + ') : "Free");
+        // REMOVED: Lab requirement display
+        // costText += `. Labs Req: ${topic.requiredLabs||0}`;
+
+        card.innerHTML = `
+            <h3>${topic.name || 'Unnamed Research'}</h3>
+            <p>${topic.description || 'N/A'}</p>
+            <p class="research-cost">${costText}</p>
+            <button onclick="completeResearch('${topic.id}')" id="research-${topic.id}-btn">Research</button>
+        `;
         targetElement.appendChild(card);
     });
-    if (displayedCount === 0) targetElement.innerHTML = RESEARCH_TOPICS.every(t => gameState.unlockedResearch.includes(t.id)) ? '<p>All research completed!</p>' : '<p>No new research. Check prerequisites/labs.</p>';
+
+    if (displayedCount === 0) {
+        if (RESEARCH_TOPICS.every(t => gameState.unlockedResearch.includes(t.id))) {
+            targetElement.innerHTML = '<p>All research completed!</p>';
+        } else {
+            targetElement.innerHTML = '<p>No new research available. Check prerequisites.</p>'; // Removed "build more labs"
+        }
+    }
+    // Button states will be updated by updateResearchButtonStatesList via updateAllButtonStatesForCurrentView
 }
 
 // ---- Button State Update Router ----
