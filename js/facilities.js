@@ -10,10 +10,10 @@ const FACILITY_TYPES = [
         output: { resource: "buildingMaterials", amount: 0.2 }, // 0.2 per game tick (second)
         mainLevelMax: 5,
         upgrades: [ // Specific upgrades for facilities
-            { id: "sharper_saws", name: "Sharper Saws", cost: 2000, effect: { outputIncrease: 0.05 }, maxTier: 3 }, // Increases output amount by 0.05
-            { id: "efficiency_experts", name: "Efficiency Experts", cost: 3000, effect: { upkeepReduction: 2 }, maxTier: 2 } // Reduces upkeepRPS by 2
+            { id: "sharper_saws", name: "Sharper Saws", cost: 2000, effect: { outputIncrease: 0.05 }, maxTier: 3, requiresMaterials: 100 },
+            { id: "efficiency_experts", name: "Efficiency Experts", cost: 3000, effect: { upkeepReduction: 2 }, maxTier: 2, requiresMaterials: 50 }
         ],
-        requiredResearch: null
+        requiredResearch: null // Available from start
     },
     {
         id: "basic_workshop",
@@ -21,12 +21,12 @@ const FACILITY_TYPES = [
         cost: 15000,
         baseUpkeepRPS: 25,
         description: "Allows crafting of more advanced components (future use). Currently provides a small global RPS boost to cheap properties.",
-        effects: [ // Global effects
-            { type: "property_rps_boost", propertyCategory: "cheap", percentage: 0.02 } // 2% boost to shacks, small_apartments
+        effects: [ // Global effects can be handled by checking owned facilities
+            { type: "property_rps_boost", propertyCategory: "cheap", percentage: 0.02 } // e.g. Shack, Small Apartment
         ],
         mainLevelMax: 3,
         upgrades: [
-            { id: "better_tools", name: "Better Tools", cost: 5000, effect: { rpsBoostIncrease: 0.01 }, maxTier: 2 }
+            { id: "better_tools", name: "Better Tools", cost: 5000, effect: { rpsBoostIncrease: 0.01 }, maxTier: 2, requiresMaterials: 75 } // increases the 'percentage' above
         ],
         requiredResearch: "basic_construction_techniques"
     },
@@ -39,10 +39,10 @@ const FACILITY_TYPES = [
         output: { resource: "researchPoints", amount: 0.1 }, // 0.1 RP per game tick
         mainLevelMax: 5,
         upgrades: [
-            { id: "more_beakers", name: "More Beakers", cost: 10000, effect: { outputIncrease: 0.05 }, maxTier: 3 },
-            { id: "grant_application", name: "Grant Writing", cost: 12000, effect: { upkeepReduction: 10}, maxTier: 1}
+            { id: "more_beakers", name: "More Beakers", cost: 10000, effect: { outputIncrease: 0.05 }, maxTier: 3, requiresMaterials: 0 },
+            { id: "grant_application", name: "Grant Writing", cost: 12000, effect: { upkeepReduction: 10}, maxTier: 1, requiresMaterials: 0 }
         ],
-        requiredResearch: "basic_education"
+        requiredResearch: "basic_education" // This facility itself is unlocked by this research
     }
 ];
 
@@ -51,30 +51,42 @@ const RESEARCH_TOPICS = [
         id: "basic_education",
         name: "Basic Education",
         costRP: 10,
-        description: "Unlocks the ability to build Small Science Labs.",
-        unlocksFacility: ["small_science_lab"],
-        unlocksProperty: [],
-        globalBuff: null
+        description: "Fundamental knowledge paving the way for scientific endeavors. Unlocks the Small Science Lab.",
+        unlocksFacilityType: ["small_science_lab"], // Facility types to make available for purchase
+        unlocksPropertyType: [],
+        globalBuff: null,
+        requiredLabs: 0 // No specific lab needed to research this, just RP
     },
     {
         id: "basic_construction_techniques",
         name: "Basic Construction",
         costRP: 25,
-        description: "Improves building methods. Unlocks Basic Workshops and some property upgrades.",
-        unlocksFacility: ["basic_workshop"],
-        unlocksProperty: [], // Could unlock a new property type here
-        globalBuff: { type: "construction_cost_reduction", percentage: 0.05 } // 5% reduction on property purchase
+        description: "Improves building methods. Unlocks Basic Workshops and enables some property upgrades.",
+        unlocksFacilityType: ["basic_workshop"],
+        unlocksPropertyType: [], // Could unlock a new property type here
+        globalBuff: { type: "property_cost_reduction", percentage: 0.05, scope: "all" },
+        requiredLabs: 1 // Requires at least one Small Science Lab to be owned
     },
     {
         id: "commercial_logistics",
         name: "Commercial Logistics",
         costRP: 50,
-        description: "Improves efficiency of commercial operations.",
-        unlocksFacility: [],
-        unlocksProperty: [],
-        globalBuff: { type: "commercial_rps_boost", percentage: 0.05 } // 5% boost to commercial properties RPS
+        description: "Improves efficiency of commercial operations. Boosts RPS for commercial properties.",
+        unlocksFacilityType: [],
+        unlocksPropertyType: [],
+        globalBuff: { type: "property_rps_boost", percentage: 0.05, scope: "commercial" }, // e.g., Corner Store
+        requiredLabs: 1
     },
-    // More research topics
+    {
+        id: "advanced_material_processing",
+        name: "Adv. Material Processing",
+        costRP: 75,
+        description: "Allows more efficient use of building materials and unlocks advanced facility upgrades.",
+        unlocksFacilityType: [],
+        unlocksPropertyType: [],
+        globalBuff: { type: "material_usage_efficiency", percentage: 0.10 }, // 10% less materials for upgrades
+        requiredLabs: 2
+    }
 ];
 
 
@@ -93,16 +105,19 @@ function calculateFacilityDynamicCost(facilityType) {
     return Math.floor(facilityType.cost * Math.pow(1.20, ownedCount)); // 20% increase per facility
 }
 
-function isFacilityAvailable(facilityType) {
-    if (facilityType.requiredResearch) {
-        return gameState.unlockedResearch.includes(facilityType.requiredResearch);
+function isFacilityTypeUnlocked(facilityTypeId) {
+    const facilityType = getFacilityTypeById(facilityTypeId);
+    if (!facilityType) return false;
+
+    // Check if this facility type is directly unlocked by a completed research topic
+    for (const researchId of gameState.unlockedResearch) {
+        const researchTopic = getResearchTopicById(researchId);
+        if (researchTopic && researchTopic.unlocksFacilityType && researchTopic.unlocksFacilityType.includes(facilityTypeId)) {
+            return true;
+        }
     }
-    // For facilities unlocked by research that unlocks facility types (like small_science_lab by basic_education)
-    const researchUnlockingThis = RESEARCH_TOPICS.find(rt => rt.unlocksFacility && rt.unlocksFacility.includes(facilityType.id));
-    if (researchUnlockingThis) {
-        return gameState.unlockedResearch.includes(researchUnlockingThis.id);
-    }
-    return !facilityType.requiredResearch; // If no specific research, check if it's a base facility (like Lumber Mill if it had no req)
+    // If it's not unlocked by any research, it must be available if it has no specific research requirement itself
+    return !facilityType.requiredResearch;
 }
 
 
@@ -113,8 +128,15 @@ function buyFacility(facilityTypeId) {
         return false;
     }
 
+    // Check if the facility type itself is unlocked (e.g. Small Science Lab via Basic Education)
+    if (!isFacilityTypeUnlocked(facilityType.id) && facilityType.requiredResearch) {
+         logMessage(`Cannot build ${facilityType.name}: Its type is not yet unlocked through research. Look for research that unlocks "${facilityType.name}".`, "error");
+        return false;
+    }
+     // A secondary check, mostly for facilities that aren't unlocked by a specific "unlocksFacilityType" research item but have a direct `requiredResearch` field.
     if (facilityType.requiredResearch && !gameState.unlockedResearch.includes(facilityType.requiredResearch)) {
-         logMessage(`Cannot buy ${facilityType.name}: Requires research "${getResearchTopicById(facilityType.requiredResearch)?.name || facilityType.requiredResearch}".`, "error");
+        const reqResearch = getResearchTopicById(facilityType.requiredResearch);
+        logMessage(`Cannot build ${facilityType.name}: Requires research "${reqResearch ? reqResearch.name : facilityType.requiredResearch}".`, "error");
         return false;
     }
 
@@ -129,26 +151,30 @@ function buyFacility(facilityTypeId) {
             typeId: facilityType.id,
             name: facilityType.name,
             mainLevel: 1,
+            baseUpkeepRPS: facilityType.baseUpkeepRPS, // Store base for reference
+            baseOutputAmount: facilityType.output ? facilityType.output.amount : 0, // Store base for reference
             currentUpkeepRPS: facilityType.baseUpkeepRPS,
-            currentOutput: facilityType.output ? { ...facilityType.output } : null, // Copy output object
-            appliedUpgrades: {} // For specific upgrades like properties
+            currentOutput: facilityType.output ? { resource: facilityType.output.resource, amount: facilityType.output.amount } : null,
+            appliedUpgrades: {}
         };
-        // Recalculate upkeep/output based on default level 1 and no applied upgrades (done by calculateFacilityStats)
-        calculateFacilityStats(newFacility, facilityType);
+        calculateFacilityStats(newFacility, facilityType); // Calculate initial stats
         ownedFacilities.push(newFacility);
 
-        updateGameData();
-        if (facilityType.output && facilityType.output.resource === 'researchPoints') {
-            document.getElementById('research-points-display').style.display = 'inline-block';
-            document.getElementById('research-section').style.display = 'block';
-        }
-        if (facilityType.output && facilityType.output.resource === 'buildingMaterials') {
-            document.getElementById('building-materials-display').style.display = 'inline-block';
+        updateGameData(); // This will recalculate total upkeep and update UI
+
+        // Show resource displays if they are now relevant
+        if (newFacility.currentOutput) {
+            if (newFacility.currentOutput.resource === 'researchPoints') {
+                document.getElementById('research-points-display').style.display = 'inline-block';
+                document.getElementById('research-section').style.display = 'block';
+            }
+            if (newFacility.currentOutput.resource === 'buildingMaterials') {
+                document.getElementById('building-materials-display').style.display = 'inline-block';
+            }
         }
         document.getElementById('total-upkeep-display').style.display = 'inline-block';
 
-
-        logMessage(`Built ${facilityType.name} for $${currentCost.toLocaleString()}. Upkeep: $${newFacility.currentUpkeepRPS}/s.`, "success");
+        logMessage(`Built ${facilityType.name} for $${currentCost.toLocaleString()}. Upkeep: $${newFacility.currentUpkeepRPS.toLocaleString()}/s.`, "success");
         return true;
     } else {
         logMessage(`Not enough cash to build ${facilityType.name}. Need $${currentCost.toLocaleString()}.`, "error");
@@ -157,42 +183,48 @@ function buyFacility(facilityTypeId) {
 }
 
 function calculateFacilityStats(facilityInstance, facilityType) {
-    let upkeep = facilityType.baseUpkeepRPS;
-    let outputAmount = facilityType.output ? facilityType.output.amount : 0;
+    let upkeep = facilityInstance.baseUpkeepRPS;
+    let outputAmount = facilityInstance.baseOutputAmount;
 
     // Apply specific upgrade effects
     for (const upgradeId in facilityInstance.appliedUpgrades) {
         const tier = facilityInstance.appliedUpgrades[upgradeId];
         const upgradeDef = facilityType.upgrades.find(u => u.id === upgradeId);
         if (upgradeDef && upgradeDef.effect) {
-            for (let i = 0; i < tier; i++) { // Apply effect for each tier achieved
+            for (let i = 0; i < tier; i++) {
                 if (upgradeDef.effect.outputIncrease) {
                     outputAmount += upgradeDef.effect.outputIncrease;
                 }
                 if (upgradeDef.effect.upkeepReduction) {
                     upkeep -= upgradeDef.effect.upkeepReduction;
                 }
+                // Handle other potential effects like rpsBoostIncrease for workshop-like facilities
+                 if (upgradeDef.effect.rpsBoostIncrease && facilityType.effects) {
+                    const mainEffect = facilityType.effects.find(e => e.type === "property_rps_boost");
+                    if (mainEffect) {
+                        // This is tricky. The effect itself is stored on the facilityType.
+                        // We might need a currentEffectPercentage on the facilityInstance.
+                        // For now, this upgrade implies the base effect gets stronger.
+                        // Actual application of this buff happens in calculateTotalPropertiesRPS
+                    }
+                }
             }
         }
     }
 
-    // Apply main level effects (e.g., level 2 gives 10% output boost and 5% upkeep reduction)
-    const mainLevelOutputMultiplier = 1 + (facilityInstance.mainLevel - 1) * 0.1; // 10% output boost per level
+    // Apply main level effects
+    const mainLevelOutputMultiplier = 1 + (facilityInstance.mainLevel - 1) * 0.10; // 10% output boost per level
     const mainLevelUpkeepMultiplier = 1 - (facilityInstance.mainLevel - 1) * 0.05; // 5% upkeep reduction per level
 
     outputAmount *= mainLevelOutputMultiplier;
     upkeep *= mainLevelUpkeepMultiplier;
 
     facilityInstance.currentUpkeepRPS = Math.max(0, parseFloat(upkeep.toFixed(2)));
-    if (facilityInstance.currentOutput && facilityType.output) { // Check if facilityInstance.currentOutput exists
-        facilityInstance.currentOutput.amount = parseFloat(outputAmount.toFixed(3)); // Output can be more precise
+    if (facilityInstance.currentOutput && facilityType.output) {
+        facilityInstance.currentOutput.amount = parseFloat(outputAmount.toFixed(3));
     } else if (facilityType.output) { // If currentOutput doesn't exist but facilityType.output does, create it
          facilityInstance.currentOutput = { resource: facilityType.output.resource, amount: parseFloat(outputAmount.toFixed(3)) };
     }
-
-
-    // Update global effects if any (this part might need more sophisticated handling for stacking)
-    // For now, assume effects are recalculated and reapplied elsewhere or buffs are directly managed in gameState
 }
 
 
@@ -207,7 +239,7 @@ function upgradeFacilityMainLevel(facilityUniqueId) {
         if (gameState.cash >= upgradeCost) {
             gameState.cash -= upgradeCost;
             facilityInstance.mainLevel++;
-            calculateFacilityStats(facilityInstance, facilityType); // Recalculate stats
+            calculateFacilityStats(facilityInstance, facilityType);
             updateGameData();
             logMessage(`${facilityInstance.name} main level upgraded to ${facilityInstance.mainLevel}. Cost: $${upgradeCost.toLocaleString()}.`, "success");
         } else {
@@ -234,17 +266,35 @@ function applySpecificFacilityUpgrade(facilityUniqueId, specificUpgradeId) {
     }
 
     const costForNextTier = Math.floor(upgradeDef.cost * Math.pow(1.6, currentTier));
-    // Add material/research checks if facility upgrades need them
+    const materialsNeeded = upgradeDef.requiresMaterials ? Math.floor(upgradeDef.requiresMaterials * Math.pow(1.2, currentTier)) : 0;
 
-    if (gameState.cash >= costForNextTier) {
-        gameState.cash -= costForNextTier;
-        facilityInstance.appliedUpgrades[specificUpgradeId] = currentTier + 1;
-        calculateFacilityStats(facilityInstance, facilityType); // Recalculate stats
-        updateGameData();
-        logMessage(`${upgradeDef.name} (Tier ${currentTier + 1}) applied to ${facilityInstance.name}. Cost: $${costForNextTier.toLocaleString()}.`, "success");
-    } else {
-        logMessage(`Not enough cash for ${upgradeDef.name} on ${facilityInstance.name}. Need $${costForNextTier.toLocaleString()}.`, "error");
+    let materialUsageEfficiency = 1;
+    if (gameState.unlockedResearch.includes("advanced_material_processing")) {
+        const buff = getResearchTopicById("advanced_material_processing").globalBuff;
+        if (buff && buff.type === "material_usage_efficiency") {
+            materialUsageEfficiency = 1 - buff.percentage;
+        }
     }
+    const actualMaterialsNeeded = Math.floor(materialsNeeded * materialUsageEfficiency);
+
+
+    if (gameState.cash < costForNextTier) {
+        logMessage(`Not enough cash for ${upgradeDef.name} on ${facilityInstance.name}. Need $${costForNextTier.toLocaleString()}.`, "error");
+        return;
+    }
+    if (actualMaterialsNeeded > 0 && gameState.buildingMaterials < actualMaterialsNeeded) {
+        logMessage(`Not enough materials for ${upgradeDef.name}. Need ${actualMaterialsNeeded} (You have ${gameState.buildingMaterials}). Efficiency bonus applied if researched.`, "error");
+        return;
+    }
+
+
+    gameState.cash -= costForNextTier;
+    if (actualMaterialsNeeded > 0) gameState.buildingMaterials -= actualMaterialsNeeded;
+
+    facilityInstance.appliedUpgrades[specificUpgradeId] = currentTier + 1;
+    calculateFacilityStats(facilityInstance, facilityType);
+    updateGameData();
+    logMessage(`${upgradeDef.name} (Tier ${currentTier + 1}) applied to ${facilityInstance.name}. Cost: $${costForNextTier.toLocaleString()}` + (actualMaterialsNeeded > 0 ? `, ${actualMaterialsNeeded} materials.` : '.'), "success");
 }
 
 
@@ -256,13 +306,12 @@ function applyFacilityOutputs() {
     ownedFacilities.forEach(fac => {
         if (fac.currentOutput && fac.currentOutput.amount > 0) {
             const resource = fac.currentOutput.resource;
-            const amount = fac.currentOutput.amount; // This is per tick (second)
+            const amount = fac.currentOutput.amount;
             if (gameState.hasOwnProperty(resource)) {
                 gameState[resource] += amount;
             } else {
                 gameState[resource] = amount;
             }
-            // gameState[resource] = parseFloat(gameState[resource].toFixed(3)); // Keep precision
         }
     });
 }
@@ -273,62 +322,85 @@ function sellFacilityInstance(facilityUniqueId) {
 
     const facilityInstance = ownedFacilities[facilityIndex];
     const facilityType = getFacilityTypeById(facilityInstance.typeId);
-    const sellPrice = Math.floor(facilityType.cost * 0.5); // Simple sell price for now
+    let upgradeValue = 0;
+     if (facilityType && facilityType.upgrades) {
+        for (const upgradeId in facilityInstance.appliedUpgrades) {
+            const tier = facilityInstance.appliedUpgrades[upgradeId];
+            const upgradeDef = facilityType.upgrades.find(u => u.id === upgradeId);
+            if (upgradeDef) {
+                for (let i = 0; i < tier; i++) {
+                    upgradeValue += Math.floor(upgradeDef.cost * Math.pow(1.6, i)) * 0.25; // Get back 25% of specific upgrade costs
+                }
+            }
+        }
+    }
+    let mainLevelUpgradeValue = 0;
+    for(let i = 0; i < facilityInstance.mainLevel -1; i++){
+        mainLevelUpgradeValue += Math.floor(facilityType.cost * 0.4 * Math.pow(1.7, i)) * 0.25;
+    }
+    const sellPrice = Math.floor(facilityType.cost * 0.5 + upgradeValue + mainLevelUpgradeValue);
+
 
     gameState.cash += sellPrice;
     ownedFacilities.splice(facilityIndex, 1);
 
     updateGameData();
-    logMessage(`Sold ${facilityInstance.name} for $${sellPrice.toLocaleString()}.`, "info");
+    logMessage(`Demolished ${facilityInstance.name} for $${sellPrice.toLocaleString()}.`, "info");
 }
 
 function completeResearch(researchId) {
     const research = RESEARCH_TOPICS.find(r => r.id === researchId);
-    if (!research || gameState.unlockedResearch.includes(researchId)) {
-        logMessage("Research topic not found or already completed.", "error");
+    if (!research) {
+        logMessage(`Research topic ID "${researchId}" not found.`, "error");
         return false;
     }
+    if (gameState.unlockedResearch.includes(researchId)) {
+        logMessage(`Research "${research.name}" already completed.`, "info");
+        return false;
+    }
+
+    const requiredLabsCount = research.requiredLabs || 0;
+    const ownedScienceLabs = ownedFacilities.filter(f => getFacilityTypeById(f.typeId)?.output?.resource === 'researchPoints').length;
+
+    if (ownedScienceLabs < requiredLabsCount) {
+        logMessage(`Cannot research "${research.name}": Requires ${requiredLabsCount} Science Lab(s) (You have ${ownedScienceLabs}).`, "error");
+        return false;
+    }
+
 
     if (gameState.researchPoints >= research.costRP) {
         gameState.researchPoints -= research.costRP;
         gameState.unlockedResearch.push(researchId);
 
-        // Apply unlocks and buffs
-        if (research.unlocksFacility) {
-            research.unlocksFacility.forEach(facId => logMessage(`Unlocked facility: ${getFacilityTypeById(facId)?.name || facId}`, "science"));
+        let unlockMessages = [];
+        if (research.unlocksFacilityType && research.unlocksFacilityType.length > 0) {
+            research.unlocksFacilityType.forEach(facId => {
+                const facType = getFacilityTypeById(facId);
+                if (facType) unlockMessages.push(`facility type "${facType.name}"`);
+            });
         }
-        if (research.unlocksProperty) {
-            // Logic to make new properties available (e.g., add to a list, or set a flag)
-            research.unlocksProperty.forEach(propId => logMessage(`Unlocked property type: ${getPropertyTypeById(propId)?.name || propId}`, "science"));
+        if (research.unlocksPropertyType && research.unlocksPropertyType.length > 0) {
+            research.unlocksPropertyType.forEach(propId => {
+                 const propType = getPropertyTypeById(propId);
+                if (propType) unlockMessages.push(`property type "${propType.name}"`);
+            });
         }
         if (research.globalBuff) {
-            // Apply global buff logic - this will need careful management in gameState
-            if (!gameState.activeBuffs) gameState.activeBuffs = [];
-            gameState.activeBuffs.push(research.globalBuff); // Store the buff; apply it where relevant
-            logMessage(`Global buff activated: ${research.globalBuff.type}`, "science");
+            // Active buffs are applied dynamically where needed (e.g. cost calculation, RPS calculation)
+            // No need to store in gameState.activeBuffs unless for very specific stateful buffs
+            unlockMessages.push(`global buff: ${research.globalBuff.type} (${research.globalBuff.percentage*100}%)`);
         }
 
-        logMessage(`Research "${research.name}" completed!`, "science");
-        updateGameData(); // Update UI for research list, facility availability etc.
+        let message = `Research "${research.name}" completed!`;
+        if (unlockMessages.length > 0) {
+            message += " Unlocked: " + unlockMessages.join(', ') + ".";
+        }
+        logMessage(message, "science");
+
+        updateGameData();
         return true;
     } else {
-        logMessage(`Not enough Research Points for "${research.name}". Need ${research.costRP} RP.`, "error");
+        logMessage(`Not enough Research Points for "${research.name}". Need ${research.costRP} RP (You have ${gameState.researchPoints.toFixed(1)} RP).`, "error");
         return false;
     }
-}
-
-// Call this to apply active global buffs from research
-function applyAllGlobalBuffs() {
-    // Reset any previously applied buff effects if they are not permanent state changes
-    // Example: If a buff reduces property costs, it should be applied when costs are calculated.
-    // For RPS boosts, they need to be part of the RPS calculation.
-
-    // This function might be more about flagginggameState variables that other functions check.
-    // E.g., gameState.propertyCostModifier = 1;
-    // (gameState.activeBuffs || []).forEach(buff => {
-    //    if (buff.type === "construction_cost_reduction") {
-    //        gameState.propertyCostModifier *= (1 - buff.percentage);
-    //    }
-    // });
-    // This approach is complex to manage dynamically. Simpler to check gameState.unlockedResearch directly.
 }
