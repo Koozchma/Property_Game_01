@@ -30,7 +30,7 @@ function initializeUIElements() {
     navResearchButton = document.getElementById('nav-research');
 
     if (leftColumnTitleElement && rightColumnTitleElement && navRentalsButton &&
-        leftColumnListElement && rightColumnListElement) { // Added checks for list elements
+        leftColumnListElement && rightColumnListElement) {
         uiInitialized = true;
         console.log("UI Elements Initialized.");
 
@@ -39,11 +39,10 @@ function initializeUIElements() {
         navResearchButton.addEventListener('click', () => switchView('research'));
     } else {
         console.error("One or more critical UI elements not found during initialization. UI might not function correctly.");
-        // Avoid breaking the entire page if console is not available or if body is already replaced
         try {
             document.body.innerHTML = `<div style="padding:20px;text-align:center;color:red;font-family:Arial,sans-serif;"><h1>Critical UI Initialization Error</h1><p>Essential HTML elements for the game are missing. Please check the browser console (F12) for more details and verify HTML element IDs.</p></div>`;
         } catch (e) {
-            // Fallback if document.body is somehow not available
+            // Fallback
         }
     }
 }
@@ -661,26 +660,51 @@ function updateResearchButtonStatesList() {
 
 // ---- Initial Render ----
 function initialRender() {
-    initializeUIElements(); 
+    // Step 1: Initialize references to all DOM elements used by the UI.
+    // This function (initializeUIElements) should populate your global UI element variables.
+    initializeUIElements();
+
+    // Step 2: Check if UI initialization was successful.
+    // If critical elements weren't found, uiInitialized will be false.
     if (!uiInitialized) {
-        console.error("UI FAILED TO INITIALIZE FROM initialRender - Aborting initialRender to prevent further errors.");
-        // ... (error display logic from previous response) ...
+        console.error("CRITICAL: UI FAILED TO INITIALIZE FROM initialRender. Aborting further UI setup to prevent cascading errors. Check previous console messages from initializeUIElements() for missing HTML element IDs.");
+        
+        // Display a prominent error message to the user directly on the page.
         const criticalErrorDiv = document.createElement('div');
         criticalErrorDiv.style.padding = "20px";
         criticalErrorDiv.style.textAlign = "center";
         criticalErrorDiv.style.fontSize = "18px";
         criticalErrorDiv.style.color = "red";
         criticalErrorDiv.style.fontFamily = "Arial, sans-serif";
-        criticalErrorDiv.innerHTML = `<h1>Critical UI Initialization Error</h1><p>Essential HTML elements for the game could not be found. Please check the browser console (F12) for more details and verify the HTML element IDs in your index.html file match those expected by the JavaScript.</p>`;
+        criticalErrorDiv.style.backgroundColor = "#fff"; // Ensure it's visible on dark themes
+        criticalErrorDiv.style.border = "2px solid red";
+        criticalErrorDiv.style.position = "fixed";
+        criticalErrorDiv.style.top = "50%";
+        criticalErrorDiv.style.left = "50%";
+        criticalErrorDiv.style.transform = "translate(-50%, -50%)";
+        criticalErrorDiv.style.zIndex = "9999";
+        criticalErrorDiv.style.boxShadow = "0 0 15px rgba(0,0,0,0.5)";
+
+        criticalErrorDiv.innerHTML = `<h1>Critical UI Initialization Error</h1>
+                                     <p>Essential HTML elements for the game could not be found or initialized correctly.</p>
+                                     <p>Please check the browser console (usually F12) for detailed error messages from <code>initializeUIElements()</code>.</p>
+                                     <p>Verify that all element IDs in your <code>index.html</code> file match those expected by the JavaScript in <code>js/ui.js</code>.</p>`;
+        
         if (document.body) {
+            // Clear the body to prevent interaction with a broken UI, then show the error.
+            // Be cautious with document.body.innerHTML = '' if other critical non-game scripts might be running.
+            // For this game, it's likely safe.
             document.body.innerHTML = ''; 
             document.body.appendChild(criticalErrorDiv);
         } else {
-            alert("Critical UI Initialization Error. Check console.");
+            // Fallback if document.body itself is somehow not available (very unlikely with DOMContentLoaded)
+            alert("CRITICAL UI INITIALIZATION ERROR. The game cannot start. Check browser console.");
         }
-        return; 
+        return; // Stop further rendering and UI setup.
     }
 
+    // Step 3: Update all the static stat displays with initial values from gameState.
+    console.log("initialRender: Updating initial stat displays.");
     updateCashDisplay();
     updateNetRPSDisplay();
     updateOwnedPropertiesCountDisplay();
@@ -688,5 +712,12 @@ function initialRender() {
     updateResearchPointsDisplay();
     updateTotalUpkeepDisplay();
 
+    // Step 4: Switch to the default view (e.g., 'rentals').
+    // switchView will call updateGameData, which in turn calls displayCurrentViewContent.
+    // displayCurrentViewContent then calls the necessary display...List functions and 
+    // updateAllButtonStatesForCurrentView to render the correct lists and button states.
+    console.log("initialRender: Switching to default view:", currentView);
     switchView(currentView); 
-} // <<<< Closing brace for initialRend
+    
+    console.log("initialRender: UI setup process completed.");
+} // <<<< THIS IS THE CORRECT CLOSING BRACE FOR initialRender
