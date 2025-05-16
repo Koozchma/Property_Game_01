@@ -11,8 +11,11 @@
         <h1>Metropolis Estates</h1>
         <div class="stats-container">
             <div id="cash-display" class="stat-item">Cash: $0</div>
-            <div id="rps-display" class="stat-item">RPS: $0/s</div>
+            <div id="rps-display" class="stat-item">Net RPS: $0/s</div>
             <div id="owned-properties-count" class="stat-item">Properties: 0</div>
+            <div id="building-materials-display" class="stat-item" style="display:none;">Materials: 0</div>
+            <div id="research-points-display" class="stat-item" style="display:none;">RP: 0</div>
+            <div id="total-upkeep-display" class="stat-item" style="display:none;">Upkeep: $0/s</div>
         </div>
     </header>
 
@@ -24,35 +27,49 @@
             </div>
         </section>
 
-        <section id="available-properties-section">
-            <h2>Available Properties</h2>
-            <div id="available-properties-list" class="property-list">
-                </div>
-        </section>
+        <div class="main-layout">
+            <div class="column column-main">
+                <section id="available-properties-section">
+                    <h2>Available Properties</h2>
+                    <div id="available-properties-list" class="property-list">
+                        </div>
+                </section>
 
-        <section id="owned-properties-section">
-            <h2>My Portfolio</h2>
-            <div id="owned-properties-list" class="property-list">
-                <p>You don't own any properties yet.</p>
-                </div>
-        </section>
+                <section id="owned-properties-section">
+                    <h2>My Portfolio</h2>
+                    <div id="owned-properties-list" class="property-list owned-items-list">
+                        <p>You don't own any properties yet.</p>
+                        </div>
+                </section>
+            </div>
 
-        <section id="production-plants-section" style="display:none;">
-            <h2>Production Plants</h2>
-            <div id="production-plants-list">
-                </div>
-        </section>
+            <div class="column column-side">
+                <section id="available-facilities-section">
+                    <h2>Available Facilities</h2>
+                    <div id="available-facilities-list" class="facility-list">
+                        <p>No facilities available yet or unlocked.</p>
+                        </div>
+                </section>
 
-        <section id="science-facilities-section" style="display:none;">
-            <h2>Science Facilities</h2>
-            <div id="science-facilities-list">
-                </div>
-        </section>
+                <section id="owned-facilities-section">
+                    <h2>My Facilities</h2>
+                    <div id="owned-facilities-list" class="facility-list owned-items-list">
+                        <p>You don't own any facilities yet.</p>
+                        </div>
+                </section>
 
+                <section id="research-section" style="display:none;">
+                    <h2>Research & Development</h2>
+                    <div id="research-options-list" class="research-list">
+                        <p>Unlock Science Facilities to begin research.</p>
+                        </div>
+                </section>
+            </div>
+        </div>
     </main>
 
     <footer>
-        <p>&copy; 2025 Metropolis Estates - Alpha v0.0.1</p>
+        <p>&copy; 2025 Metropolis Estates - Alpha v0.1.0</p>
     </footer>
 
     <script src="js/properties.js"></script>
