@@ -140,7 +140,7 @@ header h1 {
     overflow: hidden; 
 
     /* MODIFICATION: Set a fixed height for the sections */
-    height: 420px; /* Adjust this value! Start with an estimate for ~2 portfolio items + title + padding */
+    height: 480px; /* Adjust this value! Start with an estimate for ~2 portfolio items + title + padding */
                    /* Example: If 2 cards are ~150px each + title ~50px + padding ~40px = 390px */
 }
 
