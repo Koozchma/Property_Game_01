@@ -168,40 +168,151 @@ function displayAvailablePropertiesList(targetElement) {
 }
 
 function displayOwnedPropertiesList(targetElement) {
+    ensureUIInitialized();
+    if (!targetElement) { // Changed check from ownedPropertiesList to targetElement
+        console.error("Target element for owned properties not provided or initialized.");
+        return;
+    }
+    targetElement.innerHTML = ''; // Clear previous content
+
     if (ownedProperties.length === 0) {
         targetElement.innerHTML = '<p>You don\'t own any rentals yet.</p>'; return;
     }
+
     ownedProperties.forEach(propInst => {
-        const propType = getPropertyTypeById(propInst.typeId);
+        const propType = getPropertyTypeById(propInst.typeId); // from properties.js
         if (!propType) { console.error("Orphaned owned rental:", propInst); return; }
+
         const card = document.createElement('div');
-        card.className = 'owned-property-card';
+        card.className = 'owned-property-card'; // This class is still used for general card styling
         card.setAttribute('data-id', propInst.uniqueId);
-        let upgradesHTML = '<div class="upgrade-buttons-container"><p>Specific Upgrades:</p>';
-        if (propType.upgrades && propType.upgrades.length > 0) {
-            propType.upgrades.forEach(upgDef => {
-                const currentTier = propInst.appliedUpgrades[upgDef.id] || 0;
-                upgradesHTML += `
-                    <button onclick="applySpecificPropertyUpgrade(${propInst.uniqueId}, '${upgDef.id}')" id="upgrade-prop-${propInst.uniqueId}-${upgDef.id}-btn">
-                        ${upgDef.name} (${currentTier}/${upgDef.maxTier})
-                    </button>
-                `;
-            });
-        } else { upgradesHTML += '<p>No specific upgrades.</p>'; }
-        upgradesHTML += '</div>';
-        card.innerHTML = `
+        card.setAttribute('id', `owned-property-card-${propInst.uniqueId}`); // Add unique ID to the card itself
+
+        // Basic Info
+        let basicInfoHTML = `
             <h3>${propInst.name} (ID: ${propInst.uniqueId})</h3>
             <p class="prop-level">Main Level: ${propInst.mainLevel}/${propType.mainLevelMax}</p>
             <p class="prop-rps">Current RPS: $${formatNumber(propInst.currentRPS)}/s</p>
             <p>Purchase Cost: $${formatNumber(propInst.purchaseCost, 0)}</p>
-            <button class="upgrade-main-btn" onclick="upgradePropertyMainLevel(${propInst.uniqueId})" id="upgrade-main-prop-${propInst.uniqueId}-btn">
-                Upgrade Main Lvl
-            </button>
-            ${upgradesHTML}
-            <button class="sell-btn" style="margin-top:10px;" onclick="sellPropertyInstance(${propInst.uniqueId})">Sell</button>
         `;
+
+        // Manage Upgrades Button
+        let manageUpgradesButtonHTML = `
+            <button class="manage-upgrades-btn" onclick="togglePropertyUpgradesView(${propInst.uniqueId})">
+                Manage Upgrades
+            </button>
+        `;
+
+        // Hidden Detail Div for Upgrades
+        let upgradesDetailHTML = `
+            <div class="property-upgrades-detail" id="upgrades-detail-${propInst.uniqueId}">
+                </div>
+        `;
+        
+        // Sell Button
+        let sellButtonHTML = `
+            <button class="sell-btn" style="margin-top:10px;" onclick="sellPropertyInstance(${propInst.uniqueId})">
+                Sell
+            </button>
+        `;
+
+        card.innerHTML = basicInfoHTML + manageUpgradesButtonHTML + upgradesDetailHTML + sellButtonHTML;
         targetElement.appendChild(card);
     });
+    // Note: updatePropertyUpgradeButtonStates will now be effectively replaced by logic within togglePropertyUpgradesView
+}
+
+
+// New function to toggle and populate the upgrades detail view
+function togglePropertyUpgradesView(ownedPropertyUniqueId) {
+    ensureUIInitialized();
+    const propertyInstance = ownedProperties.find(p => p.uniqueId === ownedPropertyUniqueId);
+    if (!propertyInstance) {
+        console.error("Property instance not found for toggle: ", ownedPropertyUniqueId);
+        return;
+    }
+    const propertyType = getPropertyTypeById(propertyInstance.typeId);
+    if (!propertyType) {
+        console.error("Property type definition not found for instance: ", propertyInstance.typeId);
+        return;
+    }
+
+    const upgradesDetailDiv = document.getElementById(`upgrades-detail-${ownedPropertyUniqueId}`);
+    const manageButton = document.querySelector(`#owned-property-card-${ownedPropertyUniqueId} .manage-upgrades-btn`);
+
+    if (!upgradesDetailDiv || !manageButton) {
+        console.error("Could not find upgrade detail div or manage button for property ID: ", ownedPropertyUniqueId);
+        return;
+    }
+
+    const isVisible = upgradesDetailDiv.classList.contains('visible');
+
+    if (isVisible) {
+        upgradesDetailDiv.classList.remove('visible');
+        upgradesDetailDiv.innerHTML = ''; // Clear content when hiding
+        manageButton.textContent = 'Manage Upgrades';
+    } else {
+        upgradesDetailDiv.classList.add('visible');
+        manageButton.textContent = 'Hide Upgrades';
+
+        let detailContentHTML = '';
+
+        // 1. Main Level Upgrade Button
+        const mainLevelUpgradeCost = Math.floor(propertyInstance.purchaseCost * 0.3 * Math.pow(1.8, propertyInstance.mainLevel - 1));
+        let mainLevelDisabledReason = "";
+        if (propertyInstance.mainLevel >= propertyType.mainLevelMax) mainLevelDisabledReason = "(Max Level)";
+        else if (gameState.cash < mainLevelUpgradeCost) mainLevelDisabledReason = `(Need $${formatNumber(mainLevelUpgradeCost, 0)})`;
+        
+        detailContentHTML += `
+            <button class="upgrade-main-btn-detail" 
+                    onclick="upgradePropertyMainLevel(${propertyInstance.uniqueId})" 
+                    ${mainLevelDisabledReason ? 'disabled' : ''}>
+                Upgrade Main Lvl ${mainLevelDisabledReason || `($${formatNumber(mainLevelUpgradeCost,0)})`}
+            </button>
+        `;
+
+        // 2. Specific Upgrades
+        if (propertyType.upgrades && propertyType.upgrades.length > 0) {
+            detailContentHTML += '<p>Specific Upgrades:</p>';
+            propertyType.upgrades.forEach(upgDef => {
+                const currentTier = propertyInstance.appliedUpgrades[upgDef.id] || 0;
+                const costNextTier = Math.floor(upgDef.cost * Math.pow(1.5, currentTier));
+                const materialsNeededBase = upgDef.requiresMaterials ? Math.floor(upgDef.requiresMaterials * Math.pow(1.2, currentTier)) : 0;
+                let materialUsageEfficiency = 1;
+                if (gameState.unlockedResearch.includes("advanced_material_processing")) {
+                    const buffResearch = getResearchTopicById("advanced_material_processing");
+                    if (buffResearch && buffResearch.globalBuff && buffResearch.globalBuff.type === "material_usage_efficiency") {
+                        materialUsageEfficiency = 1 - buffResearch.globalBuff.percentage;
+                    }
+                }
+                const actualMaterialsNeeded = Math.floor(materialsNeededBase * materialUsageEfficiency);
+                
+                let buttonText = `${upgDef.name} (${currentTier}/${upgDef.maxTier})`;
+                let isDisabled = false;
+                let reason = "";
+
+                if (currentTier >= upgDef.maxTier) { reason = "(Max Tier)"; isDisabled = true; }
+                else if (upgDef.requiresResearch && !gameState.unlockedResearch.includes(upgDef.requiresResearch)) { reason = "(Needs Res.)"; isDisabled = true; }
+                else if (gameState.cash < costNextTier) { reason = `(Need $${formatNumber(costNextTier,0)})`; isDisabled = true; }
+                else if (actualMaterialsNeeded > 0 && gameState.buildingMaterials < actualMaterialsNeeded) { reason = `(Need ${actualMaterialsNeeded} Mats)`; isDisabled = true; }
+                else { reason = `($${formatNumber(costNextTier,0)}${actualMaterialsNeeded > 0 ? ', '+actualMaterialsNeeded+' Mats' : ''})`;}
+                
+                buttonText += ` ${reason}`;
+
+                detailContentHTML += `
+                    <button class="specific-upgrade-btn-detail" 
+                            onclick="applySpecificPropertyUpgrade(${propertyInstance.uniqueId}, '${upgDef.id}')" 
+                            ${isDisabled ? 'disabled' : ''}
+                            title="RPS Boost: +${formatNumber(upgDef.rpsBoost,2)}/tier. Materials: ${actualMaterialsNeeded > 0 ? actualMaterialsNeeded : '0'}">
+                        ${buttonText}
+                    </button>
+                `;
+            });
+        } else {
+            detailContentHTML += '<p>No specific upgrades available for this rental.</p>';
+        }
+        upgradesDetailDiv.innerHTML = detailContentHTML;
+    }
 }
 
 function displayAvailableFacilitiesList(targetElement, filterType) { // filterType: 'material' or 'science' (or 'all')
@@ -305,18 +416,26 @@ function displayResearchOptionsList(targetElement) {
 }
 
 // ---- Button State Update Functions ----
-function updateAllButtonStatesForCurrentView() {
+function updatePropertyBuyButtonStates() {
     ensureUIInitialized();
-    if (currentView === 'rentals') {
-        updatePropertyBuyButtonStates();
-        updatePropertyUpgradeButtonStates();
-    } else if (currentView === 'materials') {
-        updateFacilityBuyButtonStates('material');
-        updateFacilityUpgradeButtonStates('material');
-    } else if (currentView === 'research') {
-        updateResearchButtonStatesList();
-        updateFacilityUpgradeButtonStates('science'); // For science lab upgrades on the right
-    }
+    PROPERTY_TYPES.forEach(propType => {
+        const buyButton = document.getElementById(`buy-prop-${propType.id}-btn`);
+        if (buyButton) {
+            if(!isPropertyTypeUnlocked(propType.id)) {
+                if(buyButton.parentElement && buyButton.parentElement.style.display !== 'none') buyButton.parentElement.style.display = 'none';
+                return;
+            }
+            if(buyButton.parentElement && buyButton.parentElement.style.display === 'none') buyButton.parentElement.style.display = 'flex';
+            
+            const monetaryCost = calculateDynamicPropertyCost(propType);
+            const materialsCost = propType.materialsCost || 0;
+            let disabledReason = "";
+            if (gameState.cash < monetaryCost) disabledReason = `(Need $${formatNumber(monetaryCost,0)})`;
+            else if (materialsCost > 0 && gameState.buildingMaterials < materialsCost) disabledReason = `(Need ${materialsCost} Mats)`;
+            buyButton.disabled = !!disabledReason;
+            buyButton.textContent = `Buy ${disabledReason}`;
+        }
+    });
 }
 
 function updatePropertyBuyButtonStates() {
