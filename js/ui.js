@@ -53,25 +53,32 @@ function updateTotalUpkeepDisplay() {
     }
 }
 
-
 function displayAvailableProperties() {
     if (!availablePropertiesList) return;
-    availablePropertiesList.innerHTML = '';
 
-    PROPERTY_TYPES.forEach(propType => {
+    // (b) Change the name of available Properties, to Rentals
+    const propertiesSectionTitle = availablePropertiesList.parentElement.querySelector('h2');
+    if (propertiesSectionTitle) {
+        propertiesSectionTitle.textContent = 'Available Rentals';
+    }
+
+    availablePropertiesList.innerHTML = ''; // Clear existing list
+
+    PROPERTY_TYPES.forEach(propType => { // PROPERTY_TYPES from properties.js
         if (!propType || typeof propType.baseCost === 'undefined' || typeof propType.baseRPS === 'undefined') {
             console.error("Skipping invalid property type in displayAvailableProperties:", propType);
             return; // Skip this iteration if propType is malformed
         }
 
+        // (a) Stop the increase in building cost, I need this flatlined.
+        // This change is in properties.js: calculateDynamicPropertyCost now returns propType.baseCost
         const currentCost = calculateDynamicPropertyCost(propType); // from properties.js
+
         const baseRPSDisplay = typeof propType.baseRPS === 'number' ? propType.baseRPS.toLocaleString() : 'N/A';
         const currentCostDisplay = typeof currentCost === 'number' ? currentCost.toLocaleString() : 'N/A';
 
-
         const card = document.createElement('div');
         card.className = 'property-card';
-        // Line 46 equivalent
         card.innerHTML = `
             <h3>${propType.name || 'Unnamed Property'}</h3>
             <p>${propType.description || 'No description.'}</p>
@@ -82,7 +89,8 @@ function displayAvailableProperties() {
         `;
         availablePropertiesList.appendChild(card);
     });
-    if (availablePropertiesList.children.length === 0 && PROPERTY_TYPES.length > 0) { // check if PT array is not empty
+
+    if (availablePropertiesList.children.length === 0 && PROPERTY_TYPES.length > 0) {
         availablePropertiesList.innerHTML = '<p>No properties currently meet display criteria or all are invalid.</p>';
     } else if (PROPERTY_TYPES.length === 0) {
         availablePropertiesList.innerHTML = '<p>No property types defined.</p>';
@@ -172,10 +180,17 @@ function displayOwnedProperties() {
 
 function displayAvailableFacilities() {
     if (!availableFacilitiesList) return;
-    availableFacilitiesList.innerHTML = '';
+
+    // (b) Change available Facilities to Construction
+    const facilitiesSectionTitle = availableFacilitiesList.parentElement.querySelector('h2');
+    if (facilitiesSectionTitle) {
+        facilitiesSectionTitle.textContent = 'Available Construction';
+    }
+
+    availableFacilitiesList.innerHTML = ''; // Clear existing list
     let displayedCount = 0;
 
-    FACILITY_TYPES.forEach(facType => { // from facilities.js
+    FACILITY_TYPES.forEach(facType => { // FACILITY_TYPES from facilities.js
         if (!isFacilityTypeUnlocked(facType.id)) { // from facilities.js
             return;
         }
@@ -184,7 +199,11 @@ function displayAvailableFacilities() {
             return;
         }
         displayedCount++;
+        // (a) Stop the increase in building cost (for facilities) - Assuming similar flatline logic in facilities.js for calculateFacilityDynamicCost
+        // For facilities, calculateFacilityDynamicCost in facilities.js should be modified like this:
+        // function calculateFacilityDynamicCost(facilityType) { return facilityType.cost; }
         const currentCost = calculateFacilityDynamicCost(facType); // from facilities.js
+
         const currentCostDisplay = typeof currentCost === 'number' ? currentCost.toLocaleString() : 'N/A';
         const baseUpkeepDisplay = typeof facType.baseUpkeepRPS === 'number' ? facType.baseUpkeepRPS.toLocaleString() : 'N/A';
 
@@ -196,7 +215,6 @@ function displayAvailableFacilities() {
         } else if (facType.effects) {
             outputText = "Global Buff";
         }
-
 
         card.innerHTML = `
             <h3>${facType.name || 'Unnamed Facility'}</h3>
@@ -210,9 +228,9 @@ function displayAvailableFacilities() {
     });
 
     if (displayedCount === 0 && FACILITY_TYPES.length > 0) {
-        availableFacilitiesList.innerHTML = '<p>No facilities currently meet display criteria or all are invalid.</p>';
+        availableFacilitiesList.innerHTML = '<p>No construction options currently meet display criteria or all are invalid.</p>'; // Updated text
     } else if (FACILITY_TYPES.length === 0) {
-         availableFacilitiesList.innerHTML = '<p>No facility types defined.</p>';
+         availableFacilitiesList.innerHTML = '<p>No construction types defined.</p>'; // Updated text
     }
 }
 
