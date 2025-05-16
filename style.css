@@ -6,24 +6,24 @@
 }
 
 body {
-    font-family: 'Exo 2', 'Rajdhani', sans-serif; /* Modern, clean font */
-    background-color: #0a0f18; /* Very dark desaturated blue */
-    color: #c0c8d8; /* Light grey-blue text for readability */
+    font-family: 'Exo 2', 'Rajdhani', sans-serif;
+    background-color: #0a0f18;
+    color: #c0c8d8;
     line-height: 1.6;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    overflow-x: hidden; /* Prevent horizontal scroll from subtle glows */
+    overflow-x: hidden;
 }
 
 /* --- Header & Stats --- */
 header {
-    background-color: rgba(15, 20, 35, 0.85); /* Slightly transparent dark panel */
-    backdrop-filter: blur(5px); /* Frosted glass effect */
+    background-color: rgba(15, 20, 35, 0.85);
+    backdrop-filter: blur(5px);
     color: #e0e8ff;
     padding: 1rem 1.5rem;
     text-align: center;
-    border-bottom: 2px solid #00aaff; /* Electric blue accent */
+    border-bottom: 2px solid #00aaff;
     position: sticky; 
     top: 0;
     z-index: 1000;
@@ -31,11 +31,11 @@ header {
 }
 
 header h1 {
-    font-family: 'Orbitron', sans-serif; 
+    font-family: 'Orbitron', sans-serif;
     margin: 0;
     font-size: 2.2rem;
-    color: #00d4ff; 
-    text-shadow: 0 0 5px #00aaff, 0 0 10px #00aaff; 
+    color: #00d4ff;
+    text-shadow: 0 0 5px #00aaff, 0 0 10px #00aaff;
     letter-spacing: 1px;
 }
 
@@ -48,12 +48,12 @@ header h1 {
 }
 
 .stat-item {
-    background-color: rgba(30, 40, 60, 0.7); 
+    background-color: rgba(30, 40, 60, 0.7);
     padding: 0.5rem 0.9rem;
     border-radius: 4px;
     font-size: 0.9rem;
     color: #b0c8e0;
-    border: 1px solid #2a3f5f; 
+    border: 1px solid #2a3f5f;
     box-shadow: inset 0 0 3px rgba(0, 170, 255, 0.2), 0 1px 2px rgba(0,0,0,0.3);
     min-width: 95px;
     text-align: center;
@@ -64,12 +64,11 @@ header h1 {
     box-shadow: inset 0 0 8px rgba(0, 170, 255, 0.3), 0 0 10px rgba(0, 170, 255, 0.2);
 }
 
-
 /* --- Main Navigation --- */
 .main-navigation {
     display: flex;
     justify-content: center;
-    background-color: #0f1423; 
+    background-color: #0f1423;
     padding: 0.6rem 0;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
     border-bottom: 1px solid #2a3f5f;
@@ -77,7 +76,7 @@ header h1 {
 
 .nav-button {
     background-color: transparent;
-    color: #9cb0d0; 
+    color: #9cb0d0;
     border: 1px solid #2a3f5f;
     padding: 0.6rem 1.2rem;
     margin: 0 0.4rem;
@@ -86,21 +85,19 @@ header h1 {
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
-    position: relative; 
+    position: relative;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
-
 .nav-button:hover {
-    background-color: rgba(0, 170, 255, 0.1); 
+    background-color: rgba(0, 170, 255, 0.1);
     color: #00d4ff;
     border-color: #00aaff;
     box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
 }
-
 .nav-button.active-nav {
-    background-color: #00aaff; 
-    color: #0a0f18; 
+    background-color: #00aaff;
+    color: #0a0f18;
     border-color: #00d4ff;
     box-shadow: 0 0 15px rgba(0, 170, 255, 0.5), inset 0 0 5px rgba(255,255,255,0.2);
     transform: translateY(0px);
@@ -109,50 +106,46 @@ header h1 {
 /* --- Content Area & Columns --- */
 .content-area {
     padding: 1.5rem;
-    max-width: 1500px; 
+    max-width: 1500px;
     margin: 0 auto;
     display: flex;
     gap: 1.5rem;
     flex-grow: 1;
     width: 100%;
-    /* align-items: flex-start; */ /* If you want columns to have different heights based on content */
 }
 
 .column {
-    display: flex; 
+    display: flex;
     flex-direction: column;
     flex-basis: 50%;
-    min-width: 0; 
+    min-width: 0;
 }
 
 /* Individual Section Styling (within each column) */
 #left-column-section,
 #right-column-section {
-    background-color: rgba(20, 28, 48, 0.7); 
+    background-color: rgba(20, 28, 48, 0.7);
     backdrop-filter: blur(3px);
     padding: 1.25rem;
     border-radius: 6px;
-    border: 1px solid #2a3f5f; 
+    border: 1px solid #2a3f5f;
     box-shadow: 0 4px 15px rgba(0,0,0,0.2), inset 0 0 8px rgba(0,0,0,0.2);
     display: flex;
     flex-direction: column;
-    /* flex-grow: 1; Remove this if setting a fixed height */
     overflow: hidden; 
-
-    /* MODIFICATION: Set a fixed height for the sections */
-    height: 480px; /* Adjust this value! Start with an estimate for ~2 portfolio items + title + padding */
-                   /* Example: If 2 cards are ~150px each + title ~50px + padding ~40px = 390px */
+    height: 450px; /* <<< KEY CHANGE: Fixed height for both columns. Adjust this value! */
+                   /* Estimate based on ~2.5 card heights + title + padding */
 }
 
 #left-column-section h2,
 #right-column-section h2 {
     font-family: 'Orbitron', sans-serif;
-    color: #00d4ff; 
+    color: #00d4ff;
     border-bottom: 1px solid #00aaff;
     padding-bottom: 0.6rem;
     margin-top: 0;
     margin-bottom: 1rem;
-    flex-shrink: 0; 
+    flex-shrink: 0;
     font-size: 1.5rem;
     text-align: center;
     text-shadow: 0 0 3px rgba(0, 170, 255, 0.7);
@@ -161,93 +154,78 @@ header h1 {
 /* --- Item Lists & Scrollability --- */
 .item-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-    gap: 1rem; 
-    /* flex-grow: 1; This is now primarily handled by .scrollable-list if it's the direct child growing */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
 }
 
-/* Specific override for portfolio to usually be single column for more detail */
-#right-column-list.item-list { /* This targets the div that has BOTH classes */
-    grid-template-columns: 1fr; 
+#right-column-list.item-list { /* My Portfolio - usually single column */
+    grid-template-columns: 1fr;
+}
+/* Available Rentals - can be multiple columns if many items fit */
+#left-column-list.item-list {
+     /* Default grid-template-columns from .item-list will apply, allowing multiple cards if space */
 }
 
 
 .scrollable-list {
-    /* max-height: calc(100vh - 250px); REMOVED - height is now controlled by parent section */
-    overflow-y: auto; 
-    padding-right: 8px; /* Adjusted for thinner scrollbar */
-    padding-left: 2px; /* Slight padding on the left of scroll content */
-    padding-bottom: 10px; 
-    flex-grow: 1; /* IMPORTANT: list grows to fill the section's fixed height */
-    min-height: 0; /* Crucial for scroll within flex item */
+    overflow-y: auto;
+    padding-right: 8px;
+    padding-left: 2px;
+    padding-bottom: 10px;
+    flex-grow: 1; /* Takes available space within its fixed-height parent section */
+    min-height: 0; /* Essential for scrolling within a flex item */
 }
 
-/* Custom Scrollbar (Webkit browsers) */
-.scrollable-list::-webkit-scrollbar {
-    width: 6px; /* Thinner scrollbar */
-}
-.scrollable-list::-webkit-scrollbar-track {
-    background: rgba(42, 63, 95, 0.2); /* Darker, more transparent track */
-    border-radius: 3px;
-}
-.scrollable-list::-webkit-scrollbar-thumb {
-    background-color: #007acc; /* Slightly less bright blue thumb */
-    border-radius: 3px;
-    /* border: 1px solid rgba(0,0,0,0.2); */ /* Optional subtle border */
-}
-.scrollable-list::-webkit-scrollbar-thumb:hover {
-    background-color: #00aaff; /* Brighter on hover */
-}
+.scrollable-list::-webkit-scrollbar { width: 6px; }
+.scrollable-list::-webkit-scrollbar-track { background: rgba(42, 63, 95, 0.2); border-radius: 3px; }
+.scrollable-list::-webkit-scrollbar-thumb { background-color: #007acc; border-radius: 3px; }
+.scrollable-list::-webkit-scrollbar-thumb:hover { background-color: #00aaff; }
 
 /* --- Card Styling (Futuristic) --- */
 .property-card, .owned-property-card,
 .facility-card, .owned-facility-card,
 .research-item-card,
-.unlock-placeholder-card { /* Added placeholder here for base styles */
-    background: linear-gradient(145deg, rgba(30, 40, 60, 0.85), rgba(25, 35, 55, 0.9)); 
-    border: 1px solid #2a3f5f; 
-    padding: 0.75rem; 
+.unlock-rental-card { /* NEW CLASS FOR THE UNLOCK CARD */
+    background: linear-gradient(145deg, rgba(30, 40, 60, 0.85), rgba(25, 35, 55, 0.9));
+    border: 1px solid #2a3f5f;
+    padding: 0.75rem;
     border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(0, 170, 255, 0.1); 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(0, 170, 255, 0.1);
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Changed from center for most cards */
+    justify-content: space-between; /* Default for most cards */
     transition: all 0.3s ease;
-    position: relative; 
-    /* min-height: 150px; Removed, let content dictate or specific cards define */
+    position: relative;
 }
-
-.unlock-placeholder-card { /* Specific overrides for placeholder */
-    justify-content: center; /* Center content for placeholder */
-    align-items: center; 
-    text-align: center; 
-    min-height: 150px; /* Give placeholder a minimum height */
-    border-style: dashed; 
-    border-color: #007acc; 
-}
-.unlock-placeholder-card::before { /* No accent for placeholder */
-    display: none;
-}
-
 
 .property-card:hover, .owned-property-card:hover,
 .facility-card:hover, .owned-facility-card:hover,
 .research-item-card:hover,
-.unlock-placeholder-card:hover { 
+.unlock-rental-card:hover {
     border-color: #00aaff;
     box-shadow: 0 4px 12px rgba(0, 170, 255, 0.2), 0 0 15px rgba(0, 170, 255, 0.1), inset 0 0 0 1px rgba(0, 170, 255, 0.3);
     transform: translateY(-2px);
 }
 
 /* Card Accents */
-.property-card::before, .facility-card::before, .research-item-card::before { 
+.property-card::before, .facility-card::before, .research-item-card::before {
     content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
-    background: linear-gradient(to bottom, #00aaff, #00d4ff);
-    border-radius: 6px 0 0 6px;
+    background: linear-gradient(to bottom, #00aaff, #00d4ff); border-radius: 6px 0 0 6px;
 }
-.owned-property-card::before, .owned-facility-card::before { 
+.owned-property-card::before, .owned-facility-card::before {
     content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
-    background: linear-gradient(to bottom, #00ffaa, #00dd90);
+    background: linear-gradient(to bottom, #00ffaa, #00dd90); border-radius: 6px 0 0 6px;
+}
+.unlock-rental-card { /* Specific style for this new card type */
+    border-color: #ffc107; /* Gold/Yellow border */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 130px; /* Or adjust to match other cards */
+}
+.unlock-rental-card::before { /* Unique accent for unlock card */
+    content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+    background: linear-gradient(to bottom, #ffc107, #ff8f00); /* Gold/Orange gradient */
     border-radius: 6px 0 0 6px;
 }
 
@@ -255,225 +233,140 @@ header h1 {
 /* Typography within cards */
 .property-card h3, .owned-property-card h3,
 .facility-card h3, .owned-facility-card h3,
-.research-item-card h3, .unlock-placeholder-card h3 {
-    margin-top: 0;
-    margin-bottom: 0.6rem;
-    color: #00d4ff; 
-    font-size: 1.05rem;
-    font-family: 'Orbitron', sans-serif;
-    text-align: center;
-    text-shadow: 0 0 3px rgba(0, 170, 255, 0.5);
+.research-item-card h3, .unlock-rental-card h3 {
+    margin-top: 0; margin-bottom: 0.6rem; color: #00d4ff; font-size: 1.05rem;
+    font-family: 'Orbitron', sans-serif; text-align: center; text-shadow: 0 0 3px rgba(0, 170, 255, 0.5);
 }
-.unlock-placeholder-card h3 { /* Specific for placeholder title */
-    color: #00aaff;
-    font-size: 1.1rem;
-    margin-bottom: 0.75rem;
-}
+.unlock-rental-card h3 { color: #ffc107; font-size: 1.1rem; margin-bottom: 0.5rem; }
 
 
 .property-card p, .owned-property-card p,
 .facility-card p, .owned-facility-card p,
-.research-item-card p, .unlock-placeholder-card p {
-    margin-bottom: 0.4rem;
-    font-size: 0.85rem; 
-    color: #a0b8d0; 
+.research-item-card p, .unlock-rental-card p {
+    margin-bottom: 0.4rem; font-size: 0.85rem; color: #a0b8d0;
 }
-.unlock-placeholder-card p {
-    font-size: 0.9rem;
-    margin-bottom: 0.75rem;
-    color: #9cb0d0;
-    max-width: 90%;
-}
+.unlock-rental-card p { font-size: 0.9rem; margin-bottom: 0.6rem; color: #c0c8d8; }
 
 
-/* Specific text styling in cards (costs, income, levels) */
+/* Specific text styling in cards */
 .prop-cost, .facility-cost, .research-cost { color: #ff6b6b; font-weight: bold; } 
 .prop-upkeep, .facility-upkeep { color: #ff8f8f; font-weight: normal;} 
 .prop-rps, .facility-output { color: #50fa7b; font-weight: bold; } 
 .prop-level { color: #8be9fd; font-weight: bold; } 
-.unlock-placeholder-card .research-cost-display {
-    font-weight: bold; color: #ffc107; font-size: 1rem; margin-bottom: 1rem;
+.unlock-rental-card .research-cost-display {
+    font-weight: bold; color: #ffc107; font-size: 1rem; margin-bottom: 0.75rem;
 }
 
-
-/* Property Info Grid (for owned property cards) */
+/* Property Info Grid (for owned property/facility cards) */
 .property-info-grid {
-    display: grid;
-    grid-template-columns: auto 1fr; 
-    gap: 0.2rem 0.5rem;
-    font-size: 0.8rem;
-    margin-bottom: 0.6rem;
-    color: #b0c8e0;
+    display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.5rem;
+    font-size: 0.8rem; margin-bottom: 0.6rem; color: #b0c8e0;
 }
 .property-info-grid .label { font-weight: 600; color: #8098b0; }
 .property-info-grid .value { text-align: right; font-weight: 600; color: #d0e0f0; }
 
-/* Card Actions (for Manage Upgrades & Sell buttons on owned cards) */
+/* Card Actions (for Manage Upgrades & Sell buttons) */
 .owned-property-card .card-actions,
-.owned-facility-card .card-actions { /* Apply to facility cards too */
-    display: flex;
-    justify-content: space-between; /* Changed from space-around for tighter packing */
-    gap: 0.5rem;
-    margin-top: 0.75rem;
+.owned-facility-card .card-actions {
+    display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 0.75rem;
 }
 .owned-property-card .card-actions button,
 .owned-facility-card .card-actions button {
-    flex-grow: 1; /* Buttons share space */
-    padding: 0.5rem 0.5rem; /* Slightly more padding */
-    font-size: 0.8rem;
-    margin-top: 0;
-    min-width: 80px; /* Prevent buttons from becoming too small */
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    flex-grow: 1; padding: 0.5rem 0.5rem; font-size: 0.8rem; margin-top: 0;
+    min-width: 80px; text-transform: uppercase; letter-spacing: 0.5px;
 }
 
 /* --- Buttons --- */
 button { 
-    background: linear-gradient(145deg, #2a3f5f, #1e2b40); 
-    color: #00d4ff; 
-    border: 1px solid #00aaff;
-    padding: 0.7rem 1.2rem; 
-    text-align: center;
-    font-size: 0.9rem;
-    font-weight: 600;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    margin-top: 0.75rem; 
-    width: 100%;
-    box-sizing: border-box;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3), inset 0 0 2px rgba(0, 170, 255, 0.2);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    background: linear-gradient(145deg, #2a3f5f, #1e2b40); color: #00d4ff; 
+    border: 1px solid #00aaff; padding: 0.7rem 1.2rem; text-align: center;
+    font-size: 0.9rem; font-weight: 600; border-radius: 4px; cursor: pointer;
+    transition: all 0.2s ease-in-out; margin-top: 0.75rem; width: 100%;
+    box-sizing: border-box; box-shadow: 0 1px 3px rgba(0,0,0,0.3), inset 0 0 2px rgba(0, 170, 255, 0.2);
+    text-transform: uppercase; letter-spacing: 0.5px;
 }
 button:hover {
-    background: linear-gradient(145deg, #3a4f6f, #2e3b50);
-    border-color: #00d4ff;
-    color: #fff;
+    background: linear-gradient(145deg, #3a4f6f, #2e3b50); border-color: #00d4ff; color: #fff;
     box-shadow: 0 2px 5px rgba(0,0,0,0.4), 0 0 10px rgba(0, 170, 255, 0.3), inset 0 0 3px rgba(0, 170, 255, 0.3);
     transform: translateY(-1px);
 }
 button:disabled {
-    background: #1a2230; 
-    color: #4a5f7f; 
-    border-color: #2a3f5f;
-    cursor: not-allowed;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-    transform: translateY(0);
+    background: #1a2230; color: #4a5f7f; border-color: #2a3f5f;
+    cursor: not-allowed; box-shadow: inset 0 0 5px rgba(0,0,0,0.2); transform: translateY(0);
 }
 
-/* Specific "Unlock Next Tier Rentals" Button */
-.unlock-next-tier-button-container {
-    width: 100%;
-    padding: 0.5rem 0;
-    margin-top: 0.5rem;
-    display: flex;
-    justify-content: center;
+/* Unlock New Rental Button (on the .unlock-rental-card) */
+.unlock-rental-card button {
+    background: linear-gradient(145deg, #ffc107, #ff8f00); /* Gold/Orange gradient */
+    border-color: #ffda63;
+    color: #1a1a2e; /* Dark text for contrast */
+    width: auto;
+    padding: 0.6rem 1.5rem;
+    font-weight: 700;
 }
-button.unlock-next-tier-btn {
-    background: linear-gradient(145deg, #b71c1c, #7f0000); /* More distinct, urgent red */
-    border-color: #ff5252;
-    color: #fff;
-    padding: 0.7rem 1.3rem;
-    width: auto; 
-    max-width: 90%; 
-    font-size: 0.9rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3), inset 0 0 3px rgba(255,82,82,0.2);
+.unlock-rental-card button:hover {
+    background: linear-gradient(145deg, #ffd54f, #ffa000);
+    border-color: #ffe082;
 }
-button.unlock-next-tier-btn:hover {
-    background: linear-gradient(145deg, #d32f2f, #9f0000);
-    border-color: #ff8a80;
-}
-button.unlock-next-tier-btn:disabled {
-    background: #4e1212;
-    color: #8e5e5e;
-    border-color: #6e3232;
+.unlock-rental-card button:disabled {
+    background: #7c6000;
+    color: #bca04f;
+    border-color: #a1887f;
 }
 
 
 /* Upgrade Buttons (inside containers/details) */
 .upgrade-buttons-container button,
 .property-upgrades-detail button {
-    width: auto; 
-    margin-right: 5px;
-    margin-bottom: 5px; 
-    flex-grow: 1; 
-    padding: 0.5rem 0.8rem; 
-    font-size: 0.85rem;
-    text-transform: none; 
-    letter-spacing: 0;
+    width: auto; margin-right: 5px; margin-bottom: 5px; flex-grow: 1; 
+    padding: 0.5rem 0.8rem; font-size: 0.85rem; text-transform: none; letter-spacing: 0;
 }
 
 /* Manage Upgrades Button on Card */
 .owned-property-card .manage-upgrades-btn,
-.owned-facility-card .manage-upgrades-btn { /* Apply to facility cards too */
-    background: linear-gradient(145deg, #007acc, #005c99); 
-    border-color: #00aaff;
-    color: #fff;
+.owned-facility-card .manage-upgrades-btn { 
+    background: linear-gradient(145deg, #007acc, #005c99); border-color: #00aaff; color: #fff;
 }
 .owned-property-card .manage-upgrades-btn:hover,
 .owned-facility-card .manage-upgrades-btn:hover {
-    background: linear-gradient(145deg, #008becc, #006cb9);
-    border-color: #00d4ff;
+    background: linear-gradient(145deg, #008becc, #006cb9); border-color: #00d4ff;
 }
 
 /* Sell Button on Card */
 .owned-property-card .sell-btn,
-.owned-facility-card .sell-btn { /* Apply to facility cards too */
-    background: linear-gradient(145deg, #c0392b, #a0291b); 
-    border-color: #ff6b6b;
-    color: #fff;
+.owned-facility-card .sell-btn { 
+    background: linear-gradient(145deg, #c0392b, #a0291b); border-color: #ff6b6b; color: #fff;
 }
 .owned-property-card .sell-btn:hover,
 .owned-facility-card .sell-btn:hover {
-    background: linear-gradient(145deg, #d0493b, #b0392b);
-    border-color: #ff8f8f;
+    background: linear-gradient(145deg, #d0493b, #b0392b); border-color: #ff8f8f;
 }
 
 /* --- Expandable Upgrade Detail Section --- */
 .property-upgrades-detail {
-    padding: 0.75rem;
-    margin-top: 0.75rem;
-    background-color: rgba(15, 20, 35, 0.9); 
-    border-top: 1px solid #2a3f5f;
-    border-radius: 0 0 4px 4px;
+    padding: 0.75rem; margin-top: 0.75rem; background-color: rgba(15, 20, 35, 0.9); 
+    border-top: 1px solid #2a3f5f; border-radius: 0 0 4px 4px;
 }
 .property-upgrades-detail:not(.visible) { display: none; }
 .property-upgrades-detail.visible { display: block; }
 
 .property-upgrades-detail > p { 
-    font-family: 'Orbitron', sans-serif;
-    font-weight: normal;
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.9em;
-    color: #00aaff; 
-    text-align: center;
-    border-bottom: 1px dashed #2a3f5f;
-    padding-bottom: 0.3rem;
+    font-family: 'Orbitron', sans-serif; font-weight: normal; margin-top: 0.5rem; margin-bottom: 0.5rem;
+    font-size: 0.9em; color: #00aaff; text-align: center; border-bottom: 1px dashed #2a3f5f; padding-bottom: 0.3rem;
 }
 
 /* Buttons inside the upgrade detail panel */
 .property-upgrades-detail .upgrade-main-btn-detail {
-    background: linear-gradient(145deg, #16a085, #108065); 
-    border-color: #50fa7b; 
-    color: #fff;
+    background: linear-gradient(145deg, #16a085, #108065); border-color: #50fa7b; color: #fff;
 }
 .property-upgrades-detail .specific-upgrade-btn-detail {
-    background: linear-gradient(145deg, #8e44ad, #703090); 
-    border-color: #c377e0; 
-    color: #fff;
+    background: linear-gradient(145deg, #8e44ad, #703090); border-color: #c377e0; color: #fff;
 }
 
 
 /* --- Footer --- */
 footer {
-    text-align: center;
-    padding: 1rem;
-    background-color: #0f111a; 
-    color: #607090; 
-    font-size: 0.8rem;
-    margin-top: auto; 
-    flex-shrink: 0; 
-    border-top: 1px solid #2a3f5f;
+    text-align: center; padding: 1rem; background-color: #0f111a; 
+    color: #607090; font-size: 0.8rem; margin-top: auto; 
+    flex-shrink: 0; border-top: 1px solid #2a3f5f;
 }
