@@ -13,6 +13,9 @@ header {
     padding: 1rem 2rem;
     text-align: center;
     border-bottom: 4px solid #e67e22;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 header h1 {
@@ -23,7 +26,7 @@ header h1 {
 .stats-container {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 15px; /* Reduced gap slightly */
     margin-top: 0.5rem;
     flex-wrap: wrap;
 }
@@ -32,19 +35,41 @@ header h1 {
     background-color: #34495e;
     padding: 0.5rem 1rem;
     border-radius: 5px;
-    font-size: 1.1rem;
+    font-size: 1rem; /* Slightly reduced font size */
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    min-width: 100px; /* Ensure items have some width */
+    text-align: center;
 }
 
 main {
-    padding: 1rem 2rem;
-    max-width: 1200px;
+    padding: 1rem; /* Adjusted padding */
+    max-width: 1400px; /* Increased max-width for wider layout */
     margin: 0 auto;
 }
 
+.main-layout {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.column-main {
+    flex: 2; /* Main content takes more space */
+}
+
+.column-side {
+    flex: 1; /* Side content takes less space */
+}
+
+
 section {
     background-color: #fff;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0; /* Removed margin as gap is handled by flexbox */
     padding: 1.5rem;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -58,15 +83,21 @@ section h2 {
     margin-bottom: 1rem;
 }
 
-.property-list {
+.property-list, .facility-list, .research-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1rem;
 }
 
-.property-card, .owned-property-card {
+.owned-items-list { /* Specific styling for lists of owned things if needed */
+    /* grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); */ /* Example: slightly larger cards */
+}
+
+
+.property-card, .owned-property-card,
+.facility-card, .owned-facility-card,
+.research-item-card {
     border: 1px solid #ddd;
-    border-left: 5px solid #e67e22;
     background-color: #f9f9f9;
     padding: 1rem;
     border-radius: 5px;
@@ -76,40 +107,61 @@ section h2 {
     justify-content: space-between;
 }
 
-.property-card h3, .owned-property-card h3 {
+.property-card, .facility-card, .research-item-card { /* For available items */
+    border-left: 5px solid #e67e22; /* Orange for buyable */
+}
+.owned-property-card, .owned-facility-card { /* For owned items */
+    border-left: 5px solid #27ae60; /* Green for owned */
+}
+
+
+.property-card h3, .owned-property-card h3,
+.facility-card h3, .owned-facility-card h3,
+.research-item-card h3 {
     margin-top: 0;
     color: #34495e;
+    font-size: 1.1rem;
 }
 
-.property-card p, .owned-property-card p {
+.property-card p, .owned-property-card p,
+.facility-card p, .owned-facility-card p,
+.research-item-card p {
     margin-bottom: 0.5rem;
-    font-size: 0.95rem;
+    font-size: 0.9rem; /* Standardized paragraph font size */
 }
 
-.property-card .prop-cost, .owned-property-card .prop-rps {
+.prop-cost, .facility-cost, .research-cost,
+.prop-upkeep, .facility-upkeep {
     font-weight: bold;
-    color: #27ae60; /* Green for positive financial figures */
 }
-.owned-property-card .prop-level {
-    font-style: italic;
-    color: #2980b9;
-}
+.prop-cost, .facility-cost, .research-cost { color: #c0392b; } /* Red for costs */
+.prop-upkeep, .facility-upkeep { color: #e74c3c; } /* Lighter red for upkeep */
+.prop-rps, .facility-output, .prop-level { font-weight: bold; }
+.prop-rps, .facility-output { color: #27ae60; } /* Green for positive income/output */
+.prop-level { color: #2980b9; } /* Blue for level */
 
 
 button {
     background-color: #e67e22;
     color: white;
     border: none;
-    padding: 0.75rem 1.25rem;
+    padding: 0.6rem 1rem; /* Adjusted padding */
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 1rem;
+    font-size: 0.9rem; /* Adjusted font size */
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
     margin-top: 0.5rem;
+    width: 100%; /* Make buttons take full width of their container */
+    box-sizing: border-box;
 }
+.upgrade-buttons-container button {
+    width: auto; /* Allow multiple upgrade buttons inline */
+    margin-right: 5px;
+}
+
 
 button:hover {
     background-color: #d35400;
@@ -138,6 +190,19 @@ button:disabled {
 .game-messages-section .message-log p:last-child {
     border-bottom: none;
     margin-bottom: 0;
+}
+
+.upgrade-buttons-container {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.upgrade-buttons-container p {
+    width: 100%;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
 }
 
 

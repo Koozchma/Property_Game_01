@@ -1,69 +1,86 @@
 // Metropolis Estates - main.js
 
-// --- Game State Object ---
 let gameState = {
-    cash: 100, // Starting cash
+    cash: 200,
     rentPerSecond: 0,
-    // other global states can go here
+    netRentPerSecond: 0,
+    facilityUpkeepPerSecond: 0,
+    buildingMaterials: 100, // Start with some materials
+    researchPoints: 0,
+    unlockedResearch: [],
 };
 
-// --- Game Loop ---
 const GAME_TICK_INTERVAL = 1000; // 1 second
 let gameLoopIntervalId;
 
 function gameTick() {
-    // 1. Add income from RPS
-    let incomeThisTick = gameState.rentPerSecond; // RPS is already per second
+    applyFacilityOutputs(); // from facilities.js
 
-    // Consider facility upkeep if facilities are active
-    // let facilityUpkeepThisTick = calculateTotalFacilityUpkeep();
-    // incomeThisTick -= facilityUpkeepThisTick;
+    let incomeThisTick = gameState.rentPerSecond;
+    let expensesThisTick = gameState.facilityUpkeepPerSecond;
+    gameState.cash += (incomeThisTick - expensesThisTick);
 
-    gameState.cash += incomeThisTick;
+    if (gameState.cash < -10000 && ownedProperties.length > 0) {
+        // logMessage("Warning: Cash is significantly negative!", "error");
+    }
 
-    // 2. Update UI
-    updateCashDisplay();
-    // RPS display is updated when properties are bought/sold/upgraded
-    // Owned properties count also updated on buy/sell
-
-    // 3. Update button states (buy/upgrade) based on current cash
-    updateAllBuyButtonStates();
-    updateAllUpgradeButtonStates();
-
-    // 4. Check for game over or win conditions (later)
+    updateCashDisplay(); // from ui.js
+    updateBuildingMaterialsDisplay(); // from ui.js
+    updateResearchPointsDisplay();    // from ui.js
 }
 
-// --- Game Data Update ---
 function updateGameData() {
-    // This function is called whenever a significant change happens
-    // (e.g., buying/selling/upgrading property)
-    gameState.rentPerSecond = calculateTotalRPS();
-    // let facilityUpkeep = calculateTotalFacilityUpkeep();
-    // gameState.netRentPerSecond = gameState.rentPerSecond - facilityUpkeep; // If using net
+    gameState.rentPerSecond = calculateTotalPropertiesRPS(); // from properties.js
+    gameState.facilityUpkeepPerSecond = calculateTotalFacilityUpkeep(); // from facilities.js
+    gameState.netRentPerSecond = parseFloat((gameState.rentPerSecond - gameState.facilityUpkeepPerSecond).toFixed(2));
 
-    updateCashDisplay();
-    updateRPSDisplay();
-    updateOwnedPropertiesCountDisplay();
-    displayOwnedProperties(); // Re-render the list of owned properties
-    updateAllBuyButtonStates(); // Ensure buy buttons are correctly enabled/disabled
-    updateAllUpgradeButtonStates(); // Ensure upgrade buttons are correctly enabled/disabled
+    updateUIDisplays(); // Defined below
+
+    // Re-render lists and button states
+    displayAvailableProperties(); // from ui.js
+    displayOwnedProperties();   // from ui.js
+    displayAvailableFacilities(); // from ui.js
+    displayOwnedFacilities();   // from ui.js
+    displayResearchOptions();   // from ui.js
+
+    updateAllBuyButtonStates(); // from ui.js
+    updateAllFacilityBuyButtonStates(); // from ui.js
+    updateAllUpgradeButtonStates(); // from ui.js
+    updateAllFacilityUpgradeButtonStates(); // from ui.js
+    updateResearchButtonStates(); // from ui.js
 }
 
+function updateUIDisplays() {
+    updateCashDisplay();
+    updateNetRPSDisplay();
+    updateOwnedPropertiesCountDisplay();
+    updateBuildingMaterialsDisplay();
+    updateResearchPointsDisplay();
+    updateTotalUpkeepDisplay();
+}
 
-// --- Initialization ---
 function initGame() {
-    console.log("Metropolis Estates Initializing...");
+    console.log("Metropolis Estates Initializing (v0.2.0 - Research Tree & Material Costs)...");
+    console.log("Current Date/Time (Client): " + new Date().toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'medium' }));
 
-    // Initial UI render
-    initialRender();
-    updateGameData(); // Calculate initial RPS, update displays
 
-    // Start the game loop
-    if (gameLoopIntervalId) clearInterval(gameLoopIntervalId); // Clear if already running
+    initialRender();    // Defined in ui.js
+    updateGameData();
+
+    if (gameLoopIntervalId) clearInterval(gameLoopIntervalId);
     gameLoopIntervalId = setInterval(gameTick, GAME_TICK_INTERVAL);
 
-    logMessage("Game initialized. Good luck, Tycoon!", "success");
+    logMessage("Game initialized. Expand your empire!", "success");
+
+    // Make sure initial displays are correctly shown/hidden based on gameState
+    buildingMaterialsDisplay.style.display = gameState.buildingMaterials > 0 || ownedFacilities.some(f => f.currentOutput?.resource === 'buildingMaterials') ? 'inline-block' : 'none';
+    researchPointsDisplay.style.display = gameState.researchPoints > 0 || ownedFacilities.some(f => f.currentOutput?.resource === 'researchPoints') ? 'inline-block' : 'none';
+    document.getElementById('research-section').style.display = researchPointsDisplay.style.display; // Show research section if RP display is shown
+    totalUpkeepDisplay.style.display = gameState.facilityUpkeepPerSecond > 0 ? 'inline-block' : 'none';
+
+    // These are called in updateGameData, but an initial call after visibility setup can be good.
+    displayAvailableFacilities();
+    displayResearchOptions();
 }
 
-// --- Event Listeners & Startup ---
 document.addEventListener('DOMContentLoaded', initGame);
