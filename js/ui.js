@@ -134,21 +134,55 @@ function displayAvailablePropertiesList(targetElement) {
 }
 
 function displayOwnedPropertiesList(targetElement) {
-    if (ownedProperties.length === 0) { targetElement.innerHTML = '<p>No rentals owned.</p>'; return; }
+    ensureUIInitialized();
+    if (!targetElement) {
+        console.error("Target element for owned properties not provided or initialized.");
+        return;
+    }
+    targetElement.innerHTML = ''; // Clear previous content
+
+    if (ownedProperties.length === 0) {
+        targetElement.innerHTML = '<p>You don\'t own any rentals yet.</p>'; return;
+    }
+
     ownedProperties.forEach(propInst => {
-        const propType = getPropertyTypeById(propInst.typeId);
-        if (!propType) { console.error("Orphaned rental:", propInst); return; }
+        const propType = getPropertyTypeById(propInst.typeId); // from properties.js
+        if (!propType) { console.error("Orphaned owned rental:", propInst); return; }
+
         const card = document.createElement('div');
         card.className = 'owned-property-card';
         card.setAttribute('data-id', propInst.uniqueId);
         card.id = `owned-property-card-${propInst.uniqueId}`;
-        card.innerHTML = `<h3>${propInst.name} (ID: ${propInst.uniqueId})</h3>
-            <p class="prop-level">Lvl: ${propInst.mainLevel}/${propType.mainLevelMax}</p>
-            <p class="prop-rps">RPS: $${formatNumber(propInst.currentRPS)}/s</p>
-            <p>Cost: $${formatNumber(propInst.purchaseCost,0)}</p>
-            <button class="manage-upgrades-btn" onclick="togglePropertyUpgradesView(${propInst.uniqueId})">Manage Upgrades</button>
-            <div class="property-upgrades-detail" id="upgrades-detail-${propInst.uniqueId}"></div>
-            <button class="sell-btn" style="margin-top:10px;" onclick="sellPropertyInstance(${propInst.uniqueId})">Sell</button>`;
+
+        // Compact Info using a grid
+        let infoGridHTML = `
+            <div class="property-info-grid">
+                <p><span class="label">Lvl:</span> <span class="value">${propInst.mainLevel}/${propType.mainLevelMax}</span></p>
+                <p><span class="label">RPS:</span> <span class="value">$${formatNumber(propInst.currentRPS)}/s</span></p>
+                <p><span class="label">Cost:</span> <span class="value">$${formatNumber(propInst.purchaseCost, 0)}</span></p>
+                <p><span class="label">ID:</span> <span class="value">${propInst.uniqueId}</span></p>
+            </div>
+        `;
+
+        // Action Buttons
+        let actionsHTML = `
+            <div class="card-actions">
+                <button class="manage-upgrades-btn" onclick="togglePropertyUpgradesView(${propInst.uniqueId})">
+                    Upgrades
+                </button>
+                <button class="sell-btn" onclick="sellPropertyInstance(${propInst.uniqueId})">
+                    Sell
+                </button>
+            </div>
+        `;
+
+        // Hidden Detail Div for Upgrades
+        let upgradesDetailHTML = `
+            <div class="property-upgrades-detail" id="upgrades-detail-${propInst.uniqueId}">
+                </div>
+        `;
+
+        card.innerHTML = `<h3>${propInst.name}</h3>` + infoGridHTML + actionsHTML + upgradesDetailHTML;
         targetElement.appendChild(card);
     });
 }
