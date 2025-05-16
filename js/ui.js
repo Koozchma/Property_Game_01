@@ -176,16 +176,16 @@ function displayAvailablePropertiesList(targetElement) {
         return;
     }
     targetElement.innerHTML = ''; // Clear previous content
-    let displayedBuyableCount = 0;
+    let displayedItemCount = 0;
 
-    // 1. Display all currently unlocked and buyable properties (iterate in defined order)
-    for (const propType of PROPERTY_TYPES) { // Iterate in defined order
-        if (isPropertyTypeUnlocked(propType.id)) { // from properties.js
-            displayedBuyableCount++;
-            const currentMonetaryCost = calculateDynamicPropertyCost(propType); // from properties.js
+    // 1. Display all currently unlocked and buyable properties
+    PROPERTY_TYPES.forEach(propType => {
+        if (isPropertyTypeUnlocked(propType.id)) { 
+            displayedItemCount++;
+            const currentMonetaryCost = calculateDynamicPropertyCost(propType); 
             const materialsCost = propType.materialsCost || 0;
             const card = document.createElement('div');
-            card.className = 'property-card';
+            card.className = 'property-card'; 
             card.innerHTML = `
                 <h3>${propType.name}</h3>
                 <p>${propType.description}</p>
@@ -196,59 +196,81 @@ function displayAvailablePropertiesList(targetElement) {
             `;
             targetElement.appendChild(card);
         }
-    }
+    });
 
-    // 2. Find and display the *very next* un-unlocked property as an "Unlock" card
-    let nextUnlockablePropertyCard = null;
-    for (const propType of PROPERTY_TYPES) {
-        if (!isPropertyTypeUnlocked(propType.id)) { // This property is not yet unlocked
-            const requiredResearch = getResearchTopicById(propType.requiredResearch); // from facilities.js
-            if (requiredResearch && isResearchAvailable(requiredResearch.id)) { // And its research is available
-                nextUnlockablePropertyCard = document.createElement('div');
-                nextUnlockablePropertyCard.className = 'unlock-rental-card'; // Style as a distinct card
+    // 2. Find and display the *next* research that unlocks more properties as an "Unlock New Rental" card
+    let nextPropertyUnlockResearch = null;
+    for (const research of RESEARCH_TOPICS) { 
+        if (research.unlocksPropertyType && research.unlocksPropertyType.length > 0 &&
+            !gameState.unlockedResearch.includes(research.id) && 
+            isResearchAvailable(research.id)) { 
+            
+            const unlocksTrulyNewProperties = research.unlocksPropertyType.some(propId => {
+                const propType = getPropertyTypeById(propId);
+                return propType && !isPropertyTypeUnlocked(propType.id); 
+            });
 
-                let costStrings = [];
-                // Costs for the RESEARCH to unlock this property
-                if (requiredResearch.hasOwnProperty('cost') && typeof requiredResearch.cost === 'number' && requiredResearch.cost > 0) {
-                    costStrings.push(`$${formatNumber(requiredResearch.cost, 0)}`);
-                }
-                if (requiredResearch.hasOwnProperty('materialsCost') && typeof requiredResearch.materialsCost === 'number' && requiredResearch.materialsCost > 0) {
-                    costStrings.push(`${formatNumber(requiredResearch.materialsCost, 0)} Materials`);
-                }
-                if (requiredResearch.hasOwnProperty('costRP') && typeof requiredResearch.costRP === 'number' && requiredResearch.costRP > 0) {
-                    costStrings.push(`${formatNumber(requiredResearch.costRP, 1)} RP`);
-                }
-                let researchCostText = costStrings.length > 0 ? costStrings.join(' + ') : "Free";
-                
-                // Specific check for the 300 RP cost for "urban_planning_1"
-                if (requiredResearch.id === "urban_planning_1" && requiredResearch.costRP === 300) {
-                    researchCostText = `${formatNumber(300,0)} RP`;
-                }
-
-                nextUnlockablePropertyCard.innerHTML = `
-                    <h3>Unlock: ${propType.name}</h3>
-                    <p>Requires Research: "${requiredResearch.name}"</p>
-                    <p class="research-cost-display">Research Cost: ${researchCostText}</p>
-                    <button onclick="completeResearchAndRefreshUI('${requiredResearch.id}')" 
-                            id="unlock-property-${propType.id}-via-research-${requiredResearch.id}-btn">
-                        Unlock (${researchCostText})
-                    </button>
-                `;
-                targetElement.appendChild(nextUnlockablePropertyCard);
-                displayedBuyableCount++; // The unlock card counts as a displayed item
-                break; // Show only the very next unlockable property card
+            if (unlocksTrulyNewProperties) {
+                nextPropertyUnlockResearch = research;
+                break; 
             }
         }
     }
 
-    if (displayedBuyableCount === 0) {
-        // This implies not even the Shack is defined or something is wrong with initial unlocks
-        targetElement.innerHTML = "<p>No rentals available. Game setup error or all research completed.</p>";
-    } else if (displayedBuyableCount > 0 && !nextUnlockablePropertyCard) {
-        // All properties that have defined research paths are unlocked, or no further research unlocks properties.
-        const allDefinedPropsUnlocked = PROPERTY_TYPES.every(pt => isPropertyTypeUnlocked(pt.id));
-        if (allDefinedPropsUnlocked) {
-             targetElement.innerHTML += "<p style='text-align:center; margin-top:1rem; width:100%; grid-column: 1 / -1;'>All defined rentals unlocked!</p>";
+    // THIS IS WHERE THE "UNLOCK NEW RENTAL" CARD IS GENERATED
+    if (nextPropertyUnlockResearch) {
+        displayedItemCount++; 
+        const unlockCard = document.createElement('div');
+        unlockCard.className = 'unlock-rental-card'; // Ensure this class is styled in style.css
+
+        let costStrings = [];
+        if (nextPropertyUnlockResearch.hasOwnProperty('cost') && typeof nextPropertyUnlockResearch.cost === 'number' && nextPropertyUnlockResearch.cost > 0) {
+            costStrings.push(`$${formatNumber(nextPropertyUnlockResearch.cost, 0)}`);
+        }
+        if (nextPropertyUnlockResearch.hasOwnProperty('materialsCost') && typeof nextPropertyUnlockResearch.materialsCost === 'number' && nextPropertyUnlockResearch.materialsCost > 0) {
+            costStrings.push(`${formatNumber(nextPropertyUnlockResearch.materialsCost, 0)} Materials`);
+        }
+        if (nextPropertyUnlockResearch.hasOwnProperty('costRP') && typeof nextPropertyUnlockResearch.costRP === 'number' && nextPropertyUnlockResearch.costRP > 0) {
+            costStrings.push(`${formatNumber(nextPropertyUnlockResearch.costRP, 1)} RP`);
+        }
+        let costText = costStrings.length > 0 ? costStrings.join(' + ') : "Free";
+        
+        // Specific check for the 300 RP cost for "urban_planning_1"
+        if (nextPropertyUnlockResearch.id === "urban_planning_1" && nextPropertyUnlockResearch.costRP === 300) {
+            // Ensure costText accurately reflects the 300 RP for this specific research.
+            // If urban_planning_1 might have other costs too, adjust this logic.
+            let specificCostStrings = [];
+            if (nextPropertyUnlockResearch.costRP === 300) specificCostStrings.push(`${formatNumber(300,0)} RP`);
+            // Add other costs if "urban_planning_1" has them (e.g., money, materials)
+            if (nextPropertyUnlockResearch.cost > 0) specificCostStrings.push(`$${formatNumber(nextPropertyUnlockResearch.cost, 0)}`);
+            if (nextPropertyUnlockResearch.materialsCost > 0) specificCostStrings.push(`${formatNumber(nextPropertyUnlockResearch.materialsCost, 0)} Materials`);
+            costText = specificCostStrings.join(' + ');
+        }
+
+        const unlocksNames = nextPropertyUnlockResearch.unlocksPropertyType
+            .map(id => getPropertyTypeById(id)?.name)
+            .filter(name => name) 
+            .join(', ');
+
+        unlockCard.innerHTML = `
+            <h3>Unlock New Rentals</h3>
+            <p>Via Research: "${nextPropertyUnlockResearch.name}"</p>
+            <p>Unlocks: ${unlocksNames || 'Next Tier Properties'}</p>
+            <p class="research-cost-display">Research Cost: ${costText}</p>
+            <button onclick="completeResearchAndRefreshUI('${nextPropertyUnlockResearch.id}')" 
+                    id="unlock-property-via-research-${nextPropertyUnlockResearch.id}-btn">
+                Unlock (${costText})
+            </button>
+        `;
+        targetElement.appendChild(unlockCard);
+    }
+
+    if (displayedItemCount === 0) {
+        if (PROPERTY_TYPES.every(p => (p.requiredResearch && gameState.unlockedResearch.includes(p.requiredResearch)) || !p.requiredResearch) && 
+            !nextPropertyUnlockResearch) { 
+            targetElement.innerHTML = "<p>All available rentals unlocked!</p>";
+        } else {
+            targetElement.innerHTML = "<p>No rentals or unlocks currently available. Check research.</p>";
         }
     }
 }
