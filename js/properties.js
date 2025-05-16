@@ -1,6 +1,5 @@
 // Metropolis Estates - properties.js
 
-// --- Property Definitions ---
 const PROPERTY_TYPES = [
     {
         id: "shack",
@@ -10,8 +9,8 @@ const PROPERTY_TYPES = [
         mainLevelMax: 3,
         description: "It's a roof, mostly. Generates minimal rent.",
         category: "cheap",
-        materialsCost: 0, // Shack costs no materials
-        requiredResearch: null, // Available from start
+        materialsCost: 0,
+        requiredResearch: null,
         upgrades: [
             { id: "patch_roof", name: "Patch Roof", cost: 20, rpsBoost: 0.2, maxTier: 1, requiresMaterials: 5, requiresResearch: null },
             { id: "board_windows", name: "Board Windows", cost: 30, rpsBoost: 0.3, maxTier: 1, requiresMaterials: 8, requiresResearch: null },
@@ -27,7 +26,7 @@ const PROPERTY_TYPES = [
         description: "A basic living unit. A steady, small earner.",
         category: "cheap",
         materialsCost: 20,
-        requiredResearch: "urban_planning_1", // Example: Locked by initial urban planning research
+        requiredResearch: "urban_planning_1",
         upgrades: [
             { id: "paint_job", name: "Fresh Paint", cost: 100, rpsBoost: 0.5, maxTier: 1, requiresMaterials: 10 },
             { id: "better_fixtures", name: "Better Fixtures", cost: 150, rpsBoost: 1, maxTier: 2, requiresMaterials: 20 },
@@ -58,7 +57,7 @@ const PROPERTY_TYPES = [
         description: "The classic family home. Reliable returns.",
         category: "residential",
         materialsCost: 75,
-        requiredResearch: "urban_planning_2", // Locked further
+        requiredResearch: "urban_planning_2",
         upgrades: [
             { id: "landscaping", name: "Landscaping", cost: 500, rpsBoost: 3, maxTier: 2, requiresMaterials: 50 },
             { id: "kitchen_reno", name: "Kitchen Reno", cost: 1000, rpsBoost: 5, maxTier: 1, requiresMaterials: 80, requiresResearch: "basic_construction_techniques" },
@@ -89,12 +88,10 @@ function getPropertyTypeById(id) {
     return PROPERTY_TYPES.find(prop => prop.id === id);
 }
 
-// Cost of properties is now flat (monetary wise)
 function calculateDynamicPropertyCost(propertyType) {
     let currentCost = propertyType.baseCost;
-    // Apply global property cost reduction from research
     if (gameState.unlockedResearch.includes("basic_construction_techniques")) {
-        const buffResearch = getResearchTopicById("basic_construction_techniques"); // from facilities.js
+        const buffResearch = getResearchTopicById("basic_construction_techniques");
         if (buffResearch && buffResearch.globalBuff && buffResearch.globalBuff.type === "property_cost_reduction") {
             currentCost *= (1 - buffResearch.globalBuff.percentage);
         }
@@ -105,66 +102,56 @@ function calculateDynamicPropertyCost(propertyType) {
 function isPropertyTypeUnlocked(propertyTypeId) {
     const propType = getPropertyTypeById(propertyTypeId);
     if (!propType) return false;
-    if (!propType.requiredResearch) return true; // No research needed, always unlocked
-
-    // Check if this property type is directly unlocked by any completed research topic
+    if (!propType.requiredResearch) return true;
     for (const researchId of gameState.unlockedResearch) {
-        const researchTopic = getResearchTopicById(researchId); // from facilities.js
+        const researchTopic = getResearchTopicById(researchId);
         if (researchTopic && researchTopic.unlocksPropertyType && researchTopic.unlocksPropertyType.includes(propertyTypeId)) {
             return true;
         }
     }
-    // Fallback: Check direct requiredResearch field (though unlocksPropertyType in research is preferred)
     return gameState.unlockedResearch.includes(propType.requiredResearch);
 }
-
 
 function buyProperty(propertyTypeId) {
     const propertyType = getPropertyTypeById(propertyTypeId);
     if (!propertyType) {
-        logMessage("Error: Property type not found.", "error");
-        return false;
+        console.error("Buy Property Error: Property type not found - ", propertyTypeId); return false;
     }
-
     if (!isPropertyTypeUnlocked(propertyTypeId)) {
         const requiredResearchId = propertyType.requiredResearch;
         const researchTopic = getResearchTopicById(requiredResearchId);
-        logMessage(`Cannot buy ${propertyType.name}: Requires research "${researchTopic ? researchTopic.name : requiredResearchId}".`, "error");
+        // Use console.log for game messages now that logMessage is removed from ui.js
+        console.log(`[GAME] Cannot buy ${propertyType.name}: Requires research "${researchTopic ? researchTopic.name : requiredResearchId}".`);
         return false;
     }
-
-    const currentMonetaryCost = calculateDynamicPropertyCost(propertyType); // Monetary cost
+    const currentMonetaryCost = calculateDynamicPropertyCost(propertyType);
     const materialsNeeded = propertyType.materialsCost || 0;
-
     if (gameState.cash < currentMonetaryCost) {
-        logMessage(`Not enough cash to buy ${propertyType.name}. Need $${currentMonetaryCost.toLocaleString()}.`, "error");
+        console.log(`[GAME] Not enough cash to buy ${propertyType.name}. Need $${currentMonetaryCost.toLocaleString()}.`);
         return false;
     }
     if (materialsNeeded > 0 && gameState.buildingMaterials < materialsNeeded) {
-        logMessage(`Not enough materials to buy ${propertyType.name}. Need ${materialsNeeded} materials (You have ${Math.floor(gameState.buildingMaterials)}).`, "error");
+        console.log(`[GAME] Not enough materials to buy ${propertyType.name}. Need ${materialsNeeded} materials (You have ${Math.floor(gameState.buildingMaterials)}).`);
         return false;
     }
-
     gameState.cash -= currentMonetaryCost;
     if (materialsNeeded > 0) {
         gameState.buildingMaterials -= materialsNeeded;
     }
-
     const newProperty = {
         uniqueId: nextPropertyId++,
         typeId: propertyType.id,
         name: propertyType.name,
         mainLevel: 1,
-        purchaseCost: currentMonetaryCost, // Store the monetary cost it was bought at
+        purchaseCost: currentMonetaryCost,
         appliedUpgrades: {},
         baseRPS: propertyType.baseRPS,
         currentRPS: 0
     };
     newProperty.currentRPS = calculateInstanceRPS(newProperty, propertyType);
     ownedProperties.push(newProperty);
-
     updateGameData();
-    logMessage(`Purchased ${propertyType.name} for $${currentMonetaryCost.toLocaleString()}` + (materialsNeeded > 0 ? ` and ${materialsNeeded} materials.` : '.'), "success");
+    console.log(`[GAME] Purchased ${propertyType.name} for $${currentMonetaryCost.toLocaleString()}` + (materialsNeeded > 0 ? ` and ${materialsNeeded} materials.` : '.'));
     return true;
 }
 
@@ -186,56 +173,43 @@ function calculateInstanceRPS(propertyInstance, propertyType) {
 function upgradePropertyMainLevel(ownedPropertyUniqueId) {
     const propertyInstance = ownedProperties.find(p => p.uniqueId === ownedPropertyUniqueId);
     if (!propertyInstance) return;
-
     const propertyType = getPropertyTypeById(propertyInstance.typeId);
     if (!propertyType) return;
-
     if (propertyInstance.mainLevel < propertyType.mainLevelMax) {
-        const upgradeCost = Math.floor(propertyInstance.purchaseCost * 0.3 * Math.pow(1.8, propertyInstance.mainLevel -1)); // Monetary cost
-
+        const upgradeCost = Math.floor(propertyInstance.purchaseCost * 0.3 * Math.pow(1.8, propertyInstance.mainLevel -1));
         if (gameState.cash >= upgradeCost) {
             gameState.cash -= upgradeCost;
             propertyInstance.mainLevel++;
             propertyInstance.currentRPS = calculateInstanceRPS(propertyInstance, propertyType);
-            updateGameData();
-            logMessage(`${propertyInstance.name} (ID: ${propertyInstance.uniqueId}) main level upgraded to ${propertyInstance.mainLevel}. Cost: $${upgradeCost.toLocaleString()}.`, "success");
+            updateGameData(); // This will refresh the portfolio view, including the open upgrade detail
+            console.log(`[GAME] ${propertyInstance.name} (ID: ${propertyInstance.uniqueId}) main level upgraded to ${propertyInstance.mainLevel}. Cost: $${upgradeCost.toLocaleString()}.`);
         } else {
-            logMessage(`Not enough cash for main level upgrade of ${propertyInstance.name}. Need $${upgradeCost.toLocaleString()}.`, "error");
+            console.log(`[GAME] Not enough cash for main level upgrade of ${propertyInstance.name}. Need $${upgradeCost.toLocaleString()}.`);
         }
     } else {
-        logMessage(`${propertyInstance.name} is already at max main level.`, "info");
+        console.log(`[GAME] ${propertyInstance.name} is already at max main level.`);
     }
 }
-
 
 function applySpecificPropertyUpgrade(ownedPropertyUniqueId, specificUpgradeId) {
     const propertyInstance = ownedProperties.find(p => p.uniqueId === ownedPropertyUniqueId);
     if (!propertyInstance) return;
-
     const propertyType = getPropertyTypeById(propertyInstance.typeId);
     if (!propertyType) return;
-
     const upgradeDef = propertyType.upgrades.find(u => u.id === specificUpgradeId);
     if (!upgradeDef) {
-        logMessage(`Upgrade definition ${specificUpgradeId} not found for ${propertyType.name}.`, "error");
-        return;
+        console.error(`[GAME] Upgrade definition ${specificUpgradeId} not found for ${propertyType.name}.`); return;
     }
-
     const currentTier = propertyInstance.appliedUpgrades[specificUpgradeId] || 0;
     if (currentTier >= upgradeDef.maxTier) {
-        logMessage(`${upgradeDef.name} is already at max tier for ${propertyInstance.name}.`, "info");
-        return;
+        console.log(`[GAME] ${upgradeDef.name} is already at max tier for ${propertyInstance.name}.`); return;
     }
-
     if (upgradeDef.requiresResearch && !gameState.unlockedResearch.includes(upgradeDef.requiresResearch)) {
         const researchDef = getResearchTopicById(upgradeDef.requiresResearch);
-        logMessage(`Cannot apply ${upgradeDef.name}: Requires research "${researchDef ? researchDef.name : upgradeDef.requiresResearch}".`, "error");
-        return;
+        console.log(`[GAME] Cannot apply ${upgradeDef.name}: Requires research "${researchDef ? researchDef.name : upgradeDef.requiresResearch}".`); return;
     }
-
-    const costForNextTier = Math.floor(upgradeDef.cost * Math.pow(1.5, currentTier)); // Monetary cost
+    const costForNextTier = Math.floor(upgradeDef.cost * Math.pow(1.5, currentTier));
     const materialsNeededBase = upgradeDef.requiresMaterials ? Math.floor(upgradeDef.requiresMaterials * Math.pow(1.2, currentTier)) : 0;
-
     let materialUsageEfficiency = 1;
     if (gameState.unlockedResearch.includes("advanced_material_processing")) {
         const buffResearch = getResearchTopicById("advanced_material_processing");
@@ -244,31 +218,23 @@ function applySpecificPropertyUpgrade(ownedPropertyUniqueId, specificUpgradeId) 
         }
     }
     const actualMaterialsNeeded = Math.floor(materialsNeededBase * materialUsageEfficiency);
-
     if (gameState.cash < costForNextTier) {
-        logMessage(`Not enough cash for ${upgradeDef.name}. Need $${costForNextTier.toLocaleString()}.`, "error");
-        return;
+        console.log(`[GAME] Not enough cash for ${upgradeDef.name}. Need $${costForNextTier.toLocaleString()}.`); return;
     }
     if (actualMaterialsNeeded > 0 && gameState.buildingMaterials < actualMaterialsNeeded) {
-        logMessage(`Not enough materials for ${upgradeDef.name}. Need ${actualMaterialsNeeded} (You have ${Math.floor(gameState.buildingMaterials)}). Efficiency bonus applied if researched.`, "error");
-        return;
+        console.log(`[GAME] Not enough materials for ${upgradeDef.name}. Need ${actualMaterialsNeeded} (You have ${Math.floor(gameState.buildingMaterials)}).`); return;
     }
-
     gameState.cash -= costForNextTier;
     if (actualMaterialsNeeded > 0) gameState.buildingMaterials -= actualMaterialsNeeded;
-
     propertyInstance.appliedUpgrades[specificUpgradeId] = currentTier + 1;
     propertyInstance.currentRPS = calculateInstanceRPS(propertyInstance, propertyType);
-
-    updateGameData();
-    logMessage(`${upgradeDef.name} (Tier ${currentTier + 1}) applied to ${propertyInstance.name}. Cost: $${costForNextTier.toLocaleString()}` + (actualMaterialsNeeded > 0 ? `, ${actualMaterialsNeeded} materials.` : '.'), "success");
+    updateGameData(); // This will refresh the portfolio view
+    console.log(`[GAME] ${upgradeDef.name} (Tier ${currentTier + 1}) applied to ${propertyInstance.name}. Cost: $${costForNextTier.toLocaleString()}` + (actualMaterialsNeeded > 0 ? `, ${actualMaterialsNeeded} materials.` : '.'));
 }
 
 function calculateTotalPropertiesRPS() {
     let totalRPS = 0;
     let cheapPropertyBuffPercentage = 0;
-
-    // Calculate combined workshop buff percentage
     ownedFacilities.forEach(facInst => {
         const facType = getFacilityTypeById(facInst.typeId);
         if (facType && facType.id === "basic_workshop" && facType.effects) {
@@ -283,11 +249,9 @@ function calculateTotalPropertiesRPS() {
             }
         }
     });
-
     ownedProperties.forEach(propInst => {
         let effectiveRPS = propInst.currentRPS;
         const propTypeDetails = getPropertyTypeById(propInst.typeId);
-
         if (propTypeDetails) {
             if (gameState.unlockedResearch.includes("commercial_logistics") && propTypeDetails.category === "commercial") {
                 const buffResearch = getResearchTopicById("commercial_logistics");
@@ -307,7 +271,6 @@ function calculateTotalPropertiesRPS() {
 function sellPropertyInstance(ownedPropertyUniqueId) {
     const propertyIndex = ownedProperties.findIndex(p => p.uniqueId === ownedPropertyUniqueId);
     if (propertyIndex === -1) return;
-
     const propertyInstance = ownedProperties[propertyIndex];
     let upgradeValue = 0;
     const propertyType = getPropertyTypeById(propertyInstance.typeId);
@@ -326,16 +289,13 @@ function sellPropertyInstance(ownedPropertyUniqueId) {
     for(let i = 0; i < propertyInstance.mainLevel -1; i++){
         mainLevelUpgradeValue += Math.floor(propertyInstance.purchaseCost * 0.3 * Math.pow(1.8, i)) * 0.25;
     }
-
     const sellPrice = Math.floor(propertyInstance.purchaseCost * 0.5 + upgradeValue + mainLevelUpgradeValue);
-    const materialsReturned = Math.floor((propertyType.materialsCost || 0) * 0.25); // Return 25% of base material cost
-
+    const materialsReturned = Math.floor((propertyType.materialsCost || 0) * 0.25);
     gameState.cash += sellPrice;
     if (materialsReturned > 0) {
         gameState.buildingMaterials += materialsReturned;
     }
     ownedProperties.splice(propertyIndex, 1);
-
     updateGameData();
-    logMessage(`Sold ${propertyInstance.name} for $${sellPrice.toLocaleString()}` + (materialsReturned > 0 ? ` and recovered ${materialsReturned} materials.` : '.'), "info");
+    console.log(`[GAME] Sold ${propertyInstance.name} for $${sellPrice.toLocaleString()}` + (materialsReturned > 0 ? ` and recovered ${materialsReturned} materials.` : '.'));
 }
