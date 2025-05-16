@@ -168,9 +168,11 @@ header h1 {
 
 
 .scrollable-list {
-    max-height: calc(100vh - 250px); /* Dynamic height calculation, adjust 250px based on header/nav/footer */
+    /* max-height: 65vh; */ /* Comment out or remove the old vh value */
+    max-height: 350px;   /* ADJUST THIS VALUE AS NEEDED */
     overflow-y: auto;
-    padding: 5px; /* Padding inside scroll area */
+    padding-right: 10px;
+    padding-bottom: 20px;
 }
 
 /* Custom Scrollbar (Webkit browsers) */
