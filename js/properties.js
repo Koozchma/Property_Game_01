@@ -2,96 +2,57 @@
 
 const PROPERTY_TYPES = [
     {
-        id: "shack",
-        name: "Dilapidated Shack",
-        baseCost: 50,
-        baseRPS: 0.5,
-        mainLevelMax: 3,
-        description: "It's a roof, mostly. Generates minimal rent.",
-        category: "cheap",
+        id: "shack", name: "Dilapidated Shack", baseCost: 50, baseRPS: 0.5, mainLevelMax: 3,
+        description: "It's a roof, mostly. Generates minimal rent.", category: "cheap",
         materialsCost: 0,
-        requiredResearch: null,
+        requiredResearch: "initiate_rental_development", // Now unlocked by initial cash research
         upgrades: [
-            { id: "patch_roof", name: "Patch Roof", cost: 20, rpsBoost: 0.2, maxTier: 1, requiresMaterials: 5, requiresResearch: null },
-            { id: "board_windows", name: "Board Windows", cost: 30, rpsBoost: 0.3, maxTier: 1, requiresMaterials: 8, requiresResearch: null },
-            { id: "basic_plumbing", name: "Basic Plumbing", cost: 75, rpsBoost: 0.5, maxTier: 1, requiresMaterials: 15, requiresResearch: "basic_construction_techniques" }
+            { id: "patch_roof", name: "Patch Roof", cost: 20, rpsBoost: 0.2, maxTier: 1, requiresMaterials: 5 },
+            { id: "board_windows", name: "Board Windows", cost: 30, rpsBoost: 0.3, maxTier: 1, requiresMaterials: 8 },
+            { id: "basic_plumbing", name: "Basic Plumbing", cost: 75, rpsBoost: 0.5, maxTier: 1, requiresMaterials: 15, requiredResearch: "unlock_basic_workshop_research" } // Example of upgrade needing research
         ]
     },
     {
-        id: "small_apartment",
-        name: "Small Apartment Unit",
-        baseCost: 250,
-        baseRPS: 3,
-        mainLevelMax: 5,
-        description: "A basic living unit. A steady, small earner.",
-        category: "cheap",
-        materialsCost: 20,
-        requiredResearch: "urban_planning_1",
-        upgrades: [
-            { id: "paint_job", name: "Fresh Paint", cost: 100, rpsBoost: 0.5, maxTier: 1, requiresMaterials: 10 },
-            { id: "better_fixtures", name: "Better Fixtures", cost: 150, rpsBoost: 1, maxTier: 2, requiresMaterials: 20 },
-            { id: "security_door", name: "Security Door", cost: 200, rpsBoost: 0.75, maxTier: 1, requiresMaterials: 15 }
-        ]
+        id: "small_apartment", name: "Small Apartment Unit", baseCost: 250, baseRPS: 3, mainLevelMax: 5,
+        description: "A basic living unit. A steady, small earner.", category: "cheap",
+        materialsCost: 20, // Subsequent rentals cost materials to build
+        requiredResearch: "unlock_urban_planning_1", // Unlocked by the 300 RP research
+        upgrades: [ /* ... */ ]
     },
     {
-        id: "trailer_home",
-        name: "Trailer Home",
-        baseCost: 600,
-        baseRPS: 7,
-        mainLevelMax: 5,
-        description: "Mobile, but not going anywhere. Decent income.",
-        category: "residential",
+        id: "trailer_home", name: "Trailer Home", baseCost: 600, baseRPS: 7, mainLevelMax: 5,
+        description: "Mobile, but not going anywhere. Decent income.", category: "residential",
         materialsCost: 35,
-        requiredResearch: "urban_planning_1",
-        upgrades: [
-            { id: "skirting", name: "Add Skirting", cost: 250, rpsBoost: 1.5, maxTier: 1, requiresMaterials: 30 },
-            { id: "insulation", name: "Insulation", cost: 400, rpsBoost: 2.5, maxTier: 2, requiresMaterials: 40 },
-        ]
+        requiredResearch: "unlock_urban_planning_1", // Also unlocked by the 300 RP research
+        upgrades: [ /* ... */ ]
     },
     {
-        id: "suburban_house",
-        name: "Suburban House",
-        baseCost: 1500,
-        baseRPS: 15,
-        mainLevelMax: 7,
-        description: "The classic family home. Reliable returns.",
-        category: "residential",
+        id: "suburban_house", name: "Suburban House", baseCost: 1500, baseRPS: 15, mainLevelMax: 7,
+        description: "The classic family home. Reliable returns.", category: "residential",
         materialsCost: 75,
-        requiredResearch: "urban_planning_2",
-        upgrades: [
-            { id: "landscaping", name: "Landscaping", cost: 500, rpsBoost: 3, maxTier: 2, requiresMaterials: 50 },
-            { id: "kitchen_reno", name: "Kitchen Reno", cost: 1000, rpsBoost: 5, maxTier: 1, requiresMaterials: 80, requiresResearch: "basic_construction_techniques" },
-            { id: "add_garage", name: "Add Garage", cost: 1200, rpsBoost: 4, maxTier: 1, requiresMaterials: 100 }
-        ]
+        requiredResearch: "unlock_suburban_homes_research", // Unlocked by its specific research
+        upgrades: [ /* ... */ ]
     },
     {
-        id: "corner_store",
-        name: "Small Corner Store",
-        baseCost: 3500,
-        baseRPS: 30,
-        mainLevelMax: 6,
-        description: "Sells essentials to the neighborhood. Good cash flow.",
-        category: "commercial",
+        id: "corner_store", name: "Small Corner Store", baseCost: 3500, baseRPS: 30, mainLevelMax: 6,
+        description: "Sells essentials to the neighborhood. Good cash flow.", category: "commercial",
         materialsCost: 120,
-        requiredResearch: "commercial_development_1",
-        upgrades: [
-            { id: "shelf_stocking", name: "Better Shelves", cost: 800, rpsBoost: 5, maxTier: 3, requiresMaterials: 60 },
-            { id: "refrigeration", name: "New Coolers", cost: 1500, rpsBoost: 8, maxTier: 2, requiresMaterials: 90, requiresResearch: "commercial_logistics" },
-        ]
+        requiredResearch: "unlock_commercial_rentals_research", // Unlocked by its specific research
+        upgrades: [ /* ... */ ]
     }
+    // Define more properties like "luxury_condo" and their requiredResearch from the new tree
 ];
 
 let ownedProperties = [];
 let nextPropertyId = 0;
 
-function getPropertyTypeById(id) {
-    return PROPERTY_TYPES.find(prop => prop.id === id);
-}
+function getPropertyTypeById(id) { return PROPERTY_TYPES.find(prop => prop.id === id); }
 
-function calculateDynamicPropertyCost(propertyType) {
+function calculateDynamicPropertyCost(propertyType) { // Monetary cost is flat
     let currentCost = propertyType.baseCost;
-    if (gameState.unlockedResearch.includes("basic_construction_techniques")) {
-        const buffResearch = getResearchTopicById("basic_construction_techniques");
+    // Apply global property cost reduction from research
+    if (gameState.unlockedResearch.includes("unlock_basic_workshop_research")) { // Assuming this research gives the buff
+        const buffResearch = getResearchTopicById("unlock_basic_workshop_research"); // from facilities.js
         if (buffResearch && buffResearch.globalBuff && buffResearch.globalBuff.type === "property_cost_reduction") {
             currentCost *= (1 - buffResearch.globalBuff.percentage);
         }
@@ -102,51 +63,31 @@ function calculateDynamicPropertyCost(propertyType) {
 function isPropertyTypeUnlocked(propertyTypeId) {
     const propType = getPropertyTypeById(propertyTypeId);
     if (!propType) return false;
-    if (!propType.requiredResearch) return true;
-    for (const researchId of gameState.unlockedResearch) {
-        const researchTopic = getResearchTopicById(researchId);
-        if (researchTopic && researchTopic.unlocksPropertyType && researchTopic.unlocksPropertyType.includes(propertyTypeId)) {
-            return true;
-        }
-    }
+    if (!propType.requiredResearch) return true; // Should not happen if all have a research path
     return gameState.unlockedResearch.includes(propType.requiredResearch);
 }
 
 function buyProperty(propertyTypeId) {
     const propertyType = getPropertyTypeById(propertyTypeId);
-    if (!propertyType) {
-        console.error("Buy Property Error: Property type not found - ", propertyTypeId); return false;
-    }
+    if (!propertyType) { console.error("Buy Property Error: Type not found - ", propertyTypeId); return false; }
     if (!isPropertyTypeUnlocked(propertyTypeId)) {
-        const requiredResearchId = propertyType.requiredResearch;
-        const researchTopic = getResearchTopicById(requiredResearchId);
-        // Use console.log for game messages now that logMessage is removed from ui.js
-        console.log(`[GAME] Cannot buy ${propertyType.name}: Requires research "${researchTopic ? researchTopic.name : requiredResearchId}".`);
+        const requiredResearch = getResearchTopicById(propertyType.requiredResearch);
+        console.log(`[GAME] Cannot buy ${propertyType.name}: Requires research "${requiredResearch ? requiredResearch.name : propertyType.requiredResearch}".`);
         return false;
     }
     const currentMonetaryCost = calculateDynamicPropertyCost(propertyType);
     const materialsNeeded = propertyType.materialsCost || 0;
     if (gameState.cash < currentMonetaryCost) {
-        console.log(`[GAME] Not enough cash to buy ${propertyType.name}. Need $${currentMonetaryCost.toLocaleString()}.`);
-        return false;
+        console.log(`[GAME] Not enough cash for ${propertyType.name}. Need $${currentMonetaryCost.toLocaleString()}.`); return false;
     }
     if (materialsNeeded > 0 && gameState.buildingMaterials < materialsNeeded) {
-        console.log(`[GAME] Not enough materials to buy ${propertyType.name}. Need ${materialsNeeded} materials (You have ${Math.floor(gameState.buildingMaterials)}).`);
-        return false;
+        console.log(`[GAME] Not enough materials for ${propertyType.name}. Need ${materialsNeeded} (Have ${Math.floor(gameState.buildingMaterials)}).`); return false;
     }
     gameState.cash -= currentMonetaryCost;
-    if (materialsNeeded > 0) {
-        gameState.buildingMaterials -= materialsNeeded;
-    }
+    if (materialsNeeded > 0) gameState.buildingMaterials -= materialsNeeded;
     const newProperty = {
-        uniqueId: nextPropertyId++,
-        typeId: propertyType.id,
-        name: propertyType.name,
-        mainLevel: 1,
-        purchaseCost: currentMonetaryCost,
-        appliedUpgrades: {},
-        baseRPS: propertyType.baseRPS,
-        currentRPS: 0
+        uniqueId: nextPropertyId++, typeId: propertyType.id, name: propertyType.name, mainLevel: 1,
+        purchaseCost: currentMonetaryCost, appliedUpgrades: {}, baseRPS: propertyType.baseRPS, currentRPS: 0
     };
     newProperty.currentRPS = calculateInstanceRPS(newProperty, propertyType);
     ownedProperties.push(newProperty);
@@ -159,15 +100,49 @@ function calculateInstanceRPS(propertyInstance, propertyType) {
     let rpsFromUpgrades = 0;
     if (propertyType.upgrades) {
         for (const upgradeId in propertyInstance.appliedUpgrades) {
-            const upgradeTier = propertyInstance.appliedUpgrades[upgradeId];
+            const tier = propertyInstance.appliedUpgrades[upgradeId];
             const upgradeDef = propertyType.upgrades.find(u => u.id === upgradeId);
-            if (upgradeDef && typeof upgradeDef.rpsBoost === 'number') {
-                rpsFromUpgrades += (upgradeDef.rpsBoost * upgradeTier);
-            }
+            if (upgradeDef && typeof upgradeDef.rpsBoost === 'number') rpsFromUpgrades += (upgradeDef.rpsBoost * tier);
         }
     }
     const mainLevelMultiplier = 1 + (propertyInstance.mainLevel - 1) * 0.1;
     return parseFloat(((propertyInstance.baseRPS + rpsFromUpgrades) * mainLevelMultiplier).toFixed(2));
+}
+
+function calculateTotalPropertiesRPS() {
+    let totalRPS = 0;
+    let cheapPropertyBuffPercentage = 0;
+    let commercialPropertyBuffPercentage = 0;
+
+    // Check for global buffs from completed research
+    if (gameState.unlockedResearch.includes("unlock_basic_workshop_research")) { // Assuming this research provides the cheap buff
+        const researchTopic = getResearchTopicById("unlock_basic_workshop_research");
+        if (researchTopic && researchTopic.globalBuff && researchTopic.globalBuff.type === "property_rps_boost" && researchTopic.globalBuff.propertyCategory === "cheap") {
+            cheapPropertyBuffPercentage += researchTopic.globalBuff.percentage;
+        }
+    }
+    if (gameState.unlockedResearch.includes("commercial_logistics")) { // This ID might need to match your new research tree
+        const researchTopic = getResearchTopicById("commercial_logistics");
+        if (researchTopic && researchTopic.globalBuff && researchTopic.globalBuff.type === "property_rps_boost" && researchTopic.globalBuff.scope === "commercial") {
+            commercialPropertyBuffPercentage += researchTopic.globalBuff.percentage;
+        }
+    }
+    // Add more buff checks as needed
+
+    ownedProperties.forEach(propInst => {
+        let effectiveRPS = propInst.currentRPS;
+        const propTypeDetails = getPropertyTypeById(propInst.typeId);
+        if (propTypeDetails) {
+            if (cheapPropertyBuffPercentage > 0 && propTypeDetails.category === "cheap") {
+                 effectiveRPS *= (1 + cheapPropertyBuffPercentage);
+            }
+            if (commercialPropertyBuffPercentage > 0 && propTypeDetails.category === "commercial") {
+                 effectiveRPS *= (1 + commercialPropertyBuffPercentage);
+            }
+        }
+        totalRPS += effectiveRPS;
+    });
+    return parseFloat(totalRPS.toFixed(2));
 }
 
 function upgradePropertyMainLevel(ownedPropertyUniqueId) {
@@ -230,42 +205,6 @@ function applySpecificPropertyUpgrade(ownedPropertyUniqueId, specificUpgradeId) 
     propertyInstance.currentRPS = calculateInstanceRPS(propertyInstance, propertyType);
     updateGameData(); // This will refresh the portfolio view
     console.log(`[GAME] ${upgradeDef.name} (Tier ${currentTier + 1}) applied to ${propertyInstance.name}. Cost: $${costForNextTier.toLocaleString()}` + (actualMaterialsNeeded > 0 ? `, ${actualMaterialsNeeded} materials.` : '.'));
-}
-
-function calculateTotalPropertiesRPS() {
-    let totalRPS = 0;
-    let cheapPropertyBuffPercentage = 0;
-    ownedFacilities.forEach(facInst => {
-        const facType = getFacilityTypeById(facInst.typeId);
-        if (facType && facType.id === "basic_workshop" && facType.effects) {
-            const effectDef = facType.effects.find(e => e.type === "property_rps_boost" && e.propertyCategory === "cheap");
-            if (effectDef) {
-                let currentEffectPercentage = effectDef.percentage;
-                const upgradeToolDef = facType.upgrades.find(u => u.id === "better_tools");
-                if (upgradeToolDef && facInst.appliedUpgrades && facInst.appliedUpgrades[upgradeToolDef.id] && upgradeToolDef.effect.rpsBoostIncrease) {
-                     currentEffectPercentage += (upgradeToolDef.effect.rpsBoostIncrease * facInst.appliedUpgrades[upgradeToolDef.id]);
-                }
-                cheapPropertyBuffPercentage += currentEffectPercentage;
-            }
-        }
-    });
-    ownedProperties.forEach(propInst => {
-        let effectiveRPS = propInst.currentRPS;
-        const propTypeDetails = getPropertyTypeById(propInst.typeId);
-        if (propTypeDetails) {
-            if (gameState.unlockedResearch.includes("commercial_logistics") && propTypeDetails.category === "commercial") {
-                const buffResearch = getResearchTopicById("commercial_logistics");
-                if (buffResearch && buffResearch.globalBuff && buffResearch.globalBuff.type === "property_rps_boost" && buffResearch.globalBuff.scope === "commercial") {
-                    effectiveRPS *= (1 + buffResearch.globalBuff.percentage);
-                }
-            }
-            if (cheapPropertyBuffPercentage > 0 && propTypeDetails.category === "cheap") {
-                 effectiveRPS *= (1 + cheapPropertyBuffPercentage);
-            }
-        }
-        totalRPS += effectiveRPS;
-    });
-    return parseFloat(totalRPS.toFixed(2));
 }
 
 function sellPropertyInstance(ownedPropertyUniqueId) {
