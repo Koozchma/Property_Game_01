@@ -14,58 +14,47 @@ const GAME_TICK_INTERVAL = 1000;
 let gameLoopIntervalId;
 
 function gameTick() {
-    applyFacilityOutputs(); // from facilities.js
+    applyFacilityOutputs();
 
     let incomeThisTick = gameState.rentPerSecond;
     let expensesThisTick = gameState.facilityUpkeepPerSecond;
     gameState.cash += (incomeThisTick - expensesThisTick);
 
-    // Only update frequently changing stats in gameTick for performance
-    updateCashDisplay(); // from ui.js
-    updateBuildingMaterialsDisplay(); // from ui.js
-    updateResearchPointsDisplay();    // from ui.js
-    // NetRPS and Upkeep also change if underlying properties/facilities are bought/sold/upgraded,
-    // but those actions trigger updateGameData which handles their display.
-    // If buffs cause per-tick changes to RPS/Upkeep not captured by buy/sell, then uncomment:
-    // updateNetRPSDisplay();
-    // updateTotalUpkeepDisplay();
+    if (gameState.cash < -10000 && ownedProperties.length > 0) {
+        // console.warn("[GAME] Warning: Cash is significantly negative!"); // Using console directly
+    }
+
+    updateCashDisplay();
+    updateBuildingMaterialsDisplay();
+    updateResearchPointsDisplay();
 }
 
 function updateGameData() {
-    ensureUIInitialized(); // Make sure UI refs are good, especially if called early
+    ensureUIInitialized(); // From ui.js
 
     gameState.rentPerSecond = calculateTotalPropertiesRPS();
     gameState.facilityUpkeepPerSecond = calculateTotalFacilityUpkeep();
     gameState.netRentPerSecond = parseFloat((gameState.rentPerSecond - gameState.facilityUpkeepPerSecond).toFixed(2));
 
     // Update all static stat displays once
-    updateCashDisplay(); // Redundant if also in gameTick but harmless
+    updateCashDisplay();
     updateNetRPSDisplay();
     updateOwnedPropertiesCountDisplay();
-    updateBuildingMaterialsDisplay(); // Redundant if also in gameTick
-    updateResearchPointsDisplay();    // Redundant if also in gameTick
+    updateBuildingMaterialsDisplay();
+    updateResearchPointsDisplay();
     updateTotalUpkeepDisplay();
 
-    // Display content for the current view
-    // This function will now call the appropriate sub-display functions
-    displayCurrentViewContent(); // from ui.js
-    // Button states are updated by displayCurrentViewContent calling updateAllButtonStatesForCurrentView
+    displayCurrentViewContent(); // ui.js: This populates lists and calls updateAllButtonStatesForCurrentView
 }
 
-// Removed updateUIDisplays as its role is split between gameTick (for rapidly changing values)
-// and updateGameData (for broader refreshes including lists and button states via displayCurrentViewContent)
-
 function initGame() {
-    console.log(`Metropolis Estates Initializing (v0.3.0 - UI Views)... ${new Date().toLocaleTimeString()}`);
-
-    initialRender();    // ui.js: This calls initializeUIElements() and then switchView('rentals')
-                        // switchView('rentals') then calls updateGameData(), which populates the view.
+    console.log(`Metropolis Estates Initializing (v0.3.1)... ${new Date().toLocaleTimeString()}`);
+    initialRender(); // ui.js: This calls initializeUIElements() then switchView('rentals')
+    // updateGameData() is called by switchView, so it doesn't need to be called again here.
 
     if (gameLoopIntervalId) clearInterval(gameLoopIntervalId);
     gameLoopIntervalId = setInterval(gameTick, GAME_TICK_INTERVAL);
-
-    // Log messages removed from here
-    // Initial visibility of resource displays now handled within their update functions in ui.js
+    console.log("[GAME] Game initialized. Expand your empire!");
 }
 
 document.addEventListener('DOMContentLoaded', initGame);
