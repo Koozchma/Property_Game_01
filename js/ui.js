@@ -1,4 +1,4 @@
-// Metropolis Estates - ui.js (v0.4.2)
+// Metropolis Estates - ui.js (v0.4.9 - Sequential Unlocks & Layout)
 
 // Declare variables that will hold DOM elements. They will be assigned in initializeUIElements.
 let cashDisplay, netRpsDisplay, ownedPropertiesCountDisplay,
@@ -18,7 +18,6 @@ let currentView = 'rentals'; // Default view when the game loads
 function initializeUIElements() {
     if (uiInitialized) return; // Prevent re-initialization
 
-    // Get references to header stat display elements
     cashDisplay = document.getElementById('cash-display');
     netRpsDisplay = document.getElementById('rps-display');
     ownedPropertiesCountDisplay = document.getElementById('owned-properties-count');
@@ -26,18 +25,15 @@ function initializeUIElements() {
     researchPointsDisplay = document.getElementById('research-points-display');
     totalUpkeepDisplay = document.getElementById('total-upkeep-display');
 
-    // Get references to the dynamic column content areas
     leftColumnTitleElement = document.getElementById('left-column-title');
     leftColumnListElement = document.getElementById('left-column-list');
     rightColumnTitleElement = document.getElementById('right-column-title');
     rightColumnListElement = document.getElementById('right-column-list');
 
-    // Get references to navigation buttons
     navRentalsButton = document.getElementById('nav-rentals');
     navMaterialsButton = document.getElementById('nav-materials');
     navResearchButton = document.getElementById('nav-research');
 
-    // Check if all critical elements were found
     if (cashDisplay && netRpsDisplay && ownedPropertiesCountDisplay &&
         buildingMaterialsDisplay && researchPointsDisplay && totalUpkeepDisplay &&
         leftColumnTitleElement && leftColumnListElement &&
@@ -47,7 +43,6 @@ function initializeUIElements() {
         uiInitialized = true;
         console.log("UI Elements Initialized successfully.");
 
-        // Attach event listeners to navigation buttons
         navRentalsButton.addEventListener('click', () => switchView('rentals'));
         navMaterialsButton.addEventListener('click', () => switchView('materials'));
         navResearchButton.addEventListener('click', () => switchView('research'));
@@ -117,25 +112,28 @@ function updateOwnedPropertiesCountDisplay() { ensureUIInitialized(); if (ownedP
 function updateBuildingMaterialsDisplay() {
     ensureUIInitialized();
     if (buildingMaterialsDisplay) {
-        buildingMaterialsDisplay.textContent = `Materials: ${formatNumber(gameState.buildingMaterials, 0)}`;
+        const rate = gameState.materialsPerSecond || 0; // Assuming this is calculated in main.js/facilities.js
+        buildingMaterialsDisplay.textContent = `Materials: ${formatNumber(gameState.buildingMaterials, 0)} (+${formatNumber(rate,1)}/s)`;
         const materialsAreRelevant = PROPERTY_TYPES.some(p => p.materialsCost > 0) || FACILITY_TYPES.some(ft => ft.materialsCost > 0) || ownedFacilities.some(f => f.currentOutput?.resource === 'buildingMaterials');
-        buildingMaterialsDisplay.style.display = gameState.buildingMaterials > 0 || materialsAreRelevant ? 'inline-block' : 'none';
+        buildingMaterialsDisplay.style.display = gameState.buildingMaterials > 0 || materialsAreRelevant || rate > 0 ? 'inline-block' : 'none';
     }
 }
 function updateResearchPointsDisplay() {
     ensureUIInitialized();
     if (researchPointsDisplay) {
-        researchPointsDisplay.textContent = `RP: ${formatNumber(gameState.researchPoints, 1)}`;
+        const rate = gameState.researchPointsPerSecond || 0; // Assuming this is calculated
+        researchPointsDisplay.textContent = `RP: ${formatNumber(gameState.researchPoints, 1)} (+${formatNumber(rate,1)}/s)`;
         const researchIsRelevant = RESEARCH_TOPICS.length > 0 || ownedFacilities.some(f => f.currentOutput?.resource === 'researchPoints');
-        researchPointsDisplay.style.display = gameState.researchPoints > 0 || researchIsRelevant ? 'inline-block' : 'none';
+        researchPointsDisplay.style.display = gameState.researchPoints > 0 || researchIsRelevant || rate > 0 ? 'inline-block' : 'none';
     }
 }
 function updateTotalUpkeepDisplay() {
     ensureUIInitialized();
-    if (totalUpkeepDisplay) {
-        totalUpkeepDisplay.textContent = `Upkeep: $${formatNumber(gameState.facilityUpkeepPerSecond)}/s`;
-        totalUpkeepDisplay.style.display = gameState.facilityUpkeepPerSecond > 0 ? 'inline-block' : 'none';
-    }
+    // Upkeep display is removed from HTML in v0.5.0, but function kept for potential re-add.
+    // if (totalUpkeepDisplay) {
+    //     totalUpkeepDisplay.textContent = `Upkeep: $${formatNumber(gameState.facilityUpkeepPerSecond)}/s`;
+    //     totalUpkeepDisplay.style.display = gameState.facilityUpkeepPerSecond > 0 ? 'inline-block' : 'none';
+    // }
 }
 
 // ---- Main Content Display Router ----
@@ -155,14 +153,14 @@ function displayCurrentViewContent() {
         displayOwnedPropertiesList(rightColumnListElement);
     } else if (currentView === 'materials') {
         leftColumnTitleElement.textContent = 'Available Construction';
-        rightColumnTitleElement.textContent = 'My Constructions';
+        rightColumnTitleElement.textContent = 'My Constructions'; // This will show owned material facilities
         displayAvailableFacilitiesList(leftColumnListElement, 'material');
         displayOwnedFacilitiesList(rightColumnListElement, 'material');
     } else if (currentView === 'research') {
         leftColumnTitleElement.textContent = 'Available Research';
-        rightColumnTitleElement.textContent = 'My Science Labs';
+        rightColumnTitleElement.textContent = 'Global Production & Buffs'; // Changed from "My Science Labs"
         displayResearchOptionsList(leftColumnListElement);
-        displayOwnedFacilitiesList(rightColumnListElement, 'science');
+        displayGlobalProductionAndBuffs(rightColumnListElement); // New function for R&D right column
     }
     updateAllButtonStatesForCurrentView();
 }
@@ -171,21 +169,17 @@ function displayCurrentViewContent() {
 
 function displayAvailablePropertiesList(targetElement) {
     ensureUIInitialized();
-    if (!targetElement) {
-        console.error("Target element for available rentals not provided or initialized.");
-        return;
-    }
-    targetElement.innerHTML = ''; // Clear previous content
+    if (!targetElement) return;
+    targetElement.innerHTML = '';
     let displayedItemCount = 0;
 
-    // 1. Display all currently unlocked and buyable properties
     PROPERTY_TYPES.forEach(propType => {
-        if (isPropertyTypeUnlocked(propType.id)) { 
+        if (isPropertyTypeUnlocked(propType.id)) {
             displayedItemCount++;
-            const currentMonetaryCost = calculateDynamicPropertyCost(propType); 
+            const currentMonetaryCost = calculateDynamicPropertyCost(propType);
             const materialsCost = propType.materialsCost || 0;
             const card = document.createElement('div');
-            card.className = 'property-card'; 
+            card.className = 'property-card';
             card.innerHTML = `
                 <h3>${propType.name}</h3>
                 <p>${propType.description}</p>
@@ -198,62 +192,40 @@ function displayAvailablePropertiesList(targetElement) {
         }
     });
 
-    // 2. Find and display the *next* research that unlocks more properties as an "Unlock New Rental" card
     let nextPropertyUnlockResearch = null;
-    for (const research of RESEARCH_TOPICS) { 
+    for (const research of RESEARCH_TOPICS) {
         if (research.unlocksPropertyType && research.unlocksPropertyType.length > 0 &&
             !gameState.unlockedResearch.includes(research.id) && 
-            isResearchAvailable(research.id)) { 
-            
+            isResearchAvailable(research.id)) {
             const unlocksTrulyNewProperties = research.unlocksPropertyType.some(propId => {
                 const propType = getPropertyTypeById(propId);
-                return propType && !isPropertyTypeUnlocked(propType.id); 
+                return propType && !isPropertyTypeUnlocked(propType.id);
             });
-
             if (unlocksTrulyNewProperties) {
                 nextPropertyUnlockResearch = research;
-                break; 
+                break;
             }
         }
     }
 
-    // THIS IS WHERE THE "UNLOCK NEW RENTAL" CARD IS GENERATED
     if (nextPropertyUnlockResearch) {
-        displayedItemCount++; 
+        displayedItemCount++;
         const unlockCard = document.createElement('div');
-        unlockCard.className = 'unlock-rental-card'; // Ensure this class is styled in style.css
+        unlockCard.className = 'unlock-rental-card'; 
 
         let costStrings = [];
-        if (nextPropertyUnlockResearch.hasOwnProperty('cost') && typeof nextPropertyUnlockResearch.cost === 'number' && nextPropertyUnlockResearch.cost > 0) {
-            costStrings.push(`$${formatNumber(nextPropertyUnlockResearch.cost, 0)}`);
-        }
-        if (nextPropertyUnlockResearch.hasOwnProperty('materialsCost') && typeof nextPropertyUnlockResearch.materialsCost === 'number' && nextPropertyUnlockResearch.materialsCost > 0) {
-            costStrings.push(`${formatNumber(nextPropertyUnlockResearch.materialsCost, 0)} Materials`);
-        }
-        if (nextPropertyUnlockResearch.hasOwnProperty('costRP') && typeof nextPropertyUnlockResearch.costRP === 'number' && nextPropertyUnlockResearch.costRP > 0) {
-            costStrings.push(`${formatNumber(nextPropertyUnlockResearch.costRP, 1)} RP`);
-        }
+        if (nextPropertyUnlockResearch.hasOwnProperty('cost') && typeof nextPropertyUnlockResearch.cost === 'number' && nextPropertyUnlockResearch.cost > 0) costStrings.push(`$${formatNumber(nextPropertyUnlockResearch.cost, 0)}`);
+        if (nextPropertyUnlockResearch.hasOwnProperty('materialsCost') && typeof nextPropertyUnlockResearch.materialsCost === 'number' && nextPropertyUnlockResearch.materialsCost > 0) costStrings.push(`${formatNumber(nextPropertyUnlockResearch.materialsCost, 0)} Materials`);
+        if (nextPropertyUnlockResearch.hasOwnProperty('costRP') && typeof nextPropertyUnlockResearch.costRP === 'number' && nextPropertyUnlockResearch.costRP > 0) costStrings.push(`${formatNumber(nextPropertyUnlockResearch.costRP, 1)} RP`);
         let costText = costStrings.length > 0 ? costStrings.join(' + ') : "Free";
         
-        // Specific check for the 300 RP cost for "urban_planning_1"
         if (nextPropertyUnlockResearch.id === "urban_planning_1" && nextPropertyUnlockResearch.costRP === 300) {
-            // Ensure costText accurately reflects the 300 RP for this specific research.
-            // If urban_planning_1 might have other costs too, adjust this logic.
-            let specificCostStrings = [];
-            if (nextPropertyUnlockResearch.costRP === 300) specificCostStrings.push(`${formatNumber(300,0)} RP`);
-            // Add other costs if "urban_planning_1" has them (e.g., money, materials)
-            if (nextPropertyUnlockResearch.cost > 0) specificCostStrings.push(`$${formatNumber(nextPropertyUnlockResearch.cost, 0)}`);
-            if (nextPropertyUnlockResearch.materialsCost > 0) specificCostStrings.push(`${formatNumber(nextPropertyUnlockResearch.materialsCost, 0)} Materials`);
-            costText = specificCostStrings.join(' + ');
+             costText = `${formatNumber(300,0)} RP`;
         }
 
-        const unlocksNames = nextPropertyUnlockResearch.unlocksPropertyType
-            .map(id => getPropertyTypeById(id)?.name)
-            .filter(name => name) 
-            .join(', ');
-
+        const unlocksNames = nextPropertyUnlockResearch.unlocksPropertyType.map(id => getPropertyTypeById(id)?.name).filter(name => name).join(', ');
         unlockCard.innerHTML = `
-            <h3>Unlock New Rentals</h3>
+            <h3>Unlock Next Rentals</h3>
             <p>Via Research: "${nextPropertyUnlockResearch.name}"</p>
             <p>Unlocks: ${unlocksNames || 'Next Tier Properties'}</p>
             <p class="research-cost-display">Research Cost: ${costText}</p>
@@ -266,8 +238,7 @@ function displayAvailablePropertiesList(targetElement) {
     }
 
     if (displayedItemCount === 0) {
-        if (PROPERTY_TYPES.every(p => (p.requiredResearch && gameState.unlockedResearch.includes(p.requiredResearch)) || !p.requiredResearch) && 
-            !nextPropertyUnlockResearch) { 
+        if (PROPERTY_TYPES.every(p => (p.requiredResearch && gameState.unlockedResearch.includes(p.requiredResearch)) || !p.requiredResearch) && !nextPropertyUnlockResearch) {
             targetElement.innerHTML = "<p>All available rentals unlocked!</p>";
         } else {
             targetElement.innerHTML = "<p>No rentals or unlocks currently available. Check research.</p>";
@@ -276,11 +247,11 @@ function displayAvailablePropertiesList(targetElement) {
 }
 
 function completeResearchAndRefreshUI(researchId) {
-    const success = completeResearch(researchId); // from facilities.js
-    // completeResearch already calls updateGameData() on success, which refreshes the UI.
+    completeResearch(researchId); 
 }
 
 function displayOwnedPropertiesList(targetElement) {
+    // ... (This function remains the same as the version from ui_js_sequential_unlock_v048, with compact cards and expandable upgrades)
     ensureUIInitialized();
     if (!targetElement) return;
     targetElement.innerHTML = '';
@@ -311,6 +282,7 @@ function displayOwnedPropertiesList(targetElement) {
 }
 
 function togglePropertyUpgradesView(ownedPropertyUniqueId) {
+    // ... (This function remains the same as the version from ui_js_sequential_unlock_v048)
     ensureUIInitialized();
     const propertyInstance = ownedProperties.find(p => p.uniqueId === ownedPropertyUniqueId);
     if (!propertyInstance) return;
@@ -362,19 +334,21 @@ function togglePropertyUpgradesView(ownedPropertyUniqueId) {
     }
 }
 
+
 function displayAvailableFacilitiesList(targetElement, filterType) {
+    // ... (This function remains the same as v0.4.8, showing buyable facilities and then an "Unlock New Construction" card)
     ensureUIInitialized();
     if (!targetElement) return;
     targetElement.innerHTML = '';
-    let displayedCount = 0;
+    let displayedItemCount = 0;
+
     FACILITY_TYPES.filter(facType => {
         if (!isFacilityTypeUnlocked(facType.id)) return false;
         if (filterType === 'material') return facType.output?.resource === 'buildingMaterials' || facType.effects?.some(e => e.propertyCategory || e.type.includes("cost") || e.type.includes("material"));
         if (filterType === 'science') return facType.output?.resource === 'researchPoints';
-        return false; 
+        return false;
     }).forEach(facType => {
-        if (!facType || typeof facType.cost === 'undefined') { console.error("Invalid construction type:", facType); return; }
-        displayedCount++;
+        displayedItemCount++;
         const currentMonetaryCost = calculateFacilityDynamicCost(facType);
         const materialsCost = facType.materialsCost || 0;
         let outputText = facType.output ? `${formatNumber(facType.output.amount,3)}/s ${facType.output.resource}` : (facType.effects ? "Global Buff(s)" : "No direct output");
@@ -387,10 +361,57 @@ function displayAvailableFacilitiesList(targetElement, filterType) {
             <button onclick="buyFacility('${facType.id}')" id="buy-fac-${facType.id}-btn">Build</button>`;
         targetElement.appendChild(card);
     });
-    if (displayedCount === 0) targetElement.innerHTML = FACILITY_TYPES.some(ft => ft.requiredResearch && !isFacilityTypeUnlocked(ft.id) && ((filterType === 'material' && (ft.output?.resource === 'buildingMaterials' || ft.effects?.some(e => e.propertyCategory || e.type.includes("cost") || e.type.includes("material")))) || (filterType === 'science' && ft.output?.resource === 'researchPoints'))) ? `<p>More ${filterType} construction via research.</p>` : `<p>No ${filterType} construction options.</p>`;
+
+    let nextFacilityUnlockResearch = null;
+    for (const research of RESEARCH_TOPICS) {
+        if (research.unlocksFacilityType && research.unlocksFacilityType.length > 0 &&
+            !gameState.unlockedResearch.includes(research.id) &&
+            isResearchAvailable(research.id)) {
+            const unlocksRelevantNewFacility = research.unlocksFacilityType.some(facId => {
+                const facType = getFacilityTypeById(facId);
+                if (!facType || isFacilityTypeUnlocked(facId)) return false;
+                if (filterType === 'material') return facType.output?.resource === 'buildingMaterials' || facType.effects?.some(e => e.propertyCategory || e.type.includes("cost") || e.type.includes("material"));
+                if (filterType === 'science') return facType.output?.resource === 'researchPoints';
+                return false;
+            });
+            if (unlocksRelevantNewFacility) {
+                nextFacilityUnlockResearch = research;
+                break;
+            }
+        }
+    }
+
+    if (nextFacilityUnlockResearch) {
+        displayedItemCount++;
+        const unlockCard = document.createElement('div');
+        unlockCard.className = 'unlock-rental-card'; // Re-use style or make .unlock-facility-card
+        let costStrings = [];
+        if (nextFacilityUnlockResearch.hasOwnProperty('cost') && typeof nextFacilityUnlockResearch.cost === 'number' && nextFacilityUnlockResearch.cost > 0) costStrings.push(`$${formatNumber(nextFacilityUnlockResearch.cost, 0)}`);
+        if (nextFacilityUnlockResearch.hasOwnProperty('materialsCost') && typeof nextFacilityUnlockResearch.materialsCost === 'number' && nextFacilityUnlockResearch.materialsCost > 0) costStrings.push(`${formatNumber(nextFacilityUnlockResearch.materialsCost, 0)} Materials`);
+        if (nextFacilityUnlockResearch.hasOwnProperty('costRP') && typeof nextFacilityUnlockResearch.costRP === 'number' && nextFacilityUnlockResearch.costRP > 0) costStrings.push(`${formatNumber(nextFacilityUnlockResearch.costRP, 1)} RP`);
+        let costText = costStrings.length > 0 ? costStrings.join(' + ') : "Free";
+        const unlocksNames = nextFacilityUnlockResearch.unlocksFacilityType.map(id => getFacilityTypeById(id)?.name).filter(name => name).join(', ');
+        unlockCard.innerHTML = `
+            <h3>Unlock New Construction</h3>
+            <p>Via Research: "${nextFacilityUnlockResearch.name}"</p>
+            <p>Unlocks: ${unlocksNames || 'Next Tier Construction'}</p>
+            <p class="research-cost-display">Research Cost: ${costText}</p>
+            <button onclick="completeResearchAndRefreshUI('${nextFacilityUnlockResearch.id}')" 
+                    id="unlock-facility-tier-${nextFacilityUnlockResearch.id}-btn">
+                Unlock (${costText})
+            </button>
+        `;
+        targetElement.appendChild(unlockCard);
+    }
+
+    if (displayedItemCount === 0) {
+        targetElement.innerHTML = `<p>No ${filterType} construction options or unlocks available. Check research.</p>`;
+    }
 }
 
+
 function displayOwnedFacilitiesList(targetElement, filterType) {
+    // ... (This function remains the same as v0.4.8, using compact cards and expandable upgrades)
     ensureUIInitialized();
     if (!targetElement) return;
     targetElement.innerHTML = '';
@@ -426,6 +447,7 @@ function displayOwnedFacilitiesList(targetElement, filterType) {
 }
 
 function toggleFacilityUpgradesView(facilityUniqueId) {
+    // ... (This function remains the same as v0.4.8)
     ensureUIInitialized();
     const facilityInstance = ownedFacilities.find(f => f.uniqueId === facilityUniqueId);
     if (!facilityInstance) return;
@@ -477,31 +499,80 @@ function toggleFacilityUpgradesView(facilityUniqueId) {
 }
 
 function displayResearchOptionsList(targetElement) {
+    // ... (This function remains the same as v0.4.8, showing research topics and then an "Unlock New Science Tier" card)
     ensureUIInitialized();
     if (!targetElement) return;
     targetElement.innerHTML = '';
-    let displayedCount = 0;
-    RESEARCH_TOPICS.forEach(topic => {
-        if (gameState.unlockedResearch.includes(topic.id)) return;
-        if (!isResearchAvailable(topic.id)) return;
-        if (!topic || (typeof topic.cost === 'undefined' && typeof topic.materialsCost === 'undefined' && typeof topic.costRP === 'undefined')) {
-            console.error("Skipping invalid research topic (missing cost):", topic); return;
-        }
-        displayedCount++;
-        const card = document.createElement('div');
-        card.className = 'research-item-card';
-        let costStrings = [];
-        if (topic.hasOwnProperty('cost') && typeof topic.cost === 'number' && topic.cost > 0) costStrings.push(`$${formatNumber(topic.cost, 0)}`);
-        if (topic.hasOwnProperty('materialsCost') && typeof topic.materialsCost === 'number' && topic.materialsCost > 0) costStrings.push(`${formatNumber(topic.materialsCost, 0)} Materials`);
-        if (topic.hasOwnProperty('costRP') && typeof topic.costRP === 'number' && topic.costRP > 0) costStrings.push(`${formatNumber(topic.costRP, 1)} RP`);
-        let costText = "Cost: " + (costStrings.length > 0 ? costStrings.join(' + ') : "Free");
+    let displayedItemCount = 0;
 
-        card.innerHTML = `<h3>${topic.name}</h3><p>${topic.description}</p>
-            <p class="research-cost">${costText}</p>
-            <button onclick="completeResearch('${topic.id}')" id="research-${topic.id}-btn">Research</button>`;
-        targetElement.appendChild(card);
+    RESEARCH_TOPICS.forEach(topic => {
+        if (!gameState.unlockedResearch.includes(topic.id) && isResearchAvailable(topic.id)) {
+            if (!topic || (typeof topic.cost === 'undefined' && typeof topic.materialsCost === 'undefined' && typeof topic.costRP === 'undefined')) {
+                console.error("Skipping invalid research topic (missing cost):", topic); return;
+            }
+            displayedItemCount++;
+            const card = document.createElement('div');
+            card.className = 'research-item-card';
+            let costStrings = [];
+            if (topic.hasOwnProperty('cost') && typeof topic.cost === 'number' && topic.cost > 0) costStrings.push(`$${formatNumber(topic.cost, 0)}`);
+            if (topic.hasOwnProperty('materialsCost') && typeof topic.materialsCost === 'number' && topic.materialsCost > 0) costStrings.push(`${formatNumber(topic.materialsCost, 0)} Materials`);
+            if (topic.hasOwnProperty('costRP') && typeof topic.costRP === 'number' && topic.costRP > 0) costStrings.push(`${formatNumber(topic.costRP, 1)} RP`);
+            let costText = "Cost: " + (costStrings.length > 0 ? costStrings.join(' + ') : "Free");
+
+            card.innerHTML = `<h3>${topic.name}</h3><p>${topic.description}</p>
+                <p class="research-cost">${costText}</p>
+                <button onclick="completeResearch('${topic.id}')" id="research-${topic.id}-btn">Research</button>`;
+            targetElement.appendChild(card);
+        }
     });
-    if (displayedCount === 0) targetElement.innerHTML = RESEARCH_TOPICS.every(t => gameState.unlockedResearch.includes(t.id)) ? '<p>All research completed!</p>' : '<p>No new research. Check prerequisites.</p>';
+
+    let nextScienceUnlockResearch = null;
+    for (const research of RESEARCH_TOPICS) {
+        if (( (research.unlocksResearch && research.unlocksResearch.length > 0) || 
+              (research.unlocksFacilityType && research.unlocksFacilityType.some(fid => getFacilityTypeById(fid)?.output?.resource === 'researchPoints')) 
+            ) && 
+            !gameState.unlockedResearch.includes(research.id) &&
+            isResearchAvailable(research.id)) {
+            const unlocksNewScience = (research.unlocksResearch && research.unlocksResearch.some(resId => !isResearchAvailable(resId) && !gameState.unlockedResearch.includes(resId))) ||
+                                    (research.unlocksFacilityType && research.unlocksFacilityType.some(facId => {
+                                        const facType = getFacilityTypeById(facId);
+                                        return facType && facType.output?.resource === 'researchPoints' && !isFacilityTypeUnlocked(facId);
+                                    }));
+            if (unlocksNewScience) {
+                nextScienceUnlockResearch = research;
+                break;
+            }
+        }
+    }
+
+    if (nextScienceUnlockResearch) {
+        displayedItemCount++;
+        const unlockCard = document.createElement('div');
+        unlockCard.className = 'unlock-rental-card'; // Re-use style or make .unlock-science-card
+        let costStrings = [];
+        if (nextScienceUnlockResearch.hasOwnProperty('cost') && typeof nextScienceUnlockResearch.cost === 'number' && nextScienceUnlockResearch.cost > 0) costStrings.push(`$${formatNumber(nextScienceUnlockResearch.cost, 0)}`);
+        if (nextScienceUnlockResearch.hasOwnProperty('materialsCost') && typeof nextScienceUnlockResearch.materialsCost === 'number' && nextScienceUnlockResearch.materialsCost > 0) costStrings.push(`${formatNumber(nextScienceUnlockResearch.materialsCost, 0)} Materials`);
+        if (nextScienceUnlockResearch.hasOwnProperty('costRP') && typeof nextScienceUnlockResearch.costRP === 'number' && nextScienceUnlockResearch.costRP > 0) costStrings.push(`${formatNumber(nextScienceUnlockResearch.costRP, 1)} RP`);
+        let costText = costStrings.length > 0 ? costStrings.join(' + ') : "Free";
+        let unlocksText = [];
+        if (nextScienceUnlockResearch.unlocksResearch) nextScienceUnlockResearch.unlocksResearch.forEach(id => { const rt=getResearchTopicById(id); if(rt) unlocksText.push(rt.name);});
+        if (nextScienceUnlockResearch.unlocksFacilityType) nextScienceUnlockResearch.unlocksFacilityType.forEach(id => { const ft=getFacilityTypeById(id); if(ft && ft.output?.resource === 'researchPoints') unlocksText.push(ft.name);});
+        unlockCard.innerHTML = `
+            <h3>Unlock New Science Tier</h3>
+            <p>Via Research: "${nextScienceUnlockResearch.name}"</p>
+            <p>Unlocks: ${unlocksText.join(', ') || 'Advanced R&D Options'}</p>
+            <p class="research-cost-display">Research Cost: ${costText}</p>
+            <button onclick="completeResearchAndRefreshUI('${nextScienceUnlockResearch.id}')" 
+                    id="unlock-science-tier-${nextScienceUnlockResearch.id}-btn">
+                Unlock (${costText})
+            </button>
+        `;
+        targetElement.appendChild(unlockCard);
+    }
+
+    if (displayedItemCount === 0) {
+        targetElement.innerHTML = RESEARCH_TOPICS.every(t => gameState.unlockedResearch.includes(t.id)) ? '<p>All research completed!</p>' : '<p>No new research. Check prerequisites.</p>';
+    }
 }
 
 // ---- Button State Update Router ----
@@ -514,20 +585,19 @@ function updateAllButtonStatesForCurrentView() {
     } else if (currentView === 'research') {
         updateResearchButtonStatesList();
     }
-    // Upgrade buttons for owned items are updated when their respective detail views are toggled.
 }
 
 // ---- Specific Button State Update Functions ----
 function updatePropertyBuyButtonStates() {
+    // ... (This function remains the same as v0.4.8, updating buy buttons and the "Unlock Next Rentals" button)
     ensureUIInitialized();
     if (!leftColumnListElement) return; 
 
-    // Update regular property buy buttons
     PROPERTY_TYPES.forEach(propType => {
         const buyButton = leftColumnListElement.querySelector(`#buy-prop-${propType.id}-btn`);
         if (buyButton) {
             const cardElement = buyButton.closest('.property-card'); 
-            if(!isPropertyTypeUnlocked(propType.id)) { // Should not happen if display logic is correct
+            if(!isPropertyTypeUnlocked(propType.id)) {
                 if(cardElement) cardElement.style.display = 'none'; 
                 return;
             }
@@ -543,65 +613,58 @@ function updatePropertyBuyButtonStates() {
         }
     });
 
-    // Update the "Unlock New Rental" button state (if one is currently displayed)
-    for (const propType of PROPERTY_TYPES) {
-        if (!isPropertyTypeUnlocked(propType.id)) {
-            const requiredResearch = getResearchTopicById(propType.requiredResearch);
-            if (requiredResearch && isResearchAvailable(requiredResearch.id)) {
-                const unlockButton = leftColumnListElement.querySelector(`#unlock-property-${propType.id}-via-research-${requiredResearch.id}-btn`);
-                if (unlockButton) {
-                    const buttonContainer = unlockButton.closest('.unlock-rental-card');
-                    if (!buttonContainer) continue;
-
-                    if (gameState.unlockedResearch.includes(requiredResearch.id)) { // Should be caught by display logic
-                        buttonContainer.style.display = 'none';
-                        continue;
-                    }
-                    buttonContainer.style.display = 'flex'; // Or 'block'
-
-                    let canAfford = true;
-                    let missingReasonParts = [];
-                    let costTextPartsButton = [];
-
-                    if (requiredResearch.hasOwnProperty('cost') && typeof requiredResearch.cost === 'number' && requiredResearch.cost > 0) {
-                        costTextPartsButton.push(`$${formatNumber(requiredResearch.cost,0)}`);
-                        if (gameState.cash < requiredResearch.cost) { canAfford = false; missingReasonParts.push(`$${formatNumber(requiredResearch.cost - gameState.cash,0)}`); }
-                    }
-                    if (requiredResearch.hasOwnProperty('materialsCost') && typeof requiredResearch.materialsCost === 'number' && requiredResearch.materialsCost > 0) {
-                        costTextPartsButton.push(`${formatNumber(requiredResearch.materialsCost,0)} Mats`);
-                        if (gameState.buildingMaterials < requiredResearch.materialsCost) { canAfford = false; missingReasonParts.push(`${formatNumber(requiredResearch.materialsCost - gameState.buildingMaterials,0)} Mats`); }
-                    }
-                    if (requiredResearch.hasOwnProperty('costRP') && typeof requiredResearch.costRP === 'number' && requiredResearch.costRP > 0) {
-                        costTextPartsButton.push(`${formatNumber(requiredResearch.costRP,1)} RP`);
-                        if (gameState.researchPoints < requiredResearch.costRP) { canAfford = false; missingReasonParts.push(`${formatNumber(requiredResearch.costRP - gameState.researchPoints,1)} RP`); }
-                    }
-                    
-                    unlockButton.disabled = !canAfford;
-                    let baseButtonText = `Unlock (${propType.name})`; 
-                    let costDisplayForButton = costTextPartsButton.length > 0 ? costTextPartsButton.join(' + ') : "Free";
-
-                    if (!canAfford && missingReasonParts.length > 0) {
-                        unlockButton.textContent = `${baseButtonText} (Need ${missingReasonParts.join(', ')})`;
-                    } else {
-                        unlockButton.textContent = `${baseButtonText} - Cost: ${costDisplayForButton}`;
-                    }
-                }
-                break; // Only update the button for the first found unlockable property
+    let nextUnlockResearch = null; 
+    for (const research of RESEARCH_TOPICS) { 
+        if (research.unlocksPropertyType && research.unlocksPropertyType.length > 0 &&
+            !gameState.unlockedResearch.includes(research.id) &&
+            isResearchAvailable(research.id)) {
+            const trulyUnlocksNew = research.unlocksPropertyType.some(propId => {
+                const propType = getPropertyTypeById(propId);
+                return propType && !isPropertyTypeUnlocked(propType.id);
+            });
+            if (trulyUnlocksNew) {
+                nextUnlockResearch = research;
+                break;
+            }
+        }
+    }
+    if (nextUnlockResearch) {
+        const unlockButton = leftColumnListElement.querySelector(`#unlock-property-tier-${nextUnlockResearch.id}-btn`);
+        if (unlockButton) {
+            const buttonContainer = unlockButton.closest('.unlock-rental-card'); 
+            if (!buttonContainer) return; 
+            if (gameState.unlockedResearch.includes(nextUnlockResearch.id) || !isResearchAvailable(nextUnlockResearch.id)) {
+                buttonContainer.style.display = 'none'; return;
+            }
+            buttonContainer.style.display = 'flex'; 
+            let canAfford = true; let missingReasonParts = []; let costTextPartsButton = []; 
+            if (nextUnlockResearch.hasOwnProperty('cost') && typeof nextUnlockResearch.cost === 'number' && nextUnlockResearch.cost > 0) { costTextPartsButton.push(`$${formatNumber(nextUnlockResearch.cost,0)}`); if (gameState.cash < nextUnlockResearch.cost) { canAfford = false; missingReasonParts.push(`$${formatNumber(nextUnlockResearch.cost - gameState.cash,0)}`); }}
+            if (nextUnlockResearch.hasOwnProperty('materialsCost') && typeof nextUnlockResearch.materialsCost === 'number' && nextUnlockResearch.materialsCost > 0) { costTextPartsButton.push(`${formatNumber(nextUnlockResearch.materialsCost,0)} Mats`); if (gameState.buildingMaterials < nextUnlockResearch.materialsCost) { canAfford = false; missingReasonParts.push(`${formatNumber(nextUnlockResearch.materialsCost - gameState.buildingMaterials,0)} Mats`); }}
+            if (nextUnlockResearch.hasOwnProperty('costRP') && typeof nextUnlockResearch.costRP === 'number' && nextUnlockResearch.costRP > 0) { costTextPartsButton.push(`${formatNumber(nextUnlockResearch.costRP,1)} RP`); if (gameState.researchPoints < nextUnlockResearch.costRP) { canAfford = false; missingReasonParts.push(`${formatNumber(nextUnlockResearch.costRP - gameState.researchPoints,1)} RP`); }}
+            unlockButton.disabled = !canAfford;
+            let baseButtonText = `Unlock (${nextUnlockResearch.name})`; 
+            let costDisplayForButton = costTextPartsButton.length > 0 ? costTextPartsButton.join(' + ') : "Free";
+            if (!canAfford && missingReasonParts.length > 0) {
+                unlockButton.textContent = `${baseButtonText} (Need ${missingReasonParts.join(', ')})`;
+            } else {
+                unlockButton.textContent = `${baseButtonText} - Cost: ${costDisplayForButton}`;
             }
         }
     }
 }
 
 function updateFacilityBuyButtonStates(filterType) {
+    // ... (This function remains the same as v0.4.8, updating facility buy buttons and their "Unlock" card button)
     ensureUIInitialized();
     if (!leftColumnListElement) return;
-    FACILITY_TYPES.filter(facTypeF => {
+    FACILITY_TYPES.filter(facTypeF => { 
+        if (!isFacilityTypeUnlocked(facTypeF.id)) return false;
         if (filterType === 'material') return facTypeF.output?.resource === 'buildingMaterials' || facTypeF.effects?.some(e => e.propertyCategory || e.type.includes("cost") || e.type.includes("material"));
         if (filterType === 'science') return facTypeF.output?.resource === 'researchPoints';
-        return true;
+        return false;
     }).forEach(facType => {
         const buyButton = leftColumnListElement.querySelector(`#buy-fac-${facType.id}-btn`);
-        if (buyButton) {
+        if (buyButton) { 
             const cardElement = buyButton.closest('.facility-card');
             if (!isFacilityTypeUnlocked(facType.id)) {
                 if(cardElement) cardElement.style.display = 'none'; return;
@@ -616,9 +679,50 @@ function updateFacilityBuyButtonStates(filterType) {
             buyButton.textContent = `Build ${reason}`;
         }
     });
+
+    let nextUnlockResearch = null;
+    for (const research of RESEARCH_TOPICS) { 
+        if (research.unlocksFacilityType && research.unlocksFacilityType.length > 0 &&
+            !gameState.unlockedResearch.includes(research.id) &&
+            isResearchAvailable(research.id)) {
+            const unlocksRelevantNewFacility = research.unlocksFacilityType.some(facId => {
+                const facType = getFacilityTypeById(facId);
+                if (!facType || isFacilityTypeUnlocked(facId)) return false;
+                if (filterType === 'material') return facType.output?.resource === 'buildingMaterials' || facType.effects?.some(e => e.propertyCategory || e.type.includes("cost") || e.type.includes("material"));
+                if (filterType === 'science') return facType.output?.resource === 'researchPoints'; 
+                return false;
+            });
+            if (unlocksRelevantNewFacility) {
+                nextUnlockResearch = research;
+                break;
+            }
+        }
+    }
+    if (nextUnlockResearch) {
+        const unlockButton = leftColumnListElement.querySelector(`#unlock-facility-tier-${nextUnlockResearch.id}-btn`);
+        if (unlockButton) { 
+            const buttonContainer = unlockButton.closest('.unlock-rental-card'); 
+            if (!buttonContainer) return; 
+            if (gameState.unlockedResearch.includes(nextUnlockResearch.id) || !isResearchAvailable(nextUnlockResearch.id)) {
+                buttonContainer.style.display = 'none'; return;
+            }
+            buttonContainer.style.display = 'flex'; 
+            let canAfford = true; let missingReasonParts = []; let costTextPartsButton = []; 
+            if (nextUnlockResearch.hasOwnProperty('cost') && typeof nextUnlockResearch.cost === 'number' && nextUnlockResearch.cost > 0) { costTextPartsButton.push(`$${formatNumber(nextUnlockResearch.cost,0)}`); if (gameState.cash < nextUnlockResearch.cost) { canAfford = false; missingReasonParts.push(`$${formatNumber(nextUnlockResearch.cost - gameState.cash,0)}`); }}
+            if (nextUnlockResearch.hasOwnProperty('materialsCost') && typeof nextUnlockResearch.materialsCost === 'number' && nextUnlockResearch.materialsCost > 0) { costTextPartsButton.push(`${formatNumber(nextUnlockResearch.materialsCost,0)} Mats`); if (gameState.buildingMaterials < nextUnlockResearch.materialsCost) { canAfford = false; missingReasonParts.push(`${formatNumber(nextUnlockResearch.materialsCost - gameState.buildingMaterials,0)} Mats`); }}
+            if (nextUnlockResearch.hasOwnProperty('costRP') && typeof nextUnlockResearch.costRP === 'number' && nextUnlockResearch.costRP > 0) { costTextPartsButton.push(`${formatNumber(nextUnlockResearch.costRP,1)} RP`); if (gameState.researchPoints < nextUnlockResearch.costRP) { canAfford = false; missingReasonParts.push(`${formatNumber(nextUnlockResearch.costRP - gameState.researchPoints,1)} RP`); }}
+            unlockButton.disabled = !canAfford;
+            let baseButtonText = `Unlock (${nextUnlockResearch.name})`; 
+            let costDisplayForButton = costTextPartsButton.length > 0 ? costTextPartsButton.join(' + ') : "Free";
+            if (!canAfford && missingReasonParts.length > 0) { unlockButton.textContent = `${baseButtonText} (Need ${missingReasonParts.join(', ')})`; } 
+            else { unlockButton.textContent = `${baseButtonText} - Cost: ${costDisplayForButton}`; }
+        }
+    }
 }
 
+
 function updateResearchButtonStatesList() {
+    // ... (This function remains the same as v0.4.8, updating research topic buttons and their "Unlock Science Tier" card button)
     ensureUIInitialized();
     if (!leftColumnListElement) return;
     RESEARCH_TOPICS.forEach(topic => {
@@ -637,25 +741,59 @@ function updateResearchButtonStatesList() {
             researchButton.textContent = `Research ${canAfford ? '' : '(Need' + disabledReason + ')' }`;
         }
     });
+
+    let nextUnlockResearch = null;
+    for (const research of RESEARCH_TOPICS) { 
+        if (( (research.unlocksResearch && research.unlocksResearch.length > 0) || 
+              (research.unlocksFacilityType && research.unlocksFacilityType.some(fid => getFacilityTypeById(fid)?.output?.resource === 'researchPoints')) 
+            ) && 
+            !gameState.unlockedResearch.includes(research.id) &&
+            isResearchAvailable(research.id)) {
+            const unlocksNewScience = (research.unlocksResearch && research.unlocksResearch.some(resId => !isResearchAvailable(resId) && !gameState.unlockedResearch.includes(resId))) ||
+                                    (research.unlocksFacilityType && research.unlocksFacilityType.some(facId => {
+                                        const facType = getFacilityTypeById(facId);
+                                        return facType && facType.output?.resource === 'researchPoints' && !isFacilityTypeUnlocked(facId);
+                                    }));
+            if (unlocksNewScience) {
+                nextUnlockResearch = research;
+                break;
+            }
+        }
+    }
+    if (nextUnlockResearch) {
+        const unlockButton = leftColumnListElement.querySelector(`#unlock-science-tier-${nextUnlockResearch.id}-btn`);
+        if (unlockButton) { 
+            const buttonContainer = unlockButton.closest('.unlock-rental-card'); 
+            if (!buttonContainer) return; 
+            if (gameState.unlockedResearch.includes(nextUnlockResearch.id) || !isResearchAvailable(nextUnlockResearch.id)) {
+                buttonContainer.style.display = 'none'; return;
+            }
+            buttonContainer.style.display = 'flex'; 
+            let canAfford = true; let missingReasonParts = []; let costTextPartsButton = []; 
+            if (nextUnlockResearch.hasOwnProperty('cost') && typeof nextUnlockResearch.cost === 'number' && nextUnlockResearch.cost > 0) { costTextPartsButton.push(`$${formatNumber(nextUnlockResearch.cost,0)}`); if (gameState.cash < nextUnlockResearch.cost) { canAfford = false; missingReasonParts.push(`$${formatNumber(nextUnlockResearch.cost - gameState.cash,0)}`); }}
+            if (nextUnlockResearch.hasOwnProperty('materialsCost') && typeof nextUnlockResearch.materialsCost === 'number' && nextUnlockResearch.materialsCost > 0) { costTextPartsButton.push(`${formatNumber(nextUnlockResearch.materialsCost,0)} Mats`); if (gameState.buildingMaterials < nextUnlockResearch.materialsCost) { canAfford = false; missingReasonParts.push(`${formatNumber(nextUnlockResearch.materialsCost - gameState.buildingMaterials,0)} Mats`); }}
+            if (nextUnlockResearch.hasOwnProperty('costRP') && typeof nextUnlockResearch.costRP === 'number' && nextUnlockResearch.costRP > 0) { costTextPartsButton.push(`${formatNumber(nextUnlockResearch.costRP,1)} RP`); if (gameState.researchPoints < nextUnlockResearch.costRP) { canAfford = false; missingReasonParts.push(`${formatNumber(nextUnlockResearch.costRP - gameState.researchPoints,1)} RP`); }}
+            unlockButton.disabled = !canAfford;
+            let baseButtonText = `Unlock (${nextUnlockResearch.name})`; 
+            let costDisplayForButton = costTextPartsButton.length > 0 ? costTextPartsButton.join(' + ') : "Free";
+            if (!canAfford && missingReasonParts.length > 0) { unlockButton.textContent = `${baseButtonText} (Need ${missingReasonParts.join(', ')})`; } 
+            else { unlockButton.textContent = `${baseButtonText} - Cost: ${costDisplayForButton}`; }
+        }
+    }
 }
+
 
 // ---- Initial Render ----
 function initialRender() {
     initializeUIElements(); 
     if (!uiInitialized) {
-        console.error("CRITICAL: UI FAILED TO INITIALIZE FROM initialRender. Aborting further UI setup. Check console messages from initializeUIElements() for missing HTML element IDs.");
+        console.error("CRITICAL: UI FAILED TO INITIALIZE FROM initialRender. Aborting further UI setup.");
         return; 
     }
     console.log("initialRender: Updating initial stat displays.");
-    updateCashDisplay();
-    updateNetRPSDisplay();
-    updateOwnedPropertiesCountDisplay();
-    updateBuildingMaterialsDisplay();
-    updateResearchPointsDisplay();
-    updateTotalUpkeepDisplay();
-    
+    updateCashDisplay(); updateNetRPSDisplay(); updateOwnedPropertiesCountDisplay();
+    updateBuildingMaterialsDisplay(); updateResearchPointsDisplay(); updateTotalUpkeepDisplay();
     console.log("initialRender: Switching to default view:", currentView);
     switchView(currentView); 
-    
     console.log("initialRender: UI setup process completed.");
 }
