@@ -18,9 +18,6 @@ header {
     padding: 1rem 2rem;
     text-align: center;
     border-bottom: 4px solid #e67e22; /* Orange accent */
-    /* position: sticky; /* Uncomment if you want a sticky header */
-    /* top: 0; */
-    /* z-index: 1000; */
 }
 
 header h1 {
@@ -50,7 +47,7 @@ header h1 {
 .main-navigation {
     display: flex;
     justify-content: center;
-    background-color: #34495e; /* Consistent with stat items background */
+    background-color: #34495e;
     padding: 0.75rem 0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
@@ -64,8 +61,8 @@ header h1 {
     font-size: 1rem;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-    border-bottom: 3px solid transparent; /* For active state accent */
+    transition: background-color 0.3s ease, transform 0.1s ease, border-bottom-color 0.3s ease;
+    border-bottom: 3px solid transparent;
 }
 
 .nav-button:hover {
@@ -77,88 +74,86 @@ header h1 {
     color: white;
     font-weight: bold;
     border-bottom: 3px solid #c0392b; /* Darker orange accent for active */
-    transform: translateY(-2px); /* Slight "lift" effect for active button */
+    transform: translateY(-2px);
 }
 
-/* Main Content Area Styling (holds the two columns) */
+/* Main Content Area Styling */
 .content-area {
     padding: 1.5rem;
-    max-width: 1400px; /* Max width of the content area */
-    margin: 0 auto; /* Center the content area */
+    max-width: 1400px;
+    margin: 0 auto;
     display: flex;
-    gap: 1.5rem; /* Space between the two columns */
-    flex-grow: 1; /* Allows content area to fill available vertical space */
+    gap: 1.5rem;
+    flex-grow: 1;
     width: 100%;
     box-sizing: border-box;
 }
 
-/* Column Styling (for the two main content columns) */
+/* Column Styling */
 .column {
     display: flex;
     flex-direction: column;
-    /* gap: 1.5rem; /* Not strictly needed if each column only has one section */
-    flex-basis: 50%; /* Each column tries to take up half the space */
-    min-width: 0; /* Important for flexbox item sizing and preventing overflow */
+    flex-basis: 50%;
+    min-width: 0;
 }
 
 /* Individual Section Styling (within each column) */
 #left-column-section,
 #right-column-section {
-    background-color: #fff; /* White background for sections */
+    background-color: #fff;
     padding: 1.5rem;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     display: flex;
-    flex-direction: column; /* Stack title (h2) above list */
-    flex-grow: 1; /* Section fills its column */
-    overflow: hidden; /* Important for containing the scrollable list */
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
 }
 
 #left-column-section h2,
 #right-column-section h2 {
-    color: #2c3e50; /* Dark blue-grey for titles */
-    border-bottom: 2px solid #e67e22; /* Orange accent under titles */
+    color: #2c3e50;
+    border-bottom: 2px solid #e67e22;
     padding-bottom: 0.5rem;
     margin-top: 0;
     margin-bottom: 1rem;
-    flex-shrink: 0; /* Prevent title from shrinking if content is too large */
+    flex-shrink: 0;
 }
 
-/* Item List Styling (for the lists within sections) */
+/* Item List Styling */
 .item-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); /* Responsive grid for cards */
-    gap: 1rem; /* Space between cards */
-    flex-grow: 1; /* List takes up available space within its section */
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1rem;
+    flex-grow: 1;
 }
 
 .scrollable-list {
-    max-height: 65vh; /* Max height before scrolling (viewport height relative) */
-    overflow-y: auto; /* Enable vertical scrolling */
-    padding-right: 10px; /* Space for scrollbar to avoid content overlap */
-    /* Consider custom scrollbar styling for better aesthetics if desired */
+    max-height: 65vh;
+    overflow-y: auto;
+    padding-right: 10px; /* Space for scrollbar */
+    padding-bottom: 20px; /* Padding at the bottom of scrollable area */
 }
 
-/* Card Styling (for properties, facilities, research items) */
+/* Card Styling (properties, facilities, research) */
 .property-card, .owned-property-card,
 .facility-card, .owned-facility-card,
 .research-item-card {
-    border: 1px solid #ddd; /* Light grey border */
-    background-color: #f9f9f9; /* Off-white card background */
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
     padding: 1rem;
     border-radius: 5px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Pushes buttons to bottom if card height varies */
+    justify-content: space-between;
 }
 
-/* Specific border accents for different card types */
-.property-card, .facility-card, .research-item-card { /* For available items */
-    border-left: 5px solid #e67e22; /* Orange accent for buyable/researchable items */
+.property-card, .facility-card, .research-item-card { /* Available items */
+    border-left: 5px solid #e67e22;
 }
-.owned-property-card, .owned-facility-card { /* For owned items */
-    border-left: 5px solid #27ae60; /* Green accent for owned items */
+.owned-property-card, .owned-facility-card { /* Owned items */
+    border-left: 5px solid #27ae60; /* Green accent */
 }
 
 /* Typography within cards */
@@ -166,7 +161,7 @@ header h1 {
 .facility-card h3, .owned-facility-card h3,
 .research-item-card h3 {
     margin-top: 0;
-    color: #34495e; /* Darker text for card titles */
+    color: #34495e;
     font-size: 1.1rem;
 }
 
@@ -183,16 +178,15 @@ header h1 {
     font-weight: bold;
 }
 .prop-cost, .facility-cost, .research-cost { color: #c0392b; } /* Red for costs */
-.prop-upkeep, .facility-upkeep { color: #e74c3c; } /* Lighter red for upkeep */
+.prop-upkeep, .facility-upkeep { color: #e74c3c; }
 
 .prop-rps, .facility-output, .prop-level { font-weight: bold; }
-.prop-rps, .facility-output { color: #27ae60; } /* Green for positive income/output */
-.prop-level { color: #2980b9; } /* Blue for level indicators */
+.prop-rps, .facility-output { color: #27ae60; } /* Green */
+.prop-level { color: #2980b9; } /* Blue */
 
-
-/* General Button Styling (buy, build, upgrade, sell) */
+/* General Button Styling */
 button {
-    background-color: #e67e22; /* Default orange */
+    background-color: #e67e22;
     color: white;
     border: none;
     padding: 0.6rem 1rem;
@@ -202,40 +196,43 @@ button {
     font-size: 0.9rem;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease, box-shadow 0.1s ease; /* Added box-shadow transition */
+    transition: background-color 0.3s ease, box-shadow 0.1s ease;
     margin-top: 0.5rem;
-    width: 100%; /* Buttons within cards take full width */
+    width: 100%;
     box-sizing: border-box;
-    box-shadow: 0 2px 2px rgba(0,0,0,0.1); /* Subtle shadow */
+    box-shadow: 0 2px 2px rgba(0,0,0,0.1);
 }
 
-.upgrade-buttons-container button { /* Specific upgrade buttons can be auto-width */
-    width: auto;
-    margin-right: 5px; /* Space between multiple upgrade buttons */
-    flex-grow: 1; /* Allow them to share space if wrapped */
+.upgrade-buttons-container button,
+.property-upgrades-detail button { /* Target buttons inside upgrade containers */
+    width: auto; /* Allow multiple upgrade buttons to sit inline or wrap naturally */
+    margin-right: 5px;
+    margin-bottom: 5px; /* Ensure some space when they wrap */
+    flex-grow: 1; /* Allow them to share space better if their container is flex */
 }
+
 
 button:hover {
-    background-color: #d35400; /* Darker orange on hover */
+    background-color: #d35400;
     box-shadow: 0 3px 4px rgba(0,0,0,0.15);
 }
 
 button:disabled {
-    background-color: #bdc3c7; /* Greyed out for disabled */
+    background-color: #bdc3c7;
     color: #7f8c8d;
     cursor: not-allowed;
     box-shadow: none;
 }
 
-/* Container for multiple specific upgrade buttons */
+/* Container for multiple specific upgrade buttons (on the main card, if any were still there) */
 .upgrade-buttons-container {
     margin-top: 0.75rem;
     display: flex;
-    flex-wrap: wrap; /* Allow buttons to wrap */
-    gap: 0.5rem; /* Space between buttons */
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
-.upgrade-buttons-container p { /* "Specific Upgrades:" text */
+.upgrade-buttons-container p {
     width: 100%;
     font-weight: bold;
     margin-bottom: 0.25rem;
@@ -243,25 +240,18 @@ button:disabled {
     color: #555;
 }
 
-/* Footer Styling */
-footer {
-    text-align: center;
-    padding: 1rem;
-    background-color: #34495e; /* Consistent with header elements */
-    color: #bdc3c7; /* Light text for footer */
-    font-size: 0.85rem;
-    margin-top: auto; /* Pushes footer to the bottom of the page */
-    flex-shrink: 0; /* Prevent footer from shrinking */
-}
-
-/* Styling for the new elements within owned property cards */
+/* Styling for the new elements within owned property cards (Expandable Upgrades) */
 .owned-property-card .manage-upgrades-btn {
-    background-color: #3498db; /* A distinct blue for manage button */
+    background-color: #3498db; /* Distinct blue for manage button */
     margin-top: 10px;
-    width: calc(100% - 20px); /* Adjust if padding affects width */
-    margin-left: 10px;
-    margin-right: 10px;
-    box-sizing: border-box;
+    /* width: calc(100% - 20px); /* Removed to allow natural button width with padding */
+    /* margin-left: 10px; */ /* Use auto margins or rely on card padding */
+    /* margin-right: 10px; */
+    width: auto; /* Let it size to content + padding */
+    display: block; /* To allow margin auto to center if needed */
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 200px; /* Prevent it from being overly wide */
 }
 
 .owned-property-card .manage-upgrades-btn:hover {
@@ -269,22 +259,27 @@ footer {
 }
 
 .property-upgrades-detail {
-    display: none; /* Initially hidden */
+    /* display: none; /* Initially hidden - now controlled by class .visible */
     padding: 10px;
     margin-top: 10px;
-    background-color: #ecf0f1; /* Slightly different background for the detail area */
+    background-color: #ecf0f1; /* Slightly different background */
     border-top: 1px solid #bdc3c7;
-    border-radius: 0 0 4px 4px; /* Rounded bottom corners if card is rounded */
+    border-radius: 0 0 4px 4px;
+}
+
+.property-upgrades-detail:not(.visible) { /* New rule to hide it */
+    display: none;
 }
 
 .property-upgrades-detail.visible {
-    display: block; /* Or flex/grid if needed for internal layout */
+    display: block; /* Or flex, grid as needed for internal layout of buttons */
 }
 
 .property-upgrades-detail .upgrade-main-btn-detail,
 .property-upgrades-detail .specific-upgrade-btn-detail {
-    width: calc(100% - 10px); /* Full width within padding */
-    margin: 5px;
+    width: calc(100% - 10px); /* Full width within its padding */
+    margin: 5px auto; /* Centered with auto margins for left/right */
+    display: block; /* Ensure they take up the line */
     box-sizing: border-box;
 }
 .property-upgrades-detail .upgrade-main-btn-detail {
@@ -301,19 +296,23 @@ footer {
     background-color: #8e44ad;
 }
 
-.property-upgrades-detail p { /* For "Specific Upgrades:" title inside detail view */
+.property-upgrades-detail > p { /* For "Specific Upgrades:" title inside detail view */
     font-weight: bold;
     margin-top: 10px;
     margin-bottom: 5px;
     font-size: 0.9em;
     color: #34495e;
+    text-align: center;
 }
 
-/* Ensure the scrollable list still works with potentially taller cards */
-.scrollable-list {
-    max-height: 65vh; /* Adjust as needed, viewport height relative */
-    overflow-y: auto;
-    padding-right: 10px; /* Space for scrollbar */
-    /* Add some bottom padding to the list itself if cards expand near the bottom */
-    padding-bottom: 20px;
+
+/* Footer Styling */
+footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #34495e;
+    color: #bdc3c7;
+    font-size: 0.85rem;
+    margin-top: auto; /* Pushes footer to the bottom */
+    flex-shrink: 0; /* Prevent footer from shrinking */
 }
