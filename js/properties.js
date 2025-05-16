@@ -79,20 +79,24 @@ function getPropertyTypeById(id) {
     return PROPERTY_TYPES.find(prop => prop.id === id);
 }
 
+// function calculateDynamicPropertyCost(propertyType) {
+//     const ownedCount = ownedProperties.filter(p => p.typeId === propertyType.id).length;
+//     let currentCost = propertyType.baseCost * Math.pow(1.15, ownedCount);
+
+//     // Apply global property cost reduction from research
+//     if (gameState.unlockedResearch.includes("basic_construction_techniques")) {
+//         const buff = getResearchTopicById("basic_construction_techniques").globalBuff;
+//         if (buff && buff.type === "property_cost_reduction") {
+//             currentCost *= (1 - buff.percentage);
+//         }
+//     }
+//     return Math.floor(currentCost);
+// }
+
 function calculateDynamicPropertyCost(propertyType) {
-    const ownedCount = ownedProperties.filter(p => p.typeId === propertyType.id).length;
-    let currentCost = propertyType.baseCost * Math.pow(1.15, ownedCount);
-
-    // Apply global property cost reduction from research
-    if (gameState.unlockedResearch.includes("basic_construction_techniques")) {
-        const buff = getResearchTopicById("basic_construction_techniques").globalBuff;
-        if (buff && buff.type === "property_cost_reduction") {
-            currentCost *= (1 - buff.percentage);
-        }
-    }
-    return Math.floor(currentCost);
+    //  return propertyType.baseCost * Math.pow(1.15, gameState.properties[propertyType.id]?.length || 0); // Original
+    return propertyType.baseCost; // Modified: flat cost
 }
-
 function buyProperty(propertyTypeId) {
     const propertyType = getPropertyTypeById(propertyTypeId);
     if (!propertyType) {
