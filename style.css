@@ -41,6 +41,113 @@ header h1 {
     text-align: center;
 }
 
+.main-navigation {
+    display: flex;
+    justify-content: center;
+    background-color: #34495e; /* Darker background for nav */
+    padding: 0.75rem 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-button {
+    background-color: #7f8c8d; /* Neutral color */
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    margin: 0 0.5rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.nav-button:hover {
+    background-color: #95a5a6;
+}
+
+.nav-button.active-nav {
+    background-color: #e67e22; /* Active color */
+    color: white;
+    font-weight: bold;
+    border-bottom: 3px solid #c0392b; /* Darker orange accent */
+    transform: translateY(-2px); /* Slight lift effect */
+}
+
+.content-area { /* Replaces 'main' for styling */
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex; /* Two columns */
+    gap: 1.5rem;
+    flex-grow: 1; /* Allows main content to take available space */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* Spacing between sections if multiple were in a column */
+    flex-basis: 50%; /* Each column takes half width */
+    min-width: 0; /* Important for flexbox and overflow */
+}
+
+.column-left {
+    /* flex: 2; */ /* Adjust flex proportions if needed */
+}
+
+.column-right {
+    /* flex: 1; */
+}
+
+#left-column-section, #right-column-section {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex; /* Allow h2 and list to be flex items */
+    flex-direction: column; /* Stack h2 above list */
+    flex-grow: 1; /* Section takes up column space */
+    overflow: hidden; /* Prevent content from breaking out before scrolling */
+}
+
+#left-column-section h2, #right-column-section h2 {
+    color: #2c3e50;
+    border-bottom: 2px solid #e67e22;
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    flex-shrink: 0; /* Prevent title from shrinking */
+}
+
+.item-list { /* Generic class for lists */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); /* Slightly smaller min for cards */
+    gap: 1rem;
+    flex-grow: 1; /* List takes remaining space in section */
+}
+
+.scrollable-list {
+    max-height: 65vh; /* Adjust as needed, viewport height relative */
+    overflow-y: auto;
+    padding-right: 10px; /* Space for scrollbar */
+}
+
+/* Card styling (property-card, facility-card, etc.) remains largely the same */
+.property-card, .owned-property-card,
+.facility-card, .owned-facility-card,
+.research-item-card {
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    padding: 1rem;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
 main {
     padding: 1rem; /* Adjusted padding */
     max-width: 1400px; /* Increased max-width for wider layout */
@@ -127,41 +234,41 @@ section h2 {
 .facility-card p, .owned-facility-card p,
 .research-item-card p {
     margin-bottom: 0.5rem;
-    font-size: 0.9rem; /* Standardized paragraph font size */
+    font-size: 0.9rem;
 }
 
 .prop-cost, .facility-cost, .research-cost,
 .prop-upkeep, .facility-upkeep {
     font-weight: bold;
 }
-.prop-cost, .facility-cost, .research-cost { color: #c0392b; } /* Red for costs */
-.prop-upkeep, .facility-upkeep { color: #e74c3c; } /* Lighter red for upkeep */
+.prop-cost, .facility-cost, .research-cost { color: #c0392b; }
+.prop-upkeep, .facility-upkeep { color: #e74c3c; }
 .prop-rps, .facility-output, .prop-level { font-weight: bold; }
-.prop-rps, .facility-output { color: #27ae60; } /* Green for positive income/output */
-.prop-level { color: #2980b9; } /* Blue for level */
+.prop-rps, .facility-output { color: #27ae60; }
+.prop-level { color: #2980b9; }
 
 
-button {
+button { /* General button styling */
     background-color: #e67e22;
     color: white;
     border: none;
-    padding: 0.6rem 1rem; /* Adjusted padding */
+    padding: 0.6rem 1rem;
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 0.9rem; /* Adjusted font size */
+    font-size: 0.9rem;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
     margin-top: 0.5rem;
-    width: 100%; /* Make buttons take full width of their container */
+    width: 100%;
     box-sizing: border-box;
 }
+
 .upgrade-buttons-container button {
-    width: auto; /* Allow multiple upgrade buttons inline */
+    width: auto;
     margin-right: 5px;
 }
-
 
 button:hover {
     background-color: #d35400;
@@ -170,26 +277,6 @@ button:hover {
 button:disabled {
     background-color: #bdc3c7;
     cursor: not-allowed;
-}
-
-.game-messages-section .message-log {
-    background-color: #ecf0f1;
-    border: 1px solid #bdc3c7;
-    padding: 0.75rem;
-    border-radius: 4px;
-    max-height: 150px;
-    overflow-y: auto;
-    font-size: 0.9rem;
-}
-
-.game-messages-section .message-log p {
-    margin: 0 0 0.5rem 0;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px dashed #bdc3c7;
-}
-.game-messages-section .message-log p:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
 }
 
 .upgrade-buttons-container {
@@ -205,12 +292,11 @@ button:disabled {
     margin-bottom: 0.25rem;
 }
 
-
 footer {
     text-align: center;
-    padding: 1.5rem;
+    padding: 1rem; /* Reduced padding */
     background-color: #34495e;
     color: #bdc3c7;
-    font-size: 0.9rem;
-    margin-top: 2rem;
+    font-size: 0.85rem; /* Reduced font size */
+    margin-top: auto; /* Pushes footer to bottom if content is short */
 }
