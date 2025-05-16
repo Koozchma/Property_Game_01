@@ -514,25 +514,56 @@ function updateFacilityBuyButtonStates(filterType) {
 }
 
 function updateResearchButtonStatesList() {
-    // ... (implementation as provided in previous full ui.js, ensuring it targets buttons in leftColumnListElement)
+    ensureUIInitialized(); // Ensure DOM elements are ready
     RESEARCH_TOPICS.forEach(topic => {
-        const researchButton = leftColumnListElement.querySelector(`#research-${topic.id}-btn`); // Target within current view
+        const researchButton = document.getElementById(`research-${topic.id}-btn`); // Target button directly
+        
         if (researchButton && researchButton.closest('.research-item-card')) {
+            const cardElement = researchButton.closest('.research-item-card');
+
             if (gameState.unlockedResearch.includes(topic.id) || !isResearchAvailable(topic.id)) {
-                researchButton.closest('.research-item-card').style.display = 'none'; return;
+                cardElement.style.display = 'none'; // Hide the entire card if not available or done
+                return;
             }
-            researchButton.closest('.research-item-card').style.display = 'flex'; // Or 'block'
-            const requiredLabs = topic.requiredLabs || 0;
-            const ownedLabs = ownedFacilities.filter(f => getFacilityTypeById(f.typeId)?.output?.resource === 'researchPoints').length;
-            let reason = "";
-            if(ownedLabs < requiredLabs) reason = `(Need ${requiredLabs} Lab(s))`;
-            else if (gameState.researchPoints < topic.costRP) reason = `(Need ${formatNumber(topic.costRP,1)} RP)`;
-            researchButton.disabled = !!reason;
-            researchButton.textContent = `Research ${reason}`;
+            cardElement.style.display = 'flex'; // Or 'block', ensure card is visible if research is available
+
+            // REMOVED: Lab requirement check
+            // const requiredLabsCount = topic.requiredLabs || 0;
+            // const ownedScienceLabs = ownedFacilities.filter(f => getFacilityTypeById(f.typeId)?.output?.resource === 'researchPoints').length;
+            
+            let disabledReason = "";
+            let canAfford = true;
+
+            // if (ownedScienceLabs < requiredLabsCount) { // REMOVED
+            //     disabledReason = `(Need ${requiredLabsCount} Lab(s))`;
+            //     canAfford = false;
+            // } else // REMOVED 'else'
+            
+            if (topic.hasOwnProperty('cost') && typeof topic.cost === 'number' && topic.cost > 0) {
+                if (gameState.cash < topic.cost) {
+                    disabledReason += `(Need $${formatNumber(topic.cost - gameState.cash,0)}) `;
+                    canAfford = false;
+                }
+            }
+            if (topic.hasOwnProperty('materialsCost') && typeof topic.materialsCost === 'number' && topic.materialsCost > 0) {
+                if (gameState.buildingMaterials < topic.materialsCost) {
+                    disabledReason += `(Need ${formatNumber(topic.materialsCost - gameState.buildingMaterials,0)} Mats) `;
+                    canAfford = false;
+                }
+            }
+            if (topic.hasOwnProperty('costRP') && typeof topic.costRP === 'number' && topic.costRP > 0) {
+                if (gameState.researchPoints < topic.costRP) {
+                    disabledReason += `(Need ${formatNumber(topic.costRP - gameState.researchPoints,1)} RP) `;
+                    canAfford = false;
+                }
+            }
+            // If no cost properties, canAfford remains true.
+
+            researchButton.disabled = !canAfford;
+            researchButton.textContent = `Research ${disabledReason.trim()}`;
         }
     });
 }
-
 
 // ---- Initial Render ----
 function initialRender() {
