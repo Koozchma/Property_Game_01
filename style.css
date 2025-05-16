@@ -24,18 +24,18 @@ header {
     padding: 1rem 1.5rem;
     text-align: center;
     border-bottom: 2px solid #00aaff; /* Electric blue accent */
-    position: sticky; /* Make header sticky */
+    position: sticky; 
     top: 0;
     z-index: 1000;
     box-shadow: 0 2px 15px rgba(0, 170, 255, 0.1);
 }
 
 header h1 {
-    font-family: 'Orbitron', sans-serif; /* More stylized futuristic font for main title */
+    font-family: 'Orbitron', sans-serif; 
     margin: 0;
     font-size: 2.2rem;
-    color: #00d4ff; /* Bright cyan */
-    text-shadow: 0 0 5px #00aaff, 0 0 10px #00aaff; /* Neon glow */
+    color: #00d4ff; 
+    text-shadow: 0 0 5px #00aaff, 0 0 10px #00aaff; 
     letter-spacing: 1px;
 }
 
@@ -48,28 +48,28 @@ header h1 {
 }
 
 .stat-item {
-    background-color: rgba(30, 40, 60, 0.7); /* Semi-transparent dark cards */
+    background-color: rgba(30, 40, 60, 0.7); 
     padding: 0.5rem 0.9rem;
     border-radius: 4px;
     font-size: 0.9rem;
     color: #b0c8e0;
-    border: 1px solid #2a3f5f; /* Subtle border */
+    border: 1px solid #2a3f5f; 
     box-shadow: inset 0 0 3px rgba(0, 170, 255, 0.2), 0 1px 2px rgba(0,0,0,0.3);
     min-width: 95px;
     text-align: center;
     transition: all 0.3s ease;
 }
-
 .stat-item:hover {
     border-color: #00aaff;
     box-shadow: inset 0 0 8px rgba(0, 170, 255, 0.3), 0 0 10px rgba(0, 170, 255, 0.2);
 }
 
+
 /* --- Main Navigation --- */
 .main-navigation {
     display: flex;
     justify-content: center;
-    background-color: #0f1423; /* Dark base for nav */
+    background-color: #0f1423; 
     padding: 0.6rem 0;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
     border-bottom: 1px solid #2a3f5f;
@@ -77,7 +77,7 @@ header h1 {
 
 .nav-button {
     background-color: transparent;
-    color: #9cb0d0; /* Muted blue text */
+    color: #9cb0d0; 
     border: 1px solid #2a3f5f;
     padding: 0.6rem 1.2rem;
     margin: 0 0.4rem;
@@ -86,21 +86,21 @@ header h1 {
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
-    position: relative; /* For pseudo-elements if needed */
+    position: relative; 
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .nav-button:hover {
-    background-color: rgba(0, 170, 255, 0.1); /* Subtle hover glow */
+    background-color: rgba(0, 170, 255, 0.1); 
     color: #00d4ff;
     border-color: #00aaff;
     box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
 }
 
 .nav-button.active-nav {
-    background-color: #00aaff; /* Electric blue for active */
-    color: #0a0f18; /* Dark text on active */
+    background-color: #00aaff; 
+    color: #0a0f18; 
     border-color: #00d4ff;
     box-shadow: 0 0 15px rgba(0, 170, 255, 0.5), inset 0 0 5px rgba(255,255,255,0.2);
     transform: translateY(0px);
@@ -109,45 +109,50 @@ header h1 {
 /* --- Content Area & Columns --- */
 .content-area {
     padding: 1.5rem;
-    max-width: 1500px; /* Slightly wider */
+    max-width: 1500px; 
     margin: 0 auto;
     display: flex;
     gap: 1.5rem;
     flex-grow: 1;
     width: 100%;
+    /* align-items: flex-start; */ /* If you want columns to have different heights based on content */
 }
 
 .column {
-    display: flex;
+    display: flex; 
     flex-direction: column;
     flex-basis: 50%;
-    min-width: 0;
+    min-width: 0; 
 }
 
+/* Individual Section Styling (within each column) */
 #left-column-section,
 #right-column-section {
-    background-color: rgba(20, 28, 48, 0.7); /* Semi-transparent dark panel */
+    background-color: rgba(20, 28, 48, 0.7); 
     backdrop-filter: blur(3px);
     padding: 1.25rem;
     border-radius: 6px;
-    border: 1px solid #2a3f5f; /* Techy border */
+    border: 1px solid #2a3f5f; 
     box-shadow: 0 4px 15px rgba(0,0,0,0.2), inset 0 0 8px rgba(0,0,0,0.2);
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
-    overflow: hidden;
-    height: 400px;
+    /* flex-grow: 1; Remove this if setting a fixed height */
+    overflow: hidden; 
+
+    /* MODIFICATION: Set a fixed height for the sections */
+    height: 420px; /* Adjust this value! Start with an estimate for ~2 portfolio items + title + padding */
+                   /* Example: If 2 cards are ~150px each + title ~50px + padding ~40px = 390px */
 }
 
 #left-column-section h2,
 #right-column-section h2 {
     font-family: 'Orbitron', sans-serif;
-    color: #00d4ff; /* Bright cyan title */
+    color: #00d4ff; 
     border-bottom: 1px solid #00aaff;
     padding-bottom: 0.6rem;
     margin-top: 0;
     margin-bottom: 1rem;
-    flex-shrink: 0;
+    flex-shrink: 0; 
     font-size: 1.5rem;
     text-align: center;
     text-shadow: 0 0 3px rgba(0, 170, 255, 0.7);
@@ -156,87 +161,93 @@ header h1 {
 /* --- Item Lists & Scrollability --- */
 .item-list {
     display: grid;
-    /* For owned items, maybe 1 column for more detail, for available, 2 columns */
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Default, can be overridden */
-    gap: 1rem;
-/*     flex-grow: 1; */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+    gap: 1rem; 
+    /* flex-grow: 1; This is now primarily handled by .scrollable-list if it's the direct child growing */
 }
 
 /* Specific override for portfolio to usually be single column for more detail */
-#right-column-list.item-list { /* If it's showing owned items, usually better as 1 column */
-    grid-template-columns: 1fr; /* Single column for owned items */
+#right-column-list.item-list { /* This targets the div that has BOTH classes */
+    grid-template-columns: 1fr; 
 }
 
 
-.scrollable-list { /* This is the div that gets overflow-y: auto */
-/*     max-height: calc(100vh - 250px); /* Let's change this */ */
-    overflow-y: auto;
-    padding-right: 10px;
-    padding-bottom: 10px;
-    flex-grow: 1; /* Make the scrollable container try to take space */
-    min-height: 0; /* Crucial for flex children that scroll */
+.scrollable-list {
+    /* max-height: calc(100vh - 250px); REMOVED - height is now controlled by parent section */
+    overflow-y: auto; 
+    padding-right: 8px; /* Adjusted for thinner scrollbar */
+    padding-left: 2px; /* Slight padding on the left of scroll content */
+    padding-bottom: 10px; 
+    flex-grow: 1; /* IMPORTANT: list grows to fill the section's fixed height */
+    min-height: 0; /* Crucial for scroll within flex item */
 }
 
 /* Custom Scrollbar (Webkit browsers) */
 .scrollable-list::-webkit-scrollbar {
-    width: 8px;
+    width: 6px; /* Thinner scrollbar */
 }
-
 .scrollable-list::-webkit-scrollbar-track {
-    background: rgba(42, 63, 95, 0.3); /* Dark track */
-    border-radius: 4px;
+    background: rgba(42, 63, 95, 0.2); /* Darker, more transparent track */
+    border-radius: 3px;
 }
-
 .scrollable-list::-webkit-scrollbar-thumb {
-    background-color: #00aaff; /* Blue thumb */
-    border-radius: 4px;
-    border: 2px solid transparent; /* Creates padding around thumb */
-    background-clip: content-box;
+    background-color: #007acc; /* Slightly less bright blue thumb */
+    border-radius: 3px;
+    /* border: 1px solid rgba(0,0,0,0.2); */ /* Optional subtle border */
 }
-
 .scrollable-list::-webkit-scrollbar-thumb:hover {
-    background-color: #00d4ff;
+    background-color: #00aaff; /* Brighter on hover */
 }
 
 /* --- Card Styling (Futuristic) --- */
 .property-card, .owned-property-card,
 .facility-card, .owned-facility-card,
-.research-item-card {
-    background: linear-gradient(145deg, rgba(30, 40, 60, 0.85), rgba(25, 35, 55, 0.9)); /* Dark gradient */
-    border: 1px solid #2a3f5f; /* Tech border */
-    padding: 0.75rem; /* Using compact card padding */
+.research-item-card,
+.unlock-placeholder-card { /* Added placeholder here for base styles */
+    background: linear-gradient(145deg, rgba(30, 40, 60, 0.85), rgba(25, 35, 55, 0.9)); 
+    border: 1px solid #2a3f5f; 
+    padding: 0.75rem; 
     border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(0, 170, 255, 0.1); /* Inner glow illusion */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(0, 170, 255, 0.1); 
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: space-between; /* Changed from center for most cards */
     transition: all 0.3s ease;
-    position: relative; /* For potential pseudo-element accents */
+    position: relative; 
+    /* min-height: 150px; Removed, let content dictate or specific cards define */
 }
+
+.unlock-placeholder-card { /* Specific overrides for placeholder */
+    justify-content: center; /* Center content for placeholder */
+    align-items: center; 
+    text-align: center; 
+    min-height: 150px; /* Give placeholder a minimum height */
+    border-style: dashed; 
+    border-color: #007acc; 
+}
+.unlock-placeholder-card::before { /* No accent for placeholder */
+    display: none;
+}
+
 
 .property-card:hover, .owned-property-card:hover,
 .facility-card:hover, .owned-facility-card:hover,
-.research-item-card:hover {
+.research-item-card:hover,
+.unlock-placeholder-card:hover { 
     border-color: #00aaff;
     box-shadow: 0 4px 12px rgba(0, 170, 255, 0.2), 0 0 15px rgba(0, 170, 255, 0.1), inset 0 0 0 1px rgba(0, 170, 255, 0.3);
     transform: translateY(-2px);
 }
 
 /* Card Accents */
-.property-card::before, .facility-card::before, .research-item-card::before { /* Available items */
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 4px; height: 100%;
-    background: linear-gradient(to bottom, #00aaff, #00d4ff); /* Cyan/Blue gradient */
+.property-card::before, .facility-card::before, .research-item-card::before { 
+    content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+    background: linear-gradient(to bottom, #00aaff, #00d4ff);
     border-radius: 6px 0 0 6px;
 }
-.owned-property-card::before, .owned-facility-card::before { /* Owned items */
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 4px; height: 100%;
-    background: linear-gradient(to bottom, #00ffaa, #00dd90); /* Greenish tech accent */
+.owned-property-card::before, .owned-facility-card::before { 
+    content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+    background: linear-gradient(to bottom, #00ffaa, #00dd90);
     border-radius: 6px 0 0 6px;
 }
 
@@ -244,76 +255,91 @@ header h1 {
 /* Typography within cards */
 .property-card h3, .owned-property-card h3,
 .facility-card h3, .owned-facility-card h3,
-.research-item-card h3 {
+.research-item-card h3, .unlock-placeholder-card h3 {
     margin-top: 0;
     margin-bottom: 0.6rem;
-    color: #00d4ff; /* Bright cyan for titles */
+    color: #00d4ff; 
     font-size: 1.05rem;
     font-family: 'Orbitron', sans-serif;
     text-align: center;
     text-shadow: 0 0 3px rgba(0, 170, 255, 0.5);
 }
+.unlock-placeholder-card h3 { /* Specific for placeholder title */
+    color: #00aaff;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+}
+
 
 .property-card p, .owned-property-card p,
 .facility-card p, .owned-facility-card p,
-.research-item-card p {
+.research-item-card p, .unlock-placeholder-card p {
     margin-bottom: 0.4rem;
-    font-size: 0.85rem; /* Compact text */
-    color: #a0b8d0; /* Lighter, softer text */
+    font-size: 0.85rem; 
+    color: #a0b8d0; 
+}
+.unlock-placeholder-card p {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+    color: #9cb0d0;
+    max-width: 90%;
 }
 
+
 /* Specific text styling in cards (costs, income, levels) */
-.prop-cost, .facility-cost, .research-cost { color: #ff6b6b; font-weight: bold; } /* Bright red for costs */
-.prop-upkeep, .facility-upkeep { color: #ff8f8f; font-weight: normal;} /* Lighter red for upkeep */
-.prop-rps, .facility-output { color: #50fa7b; font-weight: bold; } /* Bright green for positive */
-.prop-level { color: #8be9fd; font-weight: bold; } /* Light blue/cyan for level */
+.prop-cost, .facility-cost, .research-cost { color: #ff6b6b; font-weight: bold; } 
+.prop-upkeep, .facility-upkeep { color: #ff8f8f; font-weight: normal;} 
+.prop-rps, .facility-output { color: #50fa7b; font-weight: bold; } 
+.prop-level { color: #8be9fd; font-weight: bold; } 
+.unlock-placeholder-card .research-cost-display {
+    font-weight: bold; color: #ffc107; font-size: 1rem; margin-bottom: 1rem;
+}
+
 
 /* Property Info Grid (for owned property cards) */
 .property-info-grid {
     display: grid;
-    grid-template-columns: auto 1fr; /* Label and value */
+    grid-template-columns: auto 1fr; 
     gap: 0.2rem 0.5rem;
     font-size: 0.8rem;
     margin-bottom: 0.6rem;
     color: #b0c8e0;
 }
-.property-info-grid .label {
-    font-weight: 600; /* Rajdhani regular or medium */
-    color: #8098b0;
-}
-.property-info-grid .value {
-    text-align: right;
-    font-weight: 600;
-    color: #d0e0f0;
-}
+.property-info-grid .label { font-weight: 600; color: #8098b0; }
+.property-info-grid .value { text-align: right; font-weight: 600; color: #d0e0f0; }
 
 /* Card Actions (for Manage Upgrades & Sell buttons on owned cards) */
-.owned-property-card .card-actions {
+.owned-property-card .card-actions,
+.owned-facility-card .card-actions { /* Apply to facility cards too */
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* Changed from space-around for tighter packing */
     gap: 0.5rem;
     margin-top: 0.75rem;
 }
-.owned-property-card .card-actions button {
-    flex-grow: 1;
-    padding: 0.5rem 0.5rem;
+.owned-property-card .card-actions button,
+.owned-facility-card .card-actions button {
+    flex-grow: 1; /* Buttons share space */
+    padding: 0.5rem 0.5rem; /* Slightly more padding */
     font-size: 0.8rem;
     margin-top: 0;
+    min-width: 80px; /* Prevent buttons from becoming too small */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* --- Buttons --- */
-button { /* General futuristic button */
-    background: linear-gradient(145deg, #2a3f5f, #1e2b40); /* Dark gradient */
-    color: #00d4ff; /* Cyan text */
+button { 
+    background: linear-gradient(145deg, #2a3f5f, #1e2b40); 
+    color: #00d4ff; 
     border: 1px solid #00aaff;
-    padding: 0.7rem 1.2rem; /* More padding for general buttons */
+    padding: 0.7rem 1.2rem; 
     text-align: center;
     font-size: 0.9rem;
     font-weight: 600;
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
-    margin-top: 0.75rem; /* More margin for primary action buttons */
+    margin-top: 0.75rem; 
     width: 100%;
     box-sizing: border-box;
     box-shadow: 0 1px 3px rgba(0,0,0,0.3), inset 0 0 2px rgba(0, 170, 255, 0.2);
@@ -328,45 +354,78 @@ button:hover {
     transform: translateY(-1px);
 }
 button:disabled {
-    background: #1a2230; /* Darker, desaturated */
-    color: #4a5f7f; /* Muted text */
+    background: #1a2230; 
+    color: #4a5f7f; 
     border-color: #2a3f5f;
     cursor: not-allowed;
     box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
     transform: translateY(0);
 }
 
+/* Specific "Unlock Next Tier Rentals" Button */
+.unlock-next-tier-button-container {
+    width: 100%;
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: center;
+}
+button.unlock-next-tier-btn {
+    background: linear-gradient(145deg, #b71c1c, #7f0000); /* More distinct, urgent red */
+    border-color: #ff5252;
+    color: #fff;
+    padding: 0.7rem 1.3rem;
+    width: auto; 
+    max-width: 90%; 
+    font-size: 0.9rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3), inset 0 0 3px rgba(255,82,82,0.2);
+}
+button.unlock-next-tier-btn:hover {
+    background: linear-gradient(145deg, #d32f2f, #9f0000);
+    border-color: #ff8a80;
+}
+button.unlock-next-tier-btn:disabled {
+    background: #4e1212;
+    color: #8e5e5e;
+    border-color: #6e3232;
+}
+
+
 /* Upgrade Buttons (inside containers/details) */
 .upgrade-buttons-container button,
 .property-upgrades-detail button {
-    width: auto;
+    width: auto; 
     margin-right: 5px;
-    margin-bottom: 5px;
-    flex-grow: 1;
-    padding: 0.5rem 0.8rem; /* Smaller padding for these */
+    margin-bottom: 5px; 
+    flex-grow: 1; 
+    padding: 0.5rem 0.8rem; 
     font-size: 0.85rem;
-    text-transform: none; /* Normal case for upgrade names */
+    text-transform: none; 
     letter-spacing: 0;
 }
 
 /* Manage Upgrades Button on Card */
-.owned-property-card .manage-upgrades-btn {
-    background: linear-gradient(145deg, #007acc, #005c99); /* Blue gradient */
+.owned-property-card .manage-upgrades-btn,
+.owned-facility-card .manage-upgrades-btn { /* Apply to facility cards too */
+    background: linear-gradient(145deg, #007acc, #005c99); 
     border-color: #00aaff;
     color: #fff;
 }
-.owned-property-card .manage-upgrades-btn:hover {
+.owned-property-card .manage-upgrades-btn:hover,
+.owned-facility-card .manage-upgrades-btn:hover {
     background: linear-gradient(145deg, #008becc, #006cb9);
     border-color: #00d4ff;
 }
 
 /* Sell Button on Card */
-.owned-property-card .sell-btn {
-    background: linear-gradient(145deg, #c0392b, #a0291b); /* Red gradient */
+.owned-property-card .sell-btn,
+.owned-facility-card .sell-btn { /* Apply to facility cards too */
+    background: linear-gradient(145deg, #c0392b, #a0291b); 
     border-color: #ff6b6b;
     color: #fff;
 }
-.owned-property-card .sell-btn:hover {
+.owned-property-card .sell-btn:hover,
+.owned-facility-card .sell-btn:hover {
     background: linear-gradient(145deg, #d0493b, #b0392b);
     border-color: #ff8f8f;
 }
@@ -375,20 +434,20 @@ button:disabled {
 .property-upgrades-detail {
     padding: 0.75rem;
     margin-top: 0.75rem;
-    background-color: rgba(15, 20, 35, 0.9); /* Darker panel inside card */
+    background-color: rgba(15, 20, 35, 0.9); 
     border-top: 1px solid #2a3f5f;
     border-radius: 0 0 4px 4px;
 }
 .property-upgrades-detail:not(.visible) { display: none; }
 .property-upgrades-detail.visible { display: block; }
 
-.property-upgrades-detail > p { /* "Specific Upgrades:" title */
+.property-upgrades-detail > p { 
     font-family: 'Orbitron', sans-serif;
     font-weight: normal;
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
     font-size: 0.9em;
-    color: #00aaff; /* Blue accent for this title */
+    color: #00aaff; 
     text-align: center;
     border-bottom: 1px dashed #2a3f5f;
     padding-bottom: 0.3rem;
@@ -396,13 +455,13 @@ button:disabled {
 
 /* Buttons inside the upgrade detail panel */
 .property-upgrades-detail .upgrade-main-btn-detail {
-    background: linear-gradient(145deg, #16a085, #108065); /* Teal gradient */
-    border-color: #50fa7b; /* Greenish border */
+    background: linear-gradient(145deg, #16a085, #108065); 
+    border-color: #50fa7b; 
     color: #fff;
 }
 .property-upgrades-detail .specific-upgrade-btn-detail {
-    background: linear-gradient(145deg, #8e44ad, #703090); /* Purple gradient */
-    border-color: #c377e0; /* Lighter purple border */
+    background: linear-gradient(145deg, #8e44ad, #703090); 
+    border-color: #c377e0; 
     color: #fff;
 }
 
@@ -411,46 +470,10 @@ button:disabled {
 footer {
     text-align: center;
     padding: 1rem;
-    background-color: #0f111a; /* Match darker header elements */
-    color: #607090; /* Muted text */
+    background-color: #0f111a; 
+    color: #607090; 
     font-size: 0.8rem;
-    margin-top: auto;
-    flex-shrink: 0;
+    margin-top: auto; 
+    flex-shrink: 0; 
     border-top: 1px solid #2a3f5f;
-}
-
-/* Styling for the "Unlock Next Tier Rentals" button container and button */
-.unlock-next-tier-button-container {
-    width: 100%; /* Take full width of the list item slot */
-    padding: 0.5rem 0; /* Add some vertical padding around the button */
-    margin-top: 0.5rem; /* Space above this button if there are cards */
-    display: flex; /* To help center the button if needed, or for future additions */
-    justify-content: center;
-}
-
-button.unlock-next-tier-btn {
-    background: linear-gradient(145deg, #c0392b, #a0291b); /* Distinct color, e.g., red/warning for unlock */
-    border-color: #ff6b6b;
-    color: #fff;
-    padding: 0.75rem 1.5rem; /* Make it a prominent button */
-    width: auto; /* Size to content */
-    max-width: 90%; /* Prevent it from being overly wide if text is long */
-    font-size: 0.95rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3), inset 0 0 3px rgba(255,107,107,0.2);
-}
-
-button.unlock-next-tier-btn:hover {
-    background: linear-gradient(145deg, #d0493b, #b0392b);
-    border-color: #ff8f8f;
-    box-shadow: 0 3px 7px rgba(0,0,0,0.4), 0 0 12px rgba(255,107,107,0.4), inset 0 0 4px rgba(255,107,107,0.3);
-}
-
-button.unlock-next-tier-btn:disabled {
-    background: #4a221c; /* Darker, desaturated red */
-    color: #885048;
-    border-color: #6a322c;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
 }
