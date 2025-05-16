@@ -78,10 +78,10 @@ const RESEARCH_TOPICS = [
     {
         id: "urban_planning_1", // This is the research for the first rental unlock after Shack
         name: "Unlock Basic Rentals",
-        costRP: 300, // UPDATED: Costs 300 RP as per new request
+        costRP: 300, // <<< SET TO 300 RP as requested
         // requiredLabs removed
         description: "Learn to build basic new rental types like apartments and trailer homes. Costs 300 RP.",
-        prerequisites: ["basic_education"],
+        prerequisites: ["basic_education"], // Requires basic education first
         unlocksPropertyType: ["small_apartment", "trailer_home"], // Properties unlocked by this
         unlocksResearch: ["urban_planning_2", "commercial_development_1"] // Next research this enables
     },
@@ -110,67 +110,26 @@ const RESEARCH_TOPICS = [
     {
         id: "urban_planning_2",
         name: "Urban Planning II",
-        costRP: 150, // Example cost for next tier
+        costRP: 150, 
         // requiredLabs removed
         description: "Unlocks Suburban Houses.",
         prerequisites: ["urban_planning_1"],
         unlocksPropertyType: ["suburban_house"],
-        unlocksResearch: ["urban_planning_3"] // Example: leads to another tier
+        unlocksResearch: ["urban_planning_3"] 
     },
-    {
-        id: "commercial_development_1",
-        name: "Commercial Dev. I",
-        costRP: 40,
-        // requiredLabs removed
-        description: "Unlocks basic commercial properties.",
-        prerequisites: ["urban_planning_1"], // Could also be from a different branch
-        unlocksPropertyType: ["corner_store"],
-        unlocksResearch: []
-    },
-    {
-        id: "advanced_material_processing",
-        name: "Adv. Material Processing",
-        costRP: 60,
-        // requiredLabs removed
-        description: "More efficient use of building materials for upgrades.",
-        prerequisites: ["basic_construction_techniques"],
-        globalBuff: { type: "material_usage_efficiency", percentage: 0.10 },
-        unlocksResearch: []
-    },
-    {
-        id: "commercial_logistics",
-        name: "Commercial Logistics",
-        costRP: 50,
-        // requiredLabs removed
-        description: "Improves RPS for commercial properties.",
-        prerequisites: ["scientific_method_1"],
-        globalBuff: { type: "property_rps_boost", percentage: 0.05, scope: "commercial" },
-        unlocksResearch: []
-    },
-    {
-        id: "scientific_method_2",
-        name: "Scientific Method II",
-        costRP: 75,
-        // requiredLabs removed
-        description: "Further improves research efficiency and unlocks Advanced Science Labs.",
-        prerequisites: ["scientific_method_1"],
-        unlocksFacilityType: ["advanced_science_lab"],
-        globalBuff: { type: "research_speed_boost", percentage: 0.10 },
-        unlocksResearch: []
-    },
+    // ... (rest of your RESEARCH_TOPICS array, ensuring 'requiredLabs' is removed from all) ...
     // Example for a next tier of property unlocks
     {
         id: "urban_planning_3",
         name: "Urban Planning III",
-        costRP: 250, // Example cost
+        costRP: 250, 
         // requiredLabs removed
         description: "Unlocks more advanced residential options.",
         prerequisites: ["urban_planning_2"],
-        unlocksPropertyType: [/* "luxury_condo", "another_property" */], // Define these property IDs in properties.js
+        unlocksPropertyType: [/* "luxury_condo", "another_property" */], 
         unlocksResearch: []
     }
 ];
-
 
 let ownedFacilities = [];
 let nextFacilityId = 0;
