@@ -158,3 +158,46 @@ function sellPropertyInstance(ownedPropertyUniqueId) {
     updateGameData();
     logMessage(`Sold ${propertyInstance.name} for $${sellPrice.toLocaleString()}.`, "info");
 }
+
+function calculateTotalPropertiesRPS() { // Make sure this is the exact name
+    // Apply workshop buffs here
+    let totalRPS = 0;
+    let workshopBuffPercentage = 0;
+
+    ownedFacilities.forEach(fac => {
+        const facType = getFacilityTypeById(fac.typeId);
+        if (facType && facType.id === "basic_workshop" && facType.effects) {
+            const effectDef = facType.effects.find(e => e.type === "property_rps_boost" && e.propertyCategory === "cheap");
+            if (effectDef) {
+                let currentEffectPercentage = effectDef.percentage;
+                // Check for upgrades that might enhance this effect
+                const upgradeDef = facType.upgrades.find(u => u.id === "better_tools");
+                if (upgradeDef && facInst.appliedUpgrades && facInst.appliedUpgrades[upgradeDef.id]) {
+                     currentEffectPercentage += (upgradeDef.effect.rpsBoostIncrease * facInst.appliedUpgrades[upgradeDef.id]);
+                }
+                workshopBuffPercentage += currentEffectPercentage;
+            }
+        }
+    });
+
+    ownedProperties.forEach(propInst => {
+        let effectiveRPS = propInst.currentRPS;
+        const propTypeDetails = getPropertyTypeById(propInst.typeId);
+
+        // Apply global RPS buffs from research
+        if (gameState.unlockedResearch.includes("commercial_logistics") && propTypeDetails && (propTypeDetails.id === "corner_store" /* add other commercial types here */)) {
+            const buff = getResearchTopicById("commercial_logistics").globalBuff;
+            if (buff && buff.type === "property_rps_boost" && buff.scope === "commercial") {
+                effectiveRPS *= (1 + buff.percentage);
+            }
+        }
+
+        // Apply workshop buff if property is "cheap"
+        if (workshopBuffPercentage > 0 && propTypeDetails && (propTypeDetails.id === "shack" || propTypeDetails.id === "small_apartment")) {
+             effectiveRPS *= (1 + workshopBuffPercentage);
+        }
+
+        totalRPS += effectiveRPS;
+    });
+    return parseFloat(totalRPS.toFixed(2));
+}
