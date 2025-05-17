@@ -1,73 +1,47 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #121212; /* Dark background */
-    color: #e0e0e0; /* Light text */
+    background-color: #2a2a2a; /* Matching the dark grey background of the section */
+    color: #e0e0e0;
     margin: 0;
     padding: 20px;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center; /* Center the container vertically */
     min-height: 100vh;
-    line-height: 1.6;
+    box-sizing: border-box;
 }
 
 .container {
     width: 90%;
-    max-width: 1000px;
-    background-color: #1e1e1e; /* Slightly lighter dark for container */
-    border-radius: 10px;
-    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
-    padding: 20px 30px;
-}
-
-header {
-    text-align: center;
-    margin-bottom: 30px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 20px;
-}
-
-header h1 {
-    color: #bb86fc; /* A 'psychotic purple' or 'manipulative violet' */
-    margin: 0 0 10px 0;
-}
-
-header p {
-    font-style: italic;
-    color: #b0b0b0;
-}
-
-.game-area {
-    display: flex;
-    flex-direction: column; /* Stack sections vertically for now */
-    gap: 30px;
-}
-
-.main-clicker-section, .upgrades-section, .research-section {
-    background-color: #2a2a2a; /* Darker elements background */
-    padding: 20px;
+    max-width: 500px; /* Adjust as needed for the clicker section's width */
+    background-color: #2a2a2a; /* Section background */
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    /* box-shadow: 0 2px 10px rgba(0,0,0,0.3); Removed for cleaner look like image */
+    padding: 25px 30px;
 }
 
-.main-clicker-section h2, .upgrades-section h2, .research-section h2 {
-    color: #03dac6; /* A contrasting 'tech' or 'unsettling' teal */
+.main-clicker-section h2 {
+    color: #03dac5; /* Teal color from the image */
     margin-top: 0;
-    border-bottom: 1px solid #444;
+    /* border-bottom: 1px solid #444; Removed to match image */
     padding-bottom: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    text-align: left; /* Matches image */
+    font-size: 1.5em; /* Approximate size from image */
+    font-weight: 600;
 }
 
 .resource-display {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 15px;
+    font-size: 1.1em; /* Approximate size */
+    font-weight: 500;
+    margin-bottom: 25px;
     text-align: center;
-    color: #cfcfcf;
+    color: #e0e0e0; /* White/light grey text */
 }
 
 .resource-display span {
-    color: #f0c040; /* Gold-ish for points */
+    color: #f0c040; /* Gold-ish for points, like in the image */
+    font-weight: bold;
 }
 
 .click-action-area {
@@ -75,48 +49,37 @@ header p {
 }
 
 .clickable-image {
-    width: 150px; /* Adjust to your image size */
-    height: 150px; /* Adjust to your image size */
+    width: 150px;   /* Adjust to your preferred size */
+    height: 150px;  /* Adjust to your preferred size */
     cursor: pointer;
-    border-radius: 50%; /* Make it circular for a 'target' feel, optional */
-    border: 3px solid #03dac6;
-    transition: transform 0.1s ease-out, box-shadow 0.2s ease-out;
-    object-fit: cover; /* Ensures the image covers the area if not perfectly square */
-    background-color: #121212; /* Background if image is transparent or smaller */
+    border-radius: 50%; /* Makes the image container circular */
+    border: 4px solid #03dac5; /* Teal border, similar to image highlight */
+    transition: transform 0.1s ease-out, box-shadow 0.15s ease-out;
+    object-fit: cover; /* Ensures the image fills the circle nicely */
+    background-color: #1e1e1e; /* Darker background for inside the circle if image is transparent */
+    padding: 5px; /* Optional: to create a small gap between image and border */
+    box-sizing: border-box; /* Ensures padding and border are included in width/height */
 }
 
 .clickable-image:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px #03dac6, 0 0 30px #03dac6aa;
+    transform: scale(1.03);
+    box-shadow: 0 0 15px #03dac5a0, 0 0 25px #03dac570;
 }
 
 .clickable-image:active {
-    transform: scale(0.95);
-    box-shadow: 0 0 10px #bb86fc, 0 0 15px #bb86fcaa;
-    border-color: #bb86fc;
+    transform: scale(0.97);
+    box-shadow: 0 0 8px #03dac5, 0 0 12px #03dac590;
+    border-color: #81ecec; /* Slightly lighter teal on click */
 }
 
 .click-power-text {
-    font-size: 1em;
-    color: #aaa;
-    margin-top: 10px;
+    font-size: 0.95em; /* Approximate size */
+    color: #b0b0b0; /* Lighter grey for this text */
+    margin-top: 15px;
     text-align: center;
 }
 
 .click-power-text span {
-    color: #f0c040;
+    color: #f0c040; /* Gold-ish for the number */
     font-weight: bold;
-}
-
-.upgrades-section p em, .research-section p em {
-    color: #777; /* For "Coming Soon" text */
-}
-
-footer {
-    text-align: center;
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid #333;
-    font-size: 0.9em;
-    color: #888;
 }
