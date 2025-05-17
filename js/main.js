@@ -1,34 +1,61 @@
-// js/main.js (TEMPORARY DEBUG VERSION)
+// js/main.js
 
-const GameLogic = {
+const Game = {
+    // Initialize the game
     init: function() {
-        console.log("[DEBUG] GameLogic.init function has started.");
-        console.log("[DEBUG] Attempting to find element with ID 'manipulate-image'...");
+        console.log("Psychopath Game: Initialization sequence started...");
 
-        const manipulateImageElement = document.getElementById('manipulate-image');
-
-        if (manipulateImageElement) {
-            console.log("[DEBUG] SUCCESS: Element 'manipulate-image' was FOUND in the HTML.", manipulateImageElement);
-            try {
-                manipulateImageElement.addEventListener('click', function() {
-                    console.log("[DEBUG] Manipulate image was CLICKED!");
-                    // In a real scenario, you'd call: GameLogic.manualManipulate();
-                });
-                console.log("[DEBUG] Event listener ADDED to 'manipulate-image'.");
-            } catch (e) {
-                console.error("[DEBUG] ERROR adding event listener:", e);
-            }
+        // Setup event listeners
+        const manipulateImage = document.getElementById('manipulate-image');
+        if (manipulateImage) {
+            manipulateImage.addEventListener('click', () => {
+                this.earnMP();
+                // Optional: Add a class for JS-driven animation if CSS :active isn't enough
+                // manipulateImage.classList.add('clicked-animation');
+                // setTimeout(() => manipulateImage.classList.remove('clicked-animation'), 100);
+            });
         } else {
-            console.error("[DEBUG] FAILURE: Element 'manipulate-image' was NOT FOUND in the HTML by getElementById.");
+            console.error("ERROR: Main manipulation image not found! Check ID 'manipulate-image'.");
         }
 
-        console.log("[DEBUG] GameLogic.init function has finished.");
+        // Initial UI setup
+        UIManager.updateUI();
+        UIManager.updateDate(); // Set the date on load
+
+        // Start the game loop (for passive income, time-based events later)
+        // For now, it's simple, but can be expanded.
+        // this.gameLoopInterval = setInterval(() => this.gameTick(), 1000); // 1 tick per second
+
+        console.log("Psychopath Game: Ready to manipulate!");
+    },
+
+    // Function to earn Manipulation Points
+    earnMP: function() {
+        gameData.manipulationPoints += gameData.mpPerClick;
+        UIManager.updateUI(); // Update the display
+        // console.log(`Earned ${gameData.mpPerClick} MP. Total: ${gameData.manipulationPoints}`);
+    },
+
+    // The main game tick (called by setInterval)
+    gameTick: function() {
+        // This is where passive MP generation will happen
+        // let passiveMPGain = 0;
+        // gameData.idleGenerators.forEach(gen => { passiveMPGain += gen.owned * gen.mps; });
+        // gameData.manipulationPoints += passiveMPGain;
+
+        // Update UI every tick
+        UIManager.updateUI();
+        // console.log("Game tick. Current MP:", gameData.manipulationPoints);
     }
-    // manualManipulate, loadGame, etc. are not used in this temporary version
+
+    // More game logic functions will go here:
+    // buyGenerator(generatorId) { ... }
+    // purchaseResearch(researchId) { ... }
+    // saveData() { ... }
+    // loadData() { ... }
 };
 
-// This listener ensures the HTML is loaded before GameLogic.init runs
+// Wait for the HTML to be fully loaded before starting the game
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("[DEBUG] DOMContentLoaded event has fired. The HTML should be ready.");
-    GameLogic.init();
+    Game.init();
 });
