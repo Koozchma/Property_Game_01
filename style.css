@@ -1,64 +1,71 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #2a2a2a; /* Matching the dark grey background of the section */
+    background-color: #1e1e1e; /* Darker background for the whole page */
     color: #e0e0e0;
     margin: 0;
     padding: 20px;
     display: flex;
     justify-content: center;
-    align-items: center; /* Center the container vertically */
+    align-items: flex-start; /* Align to top for longer content */
     min-height: 100vh;
     box-sizing: border-box;
 }
 
 .container {
     width: 90%;
-    max-width: 500px; /* Adjust as needed for the clicker section's width */
-    background-color: #2a2a2a; /* Section background */
+    max-width: 700px; /* Slightly wider to accommodate more sections */
+    background-color: #2a2a2a;
     border-radius: 8px;
-    /* box-shadow: 0 2px 10px rgba(0,0,0,0.3); Removed for cleaner look like image */
     padding: 25px 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
-.main-clicker-section h2 {
-    color: #03dac5; /* Teal color from the image */
+.main-clicker-section h2, .generators-section h2 { /* Shared style for section titles */
+    color: #03dac5;
     margin-top: 0;
-    /* border-bottom: 1px solid #444; Removed to match image */
     padding-bottom: 10px;
     margin-bottom: 20px;
-    text-align: left; /* Matches image */
-    font-size: 1.5em; /* Approximate size from image */
+    text-align: left;
+    font-size: 1.6em;
     font-weight: 600;
+    border-bottom: 1px solid #383838;
 }
 
 .resource-display {
-    font-size: 1.1em; /* Approximate size */
+    font-size: 1.1em;
     font-weight: 500;
-    margin-bottom: 25px;
+    margin-bottom: 10px; /* Reduced margin */
     text-align: center;
-    color: #e0e0e0; /* White/light grey text */
+    color: #e0e0e0;
+}
+
+.resource-display.secondary-stats { /* For MPS display */
+    font-size: 0.9em;
+    color: #b0b0b0;
+    margin-bottom: 20px;
 }
 
 .resource-display span {
-    color: #f0c040; /* Gold-ish for points, like in the image */
+    color: #f0c040;
     font-weight: bold;
 }
 
 .click-action-area {
     text-align: center;
+    margin-bottom: 30px; /* Space before next section */
 }
 
 .clickable-image {
-    width: 150px;   /* Adjust to your preferred size */
-    height: 150px;  /* Adjust to your preferred size */
+    width: 140px;
+    height: 140px;
     cursor: pointer;
-    border-radius: 50%; /* Makes the image container circular */
-    border: 4px solid #03dac5; /* Teal border, similar to image highlight */
+    border-radius: 50%;
+    border: 4px solid #03dac5;
     transition: transform 0.1s ease-out, box-shadow 0.15s ease-out;
-    object-fit: cover; /* Ensures the image fills the circle nicely */
-    background-color: #1e1e1e; /* Darker background for inside the circle if image is transparent */
-    padding: 5px; /* Optional: to create a small gap between image and border */
-    box-sizing: border-box; /* Ensures padding and border are included in width/height */
+    object-fit: cover;
+    background-color: #1e1e1e;
+    padding: 5px;
+    box-sizing: border-box;
 }
 
 .clickable-image:hover {
@@ -69,17 +76,83 @@ body {
 .clickable-image:active {
     transform: scale(0.97);
     box-shadow: 0 0 8px #03dac5, 0 0 12px #03dac590;
-    border-color: #81ecec; /* Slightly lighter teal on click */
+    border-color: #81ecec;
 }
 
 .click-power-text {
-    font-size: 0.95em; /* Approximate size */
-    color: #b0b0b0; /* Lighter grey for this text */
+    font-size: 0.95em;
+    color: #b0b0b0;
     margin-top: 15px;
     text-align: center;
 }
 
 .click-power-text span {
-    color: #f0c040; /* Gold-ish for the number */
+    color: #f0c040;
     font-weight: bold;
+}
+
+/* Styles for Generators Section */
+.generators-section {
+    margin-top: 20px;
+}
+
+#idle-generators-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between generator items */
+}
+
+.generator-item {
+    background-color: #333; /* Slightly different background for items */
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 4px solid #bb86fc; /* Purple accent */
+    display: flex;
+    flex-direction: column; /* Stack info vertically */
+    gap: 8px; /* Space within item */
+}
+
+.generator-item .name {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #e0e0e0;
+}
+
+.generator-item .description {
+    font-size: 0.85em;
+    color: #b0b0b0;
+    font-style: italic;
+}
+
+.generator-item .stats, .generator-item .cost-info {
+    font-size: 0.9em;
+    color: #ccc;
+}
+
+.generator-item .owned {
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #03dac5; /* Teal for owned count */
+}
+
+.generator-item button {
+    background-color: #bb86fc; /* Purple button */
+    color: #121212; /* Dark text on button */
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+    align-self: flex-start; /* Button doesn't take full width */
+}
+
+.generator-item button:hover {
+    background-color: #9f4bff;
+}
+
+.generator-item button:disabled {
+    background-color: #555;
+    color: #888;
+    cursor: not-allowed;
 }
