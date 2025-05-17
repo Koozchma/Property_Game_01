@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Psychopath Clicker</title>
+    <title>Psychopath: The Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,11 +13,21 @@
             <div class="resource-display">
                 Manipulation Points (MP): <span id="mp-count">0</span>
             </div>
+            <div class="resource-display secondary-stats">
+                MP per second: <span id="mps-count">0</span>
+            </div>
             <div class="click-action-area">
                 <img src="images/Psychopath_01.png" alt="Manipulate Target" id="manipulate-image" class="clickable-image" title="Click to manipulate...">
                 <p class="click-power-text">Gain <span id="click-power-display">1</span> MP per click</p>
             </div>
         </div>
+
+        <div class="generators-section">
+            <h2>Tools of Influence</h2>
+            <div id="idle-generators-list">
+                </div>
+        </div>
+
         </div>
 
     <script src="js/gamedata.js"></script>
